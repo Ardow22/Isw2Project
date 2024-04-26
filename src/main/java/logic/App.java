@@ -1,6 +1,7 @@
 package logic;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
@@ -15,7 +16,7 @@ import logic.controller.HandlerController;
  */
 public class App {
 	
-    public static void main( String[] args ) throws JSONException, IOException, RevisionSyntaxException, NoHeadException, GitAPIException {
+    public static void main( String[] args ) throws JSONException, IOException, RevisionSyntaxException, NoHeadException, GitAPIException, ParseException {
     	HandlerController Hc = new HandlerController();
     	String repository = "bookkeeper";
         Hc.startAnalysis(repository);
