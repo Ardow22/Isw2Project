@@ -120,10 +120,6 @@ public class TicketController {
 	            Matcher matcher = pattern.matcher(c.getMessage());
 	    		while(matcher.find()) {
 	    			String match = matcher.group();
-	    			/*System.out.println("IL TICKET è: "+ticket.getKey());
-	    			System.out.println("Il MESSAGGIO DEL COMMIT è: "+c.getMessage());
-	    			System.out.println("MATCH è :"+match);
-	    			System.out.println("\n\n");*/
 	    			if (match.equals(ticket.getKey())) {
 	    				c.setTicket(ticket);
 		    			commitsForTicket.add(c);

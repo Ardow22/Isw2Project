@@ -105,7 +105,7 @@ public class HandlerController {
 			ArrayList<String> myClassList = new ArrayList<String>();//lista che conterrà tutte le classi del progetto nella release.
 	    	for (Commit c: r.getCommits()) {
 	    		printer.printString("In corso l'analisi del commit: "+ c.getId());
-	    		c.setClassesTouched(Cc.getClassesTouched(c.getCommit()));
+	    		c.setClassesTouched(Cc.getClasses(c.getCommit()));
 	    		for (JavaClass jvc: c.getClassesTouched()) {
 	    			jvc.setRelease(r);
 	    			if (!myClassList.contains(jvc.getNamePath())) {

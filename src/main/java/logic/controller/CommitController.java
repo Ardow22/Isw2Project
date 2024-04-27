@@ -164,7 +164,7 @@ public class CommitController {
         return commitsForThisRelease;
     }
 	
-	public ArrayList<JavaClass> getClassesTouched(RevCommit commit) throws IOException, JSONException {
+	public ArrayList<JavaClass> getClasses(RevCommit commit) throws IOException, JSONException {
 		 ArrayList<JavaClass> classes = new ArrayList<JavaClass>();
 		 try (Repository repository = new FileRepository(new File(filepath + "/.git"))) {
 			 try (TreeWalk treeWalk = new TreeWalk(repository)) {
@@ -176,6 +176,7 @@ public class CommitController {
 	                	System.out.println("Includo la classe: "+treeWalk.getPathString());
 	                	JavaClass jClass = new JavaClass();
 	   				    jClass.setNamePath(treeWalk.getPathString());
+	   				    jClass.setBuggy(false);
 	   				    classes.add(jClass);
 	                }
 	            }

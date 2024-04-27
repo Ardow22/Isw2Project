@@ -22,15 +22,15 @@ public class CSVController {
 	            fileWriter.append("\n");
 	            fileWriter.append(projName);
 	            System.out.println("STO QUI");
-	            String buggyness = "No";
+	            //String buggyness = "No";
 	            for (Release r: releaseList) {
 	            	int releaseNumber = r.getNumberOfRelease();
 	            	for (Commit c: r.getCommits()) {
 	            		for (JavaClass jvc: c.getClassesTouched()) {
-	            			if (jvc.isBuggy() == true) {
+	            			/*if (jvc.isBuggy() == true) {
 	            				buggyness = "Si";
-	            			}
-	            			fileWriter.append(String.format("%s,%s,%d,%s\n", projName, jvc.getNamePath(), releaseNumber, buggyness));
+	            			}*/
+	            			fileWriter.append(String.format("%s,%s,%d,%s\n", projName, jvc.getNamePath(), releaseNumber, jvc.isBuggy()));
 	            		}
 	            	}
 	            }

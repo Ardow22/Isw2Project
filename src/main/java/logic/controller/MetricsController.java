@@ -56,8 +56,8 @@ public class MetricsController {
 					lines = countInClass(jvName, lastCommit);
 					System.out.println("Il numero di linee di codice è: "+lines.get(0));
 					System.out.println("Il numero di linee di commenti è: "+lines.get(1));
-					//System.out.println("Il numero di metodi nella classe è: "+lines.get(2));
-					//System.out.println("Il numero di attributi nella classe è: "+lines.get(3));
+					System.out.println("Il numero di metodi nella classe è: "+lines.get(2));
+					System.out.println("Il numero di attributi nella classe è: "+lines.get(3));
 					
 					//6 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
 					NR = countCommits(release, jvName);
@@ -134,17 +134,17 @@ public class MetricsController {
 		 String urlClass = retrieveUrlClass(nameClass, lastCommit);
 		 int LOC = 0;
 		 int linesOfComments = 0;
-		 //int numberOfMethods = 0;
-		 //int numberOfAttributes = 0;
+		 int numberOfMethods = 0;
+		 int numberOfAttributes = 0;
 		 ArrayList<Integer> total = new ArrayList<Integer>();
 		 LOC = countLinesOfCode(nameClass, lastCommit.getCommit());
 	     total.add(LOC);
 	     linesOfComments = countLinesOfComments(nameClass, lastCommit.getCommit());
 	     total.add(linesOfComments);
-	     //numberOfMethods = countMethods(decodedContent);
-	     //total.add(numberOfMethods);
-	     /*numberOfAttributes = countAttributes(decodedContent);
-	     total.add(numberOfAttributes);*/
+	     numberOfMethods = countNrMethods(nameClass, lastCommit.getCommit());
+	     total.add(numberOfMethods);
+	     numberOfAttributes = countNrAttributes(nameClass, lastCommit.getCommit());
+	     total.add(numberOfAttributes);
 		 return total;
 	}
 	
@@ -217,7 +217,25 @@ public class MetricsController {
 		     }
 		 }
 		 return commentLines;		
-	 }
+	}
+	
+	public int countNrMethods(String fileName, RevCommit commit) throws IOException {
+        int nrOfMethods = 0;
+        try (Repository repository = new FileRepository(new File(filepath + "/.git"))) {
+        	try (TreeWalk treeWalk = new TreeWalk(repository)) {
+        		treeWalk.addTree(commit.getTree());
+                treeWalk.setRecursive(true);
+                while (treeWalk.next()) {
+                	if (treeWalk.getPathString().equals(fileName)) {
+                		String content = new String(repository.open(treeWalk.getObjectId(0)).getBytes());
+                        nrOfMethods = countMethods(content);
+                        break;
+                    }
+                }
+            }
+        }
+        return nrOfMethods;
+    }
 	
 	public int countMethods(String code) {
 	    int methodCount = 0;
@@ -256,6 +274,24 @@ public class MetricsController {
 	        }
 	    }
 	    return methodCount;
+    }
+	
+	public int countNrAttributes(String fileName, RevCommit commit) throws IOException {
+        int nrOfAttributes = 0;
+        try (Repository repository = new FileRepository(new File(filepath + "/.git"))) {
+        	try (TreeWalk treeWalk = new TreeWalk(repository)) {
+        		treeWalk.addTree(commit.getTree());
+                treeWalk.setRecursive(true);
+                while (treeWalk.next()) {
+                	if (treeWalk.getPathString().equals(fileName)) {
+                		String content = new String(repository.open(treeWalk.getObjectId(0)).getBytes());
+                        nrOfAttributes = countAttributes(content);
+                        break;
+                    }
+                }
+            }
+        }
+        return nrOfAttributes;
     }
 	
 	public int countAttributes(String code) {
@@ -301,14 +337,14 @@ public class MetricsController {
 		 ArrayList<JavaClass> jc = lastCommit.getClassesTouched();
 		 int LOC = lines.get(0);
 		 int linesOfComments = lines.get(1);
-		 //int numberOfMethods = lines.get(2);
-		 //int numberOfAttributes = lines.get(3);
+		 int numberOfMethods = lines.get(2);
+		 int numberOfAttributes = lines.get(3);
 		 for (JavaClass jClass: jc) {
 			 if (jClass.getNamePath().equals(className)) {
 				 jClass.setLOC(LOC);
 				 jClass.setLinesOfComments(linesOfComments);
-				 //jClass.setNumberOfMethods(numberOfMethods);
-				 //jClass.setNumberOfAttributes(numberOfAttributes);
+				 jClass.setNumberOfMethods(numberOfMethods);
+				 jClass.setNumberOfAttributes(numberOfAttributes);
 				 
 		     }
 	     }

@@ -20,7 +20,7 @@ public class JavaClass {
 	private int maxAddedLOC;
 	private int numberOfMethods;
 	private int numberOfAttributes;
-	private boolean buggy = false;
+	private boolean buggy;
 
 	public String getNamePath() {
 		return namePath;
