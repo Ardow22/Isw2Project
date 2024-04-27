@@ -2,6 +2,8 @@ package logic.controller;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -22,6 +24,7 @@ public class HandlerController {
 	public static final CommitController Cc = new CommitController();
 	public static final TicketController Tc = new TicketController();
 	public static final MetricsController Mc = new MetricsController();
+	public static final CSVController csv = new CSVController();
 	public static final Printer printer = new Printer();
 	
 	public void startAnalysis(String repository) throws IOException, JSONException, RevisionSyntaxException, NoHeadException, GitAPIException, ParseException{
@@ -102,7 +105,7 @@ public class HandlerController {
 			ArrayList<String> myClassList = new ArrayList<String>();//lista che conterrà tutte le classi del progetto nella release.
 	    	for (Commit c: r.getCommits()) {
 	    		printer.printString("In corso l'analisi del commit: "+ c.getId());
-	    		c.setClassesTouched(Gc.getClassesTouched(c.getTree()));
+	    		c.setClassesTouched(Cc.getClassesTouched(c.getCommit()));
 	    		for (JavaClass jvc: c.getClassesTouched()) {
 	    			jvc.setRelease(r);
 	    			if (!myClassList.contains(jvc.getNamePath())) {
@@ -127,11 +130,11 @@ public class HandlerController {
 	    		}
 	    	}
 	    	printer.printString("\nCalcolo delle metriche in corso...");
-	    	mc.calculateMetrics(r, myClassList, myTicketList);
+	    	Mc.calculateMetrics(r, myClassList, myTicketList);
 	    }
 		
-		//printer.printString("Creazione del file csv in corso...");
-		//csv.createDataset(myReleaseList, myTicketList, repository);
+		printer.printString("Creazione del file csv in corso...");
+		csv.createDataset(myReleaseList, myTicketList, repository);
 	
 		
 	}

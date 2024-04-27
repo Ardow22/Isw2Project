@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import logic.model.entity.JavaClass;
 import logic.model.entity.Commit;
 import logic.model.entity.Release;
 
@@ -28,6 +29,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.CommitTimeRevFilter;
+import org.eclipse.jgit.treewalk.TreeWalk;
 
 public class CommitController {
 	private static final String filepath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\bookkeeper\\";
@@ -152,6 +154,7 @@ public class CommitController {
 				        myCommit.setAuthor(nameAuthor);
 				        myCommit.setDate(dateCommit);
 				        myCommit.setMessage(completeCommitMessage);
+				        myCommit.setCommit(commit);
 				        commitsForThisRelease.add(myCommit);
 
                     }
@@ -160,6 +163,38 @@ public class CommitController {
         }
         return commitsForThisRelease;
     }
-
-
+	
+	public ArrayList<JavaClass> getClassesTouched(RevCommit commit) throws IOException, JSONException {
+		 ArrayList<JavaClass> classes = new ArrayList<JavaClass>();
+		 try (Repository repository = new FileRepository(new File(filepath + "/.git"))) {
+			 try (TreeWalk treeWalk = new TreeWalk(repository)) {
+	            treeWalk.addTree(commit.getTree());
+	            treeWalk.setRecursive(true);
+	            while (treeWalk.next()) {
+	                if (treeWalk.getPathString().endsWith(".java") && !treeWalk.getPathString().contains("test") 
+	                		&& !treeWalk.getPathString().contains("package-info.java")) {
+	                	System.out.println("Includo la classe: "+treeWalk.getPathString());
+	                	JavaClass jClass = new JavaClass();
+	   				    jClass.setNamePath(treeWalk.getPathString());
+	   				    classes.add(jClass);
+	                }
+	            }
+	        }
+	    }
+		 
+		 
+		 
+		 
+		 /*for (int i = 0; i < treeJsonArray.length(); i++) {
+			 if (pathFromJSonObject.endsWith(".java") && !pathFromJSonObject.contains("Test") && !pathFromJSonObject.contains("package-info.java")) {
+				 System.out.println("Includo la classe: "+pathFromJSonObject);
+				 String urlFromJSonObject = fileJSonObject.getString("url");
+				 JavaClass jClass = new JavaClass();
+				 jClass.setNamePath(pathFromJSonObject);
+				 jClass.setUrlClass(urlFromJSonObject);
+				 classes.add(jClass);
+			 };	
+		 }*/
+		 return classes;
+	 }
 }

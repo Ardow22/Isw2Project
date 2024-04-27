@@ -2,8 +2,7 @@ package logic.model.entity;
 
 import java.util.ArrayList;
 
-import logic.model.entity.JavaClass;
-import logic.model.entity.Ticket;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 public class Commit {
 	private Ticket ticket; //sarebbe il ticket preso da JIRA
@@ -11,6 +10,7 @@ public class Commit {
 	private String author;
 	private String date;
 	private String message;
+	private RevCommit commit;
 	private ArrayList<JavaClass> classesTouched;
 	
 	
@@ -59,6 +59,14 @@ public class Commit {
 
 	public void setTicket(Ticket ticket) {
 		this.ticket = ticket;
+	}
+
+	public RevCommit getCommit() {
+		return commit;
+	}
+
+	public void setCommit(RevCommit commit) {
+		this.commit = commit;
 	}
 
 
