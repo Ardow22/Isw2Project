@@ -7,7 +7,6 @@ import java.util.ArrayList;
 public class JavaClass {
 	
 	private String namePath;
-	private String urlClass;
 	private int LOC;
 	private int linesOfComments;
 	private ArrayList<String> Authors;
@@ -36,14 +35,6 @@ public class JavaClass {
 
 	public void setLOC(int lOC) {
 		LOC = lOC;
-	}
-
-	public String getUrlClass() {
-		return urlClass;
-	}
-
-	public void setUrlClass(String urlClass) {
-		this.urlClass = urlClass;
 	}
 
 	public int getNumberOfAuthors() {

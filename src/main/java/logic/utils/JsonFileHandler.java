@@ -16,20 +16,9 @@ import org.json.JSONObject;
 
 public class JsonFileHandler {
 	
-	private final static String owner = "apache";
-	private final static String filepath = "C:\\Users\\HP\\Documents\\LAUREA MAGISTRALE\\ISW2\\prova.txt";
-	private final static String username = "Ardow22";
-	
-	
-	public static JSONObject readJsonFromUrl(String url, String user, String tkn, boolean auth) throws IOException, JSONException {
+	public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
 		URL url2 = new URL(url);
 		URLConnection uc = url2.openConnection(); 
-		if (auth) { 
-			String userpass = user + ":" + tkn;
-		    byte[] encodedBytes = Base64.getEncoder().encode(userpass.getBytes()); 
-		    String basicAuth = "Basic " + new String(encodedBytes);
-			uc.setRequestProperty("Authorization", basicAuth);
-		} 
 		
 		try (InputStream is = uc.getInputStream()) {
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8"))); 

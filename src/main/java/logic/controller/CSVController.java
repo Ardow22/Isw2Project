@@ -27,9 +27,6 @@ public class CSVController {
 	            	int releaseNumber = r.getNumberOfRelease();
 	            	for (Commit c: r.getCommits()) {
 	            		for (JavaClass jvc: c.getClassesTouched()) {
-	            			/*if (jvc.isBuggy() == true) {
-	            				buggyness = "Si";
-	            			}*/
 	            			fileWriter.append(String.format("%s,%s,%d,%s\n", projName, jvc.getNamePath(), releaseNumber, jvc.isBuggy()));
 	            		}
 	            	}

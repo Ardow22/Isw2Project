@@ -2,8 +2,6 @@ package logic.controller;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.time.format.DateTimeFormatter;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -35,6 +33,7 @@ public class HandlerController {
 	    releaseList = Rc.ListRelease(repository.toUpperCase());
 	    Rc.setNumberReleases(releaseList);
 	    printer.printReleases(releaseList);
+	  
 	   
 	  //RECUPERO TUTTI I COMMIT DI OGNI RELEASE
 	    printer.printString("Recupero dei commit relativi ad ogni release in corso...");
@@ -68,32 +67,58 @@ public class HandlerController {
 			System.out.println("\n");
 		}
 		
+		//ELIMINO TUTTI I TICKET CHE NON HANNO COMMIT ASSOCIATI
+		ArrayList<Ticket> myTktList = new ArrayList<Ticket>();
+		for (Ticket t: ticketList) {
+			if (t.getCommitsForTicket().size() != 0) {
+				myTktList.add(t);
+			}
+		}
+		
 		printer.printString("Calcolo delle Opening Version e delle Injected Version in corso...");
-	    for (Ticket t: ticketList) {
+	    for (Ticket t: myTktList) {
 	    	//IL PRIMO AV DEVE ESSERE PRIMA DI OV, QUINDI IV <= OV
 	    	t.setOpeningVersion(Tc.calculateOpeningVersion(t, releaseList));
 	    }
 	    
 	    //TOLGO TUTTI I TICKET CON VALORI DI FV E OV NON CONGRUI
-	    ArrayList<Ticket> myTicketList = new ArrayList<Ticket>();
-	    for (Ticket t: ticketList) {
+	    ArrayList<Ticket> myTktList2 = new ArrayList<Ticket>();
+	    for (Ticket t: myTktList) {
 	    	if (t.getFixVersion().getNumberOfRelease() >= t.getOpeningVersion().getNumberOfRelease()) {
-	    		myTicketList.add(t);
+	    		myTktList2.add(t);
 	    	}
 	    }
 	    
-	    for (Ticket t: myTicketList) {
-	    	t.setInjectedVersion(Tc.calculateInjectedVersion(t, releaseList, myTicketList));
+	    for (Ticket t: myTktList2) {
+	    	t.setInjectedVersion(Tc.calculateInjectedVersion(t, releaseList, myTktList2, Rc));
+	    }
+	   
+	    
+	    //CONSIDERO SOLO I TICKET CHE HANNO IV E OV CONGRUI
+	    ArrayList<Ticket> myTktList3 = new ArrayList<Ticket>();
+	    for (Ticket t: myTktList2) {
+	    	if (t.getInjectedVersion().getNumberOfRelease() < t.getOpeningVersion().getNumberOfRelease()) {
+	    		myTktList3.add(t);
+	    	} 
 	    }
 	    
+	    //TOLGO ANCHE I TICKET CHE HANNO INJECTED VERSION E FIX VERSION UGUALI, PERCHé SIGNIFICA CHE IL BUG NON C'è
+	    ArrayList<Ticket> myTicketList = new ArrayList<Ticket>();
+	    for (Ticket t: myTktList3) {
+	    	if (t.getInjectedVersion().getNumberOfRelease() != t.getFixVersion().getNumberOfRelease()) {
+	    		myTicketList.add(t);
+	    	} 
+	    }
+	    
+	    //ELENCO DEI TICKET RIMASTI
 	    for (Ticket t: myTicketList) {
 	    	System.out.println("Ticket: "+t.getKey());
+	    	System.out.println("IV: "+t.getInjectedVersion().getNumberOfRelease());
 	    	System.out.println("OV: "+t.getOpeningVersion().getNumberOfRelease());
 	    	System.out.println("FV: "+t.getFixVersion().getNumberOfRelease());
-	    	System.out.println("IV: "+t.getInjectedVersion().getNumberOfRelease());
-	    	System.out.println("\n");
+	    	System.out.println("\n"); 	
 	    }
-	    
+	    /*
 	    //CONSIDERO SOLO LA PRIMA METà DELLE RELEASE
 	    int halfSize = releaseList.size() / 2;
 		ArrayList<Release> myReleaseList = new ArrayList<>(releaseList.subList(0, halfSize));
@@ -105,14 +130,14 @@ public class HandlerController {
 			ArrayList<String> myClassList = new ArrayList<String>();//lista che conterrà tutte le classi del progetto nella release.
 	    	for (Commit c: r.getCommits()) {
 	    		printer.printString("In corso l'analisi del commit: "+ c.getId());
-	    		c.setClassesTouched(Cc.getClasses(c.getCommit()));
+	    		c.setClassesTouched(Cc.getClasses(c.getCommit(), repository));
 	    		for (JavaClass jvc: c.getClassesTouched()) {
 	    			jvc.setRelease(r);
 	    			if (!myClassList.contains(jvc.getNamePath())) {
 	    				myClassList.add(jvc.getNamePath());
 	    			}
 	    		}
-	    		if(c.getTicket() != null) {
+	    		if(c.getTicket() != null && myTicketList.contains(c.getTicket())) {//Verifico che il ticket sia congruo
 	    			if (c.getTicket().getAffversions().size() != 0) {
 	    				if (c.getTicket().getAffversions().contains(r)) {
 	    					for (JavaClass jclass: c.getClassesTouched()) {
@@ -129,12 +154,12 @@ public class HandlerController {
                     }
 	    		}
 	    	}
-	    	printer.printString("\nCalcolo delle metriche in corso...");
-	    	Mc.calculateMetrics(r, myClassList, myTicketList);
+	    	//printer.printString("\nCalcolo delle metriche in corso...");
+	    	//Mc.calculateMetrics(r, myClassList, myTicketList, repository);
 	    }
 		
 		printer.printString("Creazione del file csv in corso...");
-		csv.createDataset(myReleaseList, myTicketList, repository);
+		csv.createDataset(myReleaseList, myTicketList, repository);*/
 	
 		
 	}

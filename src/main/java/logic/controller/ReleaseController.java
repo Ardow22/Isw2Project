@@ -32,8 +32,7 @@ public class ReleaseController {
 		   releases = new ArrayList<LocalDateTime>();
 		         Integer i;
 		         String url = "https://issues.apache.org/jira/rest/api/2/project/" + projName;
-		         //JSONObject json = readJsonFromUrl(url);
-		         JSONObject json = JSFH.readJsonFromUrl(url, "", "", false);
+		         JSONObject json = JSFH.readJsonFromUrl(url);
 		         JSONArray versions = json.getJSONArray("versions");
 		         releaseNames = new HashMap<LocalDateTime, String>();
 		         releaseID = new HashMap<LocalDateTime, String> ();

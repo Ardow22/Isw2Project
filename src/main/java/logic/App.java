@@ -18,7 +18,7 @@ public class App {
 	
     public static void main( String[] args ) throws JSONException, IOException, RevisionSyntaxException, NoHeadException, GitAPIException, ParseException {
     	HandlerController Hc = new HandlerController();
-    	String repository = "bookkeeper";
+    	String repository = "openjpa";
         Hc.startAnalysis(repository);
     }
 }

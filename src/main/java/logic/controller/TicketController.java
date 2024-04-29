@@ -1,9 +1,14 @@
 package logic.controller;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,7 +40,7 @@ public class TicketController {
 	              + projName + "%22AND%22issueType%22=%22Bug%22AND(%22status%22=%22closed%22OR"
 	              + "%22status%22=%22resolved%22)AND%22resolution%22=%22fixed%22&fields=key,resolutiondate,versions,created,fixVersions&startAt="
 	              + i.toString() + "&maxResults=" + j.toString();
-	          JSONObject json = JSFH.readJsonFromUrl(url, "", "", false);
+	          JSONObject json = JSFH.readJsonFromUrl(url);
 	          JSONArray issues = json.getJSONArray("issues");
 	          total = json.getInt("total");
 	          for (; i < total && i < j; i++) {
@@ -144,7 +149,7 @@ public class TicketController {
   	  return null;	  
     }
 	
-	public Release calculateInjectedVersion(Ticket ticket, ArrayList<Release> releaseList, ArrayList<Ticket> ticketList) {
+	public Release calculateInjectedVersion(Ticket ticket, ArrayList<Release> releaseList, ArrayList<Ticket> ticketList, ReleaseController Rc) throws JSONException, IOException, ParseException {
   	  if (ticket.getAffversions().size() != 0) {
   		  //ticket.getAffversions.sort(Comparator.comparing(Release::getVersionNumber));
   		  return ticket.getAffversions().get(0);//nel caso aggiungere codice per verificare quale versione venga prima   
@@ -153,7 +158,7 @@ public class TicketController {
   		  return ticket.getFixVersion();
   	  }
   	  else {
-  		  int P = IncrementProportion(ticket, releaseList, ticketList);
+  		  int P = Proportion(ticket, releaseList, ticketList, Rc);
   		  int FV = ticket.getFixVersion().getNumberOfRelease();
   		  int OV = ticket.getOpeningVersion().getNumberOfRelease();
   		  int difference = 0;
@@ -163,7 +168,7 @@ public class TicketController {
   		  else {
   			  difference = FV - OV;
   		  }
-  		  int IV = FV - (difference) * P;
+  		  int IV = FV - (difference * P);
   		  if (IV < 0) {
   			  IV = 0;
   		  }
@@ -177,7 +182,7 @@ public class TicketController {
   	  return null;
     }
     
-    public int IncrementProportion(Ticket ticket, ArrayList <Release> releaseList, ArrayList <Ticket> ticketList) {
+    public int Proportion(Ticket ticket, ArrayList <Release> releaseList, ArrayList <Ticket> ticketList, ReleaseController Rc) throws JSONException, IOException, ParseException {
   	  int limitRelease;
   	  limitRelease = ticket.getFixVersion().getNumberOfRelease();
   	  ArrayList<Ticket> subList = new ArrayList<Ticket>();
@@ -188,9 +193,9 @@ public class TicketController {
   	  }
   	  
   	  if (subList.size() < 5) {
-  		  return 1;//QUI VA USATO COLDSTART
+  		  subList = ColdStart(ticket, Rc);//COLDSTART
   	  }
- 
+  	  //INCREMENT PROPORTION
   	  ArrayList<Integer> listP = new ArrayList<Integer>();
   	  int FV = 1;
   	  int IV = 1;
@@ -222,6 +227,101 @@ public class TicketController {
   		  averageP = sum/listP.size();
   	  }
   	  return averageP;
+    }
+    
+    private ArrayList<Ticket> ColdStart(Ticket ticket, ReleaseController Rc) throws JSONException, IOException, ParseException {
+    	 ArrayList<String> allProjects = new ArrayList<>(Arrays.asList("avro", "storm", "zookeeper", "syncope", "tajo"));
+    	 ArrayList<Ticket> allTickets = new ArrayList<Ticket>();	
+    	/*BOOKKEEPER: 2011 - 2017
+    	 * OPENJPA: 2006 - 2022
+    	 * 
+    	 * AVRO: 2009 - 2023
+    	 * STORM: 2013 - 2024
+    	 * ZOOKKEEPER: 2008 - OLTRE IL 2020
+    	 * SYNCOPE: 2012 - 2017
+    	 * TAJO: 2013 - 2019 */
+    	String limitDate = "";
+    	limitDate = ticket.getFixVersion().getReleaseDate();
+    	for (String project: allProjects) {
+    		ArrayList<Release> releasesList = new ArrayList<Release>();
+    	    releasesList = Rc.ListRelease(project.toUpperCase());
+    	    Rc.setNumberReleases(releasesList);
+    	    
+    	    ArrayList<Ticket> ticketsList = new ArrayList<Ticket>();
+    		ticketsList = retrieveTicketsID(project.toUpperCase(), releasesList);
+    		Collections.reverse(ticketsList);
+    		
+    		for (Ticket t: ticketsList) {
+    	    	t.setOpeningVersion(calculateOpeningVersion(t, releasesList));
+    	    }
+    		
+    		//TOLGO TUTTI I TICKET CON VALORI DI FV E OV NON CONGRUI
+    		ArrayList<Ticket> myTktsList2 = new ArrayList<Ticket>();
+    	    for (Ticket t: ticketsList) {
+    	    	if (t.getFixVersion().getNumberOfRelease() >= t.getOpeningVersion().getNumberOfRelease()) {
+    	    		myTktsList2.add(t);
+    	    	}
+    	    }
+    	    
+    	    //I TICKET SENZA AFFECTED VERSION NON CI INTERESSANO
+    	    ArrayList<Ticket> myTktsList3 = new ArrayList<Ticket>();
+    	    for (Ticket t: myTktsList2) {
+    	    	if (t.getAffversions().size() != 0) {
+    	    		myTktsList3.add(t);
+    	    	}
+    	    }
+    	    
+    	    for (Ticket t: myTktsList3) {
+    	    	t.setInjectedVersion(coldStartInjectedVersion(t));
+    	    }
+    	    
+    	    //CONSIDERO SOLO I TICKET CHE HANNO IV E OV CONGRUI
+    	    ArrayList<Ticket> myTktsList4 = new ArrayList<Ticket>();
+    	    for (Ticket t: myTktsList3) {
+    	    	if (t.getInjectedVersion().getNumberOfRelease() < t.getOpeningVersion().getNumberOfRelease()) {
+    	    		myTktsList4.add(t);
+    	    	} 
+    	    }
+    	    
+    	    //TOLGO ANCHE I TICKET CHE HANNO INJECTED VERSION E FIX VERSION UGUALI, PERCHé SIGNIFICA CHE IL BUG NON C'è
+    	    ArrayList<Ticket> myTktsList5 = new ArrayList<Ticket>();
+    	    for (Ticket t: myTktsList4) {
+    	    	if (t.getInjectedVersion().getNumberOfRelease() != t.getFixVersion().getNumberOfRelease()) {
+    	    		myTktsList5.add(t);
+    	    	} 
+    	    }
+    	    
+    	    //AGGIUNGO I TICKET RIMASTI AI TICKET FINALI
+    	    for (Ticket t: myTktsList5) {
+    	    	allTickets.add(t);
+    	    } 
+    	}
+    	
+    	//PRENDO SOLO I TICKET FINO ALLA DATA CHE MI INTERESSA
+    	ArrayList<Ticket> subTktList = new ArrayList<Ticket>();
+    	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date2 = dateFormat.parse(limitDate);
+    	for (Ticket t: allTickets) {
+    		Date date1 = dateFormat.parse(t.getFixVersion().getReleaseDate());
+    		if (date1.before(date2)) {
+    			 subTktList.add(t);
+    		} 
+    	}
+    	
+    	return subTktList;
+    }
+    
+    public Release coldStartInjectedVersion(Ticket ticket) {//DA CONTROLLARE, A ME SERVONO SOLO I TICKET CHE GIà HANNO LE AFFECTED VERSION
+    	if (ticket.getAffversions().size() != 0) {
+    		//ticket.getAffversions.sort(Comparator.comparing(Release::getVersionNumber));
+    		return ticket.getAffversions().get(0);//nel caso aggiungere codice per verificare quale versione venga prima   
+    	}
+    	else if (ticket.getFixVersion().getNumberOfRelease() == 0) {
+    		return ticket.getFixVersion();
+    	}
+    	else {
+    		return null;
+    	}
     }
 
 		

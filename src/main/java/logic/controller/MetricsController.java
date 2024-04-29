@@ -20,10 +20,11 @@ import logic.utils.JsonFileHandler;
 
 public class MetricsController {
     public static JsonFileHandler JSFH;
-    private static final String filepath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\bookkeeper\\";
+    //private static final String filepath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\bookkeeper\\";
+    private static final String filepath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
 	
 	
-	public void calculateMetrics(Release release, ArrayList<String> classList, ArrayList<Ticket> myTicketList) throws IOException, JSONException {
+	public void calculateMetrics(Release release, ArrayList<String> classList, ArrayList<Ticket> myTicketList, String repo) throws IOException, JSONException {
 		System.out.println("CALCOLIAMO LE METRICHE PER LA CLASSE");
 		ArrayList<String> totAuth = new ArrayList<String>();
 		int NR = 0;
@@ -51,31 +52,27 @@ public class MetricsController {
 					
 					//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
 					//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
-					//4 CALCOLO NUMERO DI METODI DELLA CLASSE
-					//5 CALCOLO NUMERO DI ATTRIBUTI DELLA CLASSE
-					lines = countInClass(jvName, lastCommit);
+					lines = countInClass(jvName, lastCommit, repo);
 					System.out.println("Il numero di linee di codice è: "+lines.get(0));
 					System.out.println("Il numero di linee di commenti è: "+lines.get(1));
-					System.out.println("Il numero di metodi nella classe è: "+lines.get(2));
-					System.out.println("Il numero di attributi nella classe è: "+lines.get(3));
 					
-					//6 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
+					//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
 					NR = countCommits(release, jvName);
 					System.out.println("Il numero di commit contenente la classe è: "+NR);
 					
-					//7 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
+					//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
 					NFix = countFixCommits(myTicketList, release, jvName);
 					System.out.println("Il numero di commit fixanti in cui compare la classe è: "+NFix);
 					
-					//8 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
+					//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
 					release.setAgeOfRelease(calculateAgeOfRelease(release));
 					System.out.println("L'età della release è: "+release.getAgeOfRelease());
 					
-					//9 CALCOLO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE (PRENDI ULTIMO COMMIT) [CHANGE SET SIZE]
+					//7 CALCOLO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE (PRENDI ULTIMO COMMIT) [CHANGE SET SIZE]
 					changeSetSize = countFiles(jvName, lastCommit);
 					System.out.println("Il numero di file committed insieme alla classe è: "+changeSetSize);
 					
-					//10 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
+					//8 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
 					maxChangeSetSize = maxCountFiles(jvName, release);
 					System.out.println("Il numero massimo di file committed insieme alla classe è: "+maxChangeSetSize);
 					
@@ -130,36 +127,20 @@ public class MetricsController {
 		 }	 
 	}
 	
-	public ArrayList<Integer> countInClass(String nameClass, Commit lastCommit) throws IOException, JSONException {
-		 String urlClass = retrieveUrlClass(nameClass, lastCommit);
+	public ArrayList<Integer> countInClass(String nameClass, Commit lastCommit, String repo) throws IOException, JSONException {
 		 int LOC = 0;
 		 int linesOfComments = 0;
-		 int numberOfMethods = 0;
-		 int numberOfAttributes = 0;
 		 ArrayList<Integer> total = new ArrayList<Integer>();
-		 LOC = countLinesOfCode(nameClass, lastCommit.getCommit());
+		 LOC = countLinesOfCode(nameClass, lastCommit.getCommit(), repo);
 	     total.add(LOC);
-	     linesOfComments = countLinesOfComments(nameClass, lastCommit.getCommit());
+	     linesOfComments = countLinesOfComments(nameClass, lastCommit.getCommit(), repo);
 	     total.add(linesOfComments);
-	     numberOfMethods = countNrMethods(nameClass, lastCommit.getCommit());
-	     total.add(numberOfMethods);
-	     numberOfAttributes = countNrAttributes(nameClass, lastCommit.getCommit());
-	     total.add(numberOfAttributes);
 		 return total;
 	}
 	
-	public String retrieveUrlClass(String nameClass, Commit lastCommit) {
-		 for (JavaClass jvc: lastCommit.getClassesTouched()) {
-			 if (nameClass.equals(jvc.getNamePath())) {
-				 return jvc.getUrlClass();
-			 }
-		 }
-		 return null;
-	}
-	
-	public int countLinesOfCode(String fileName, RevCommit commit) throws IOException {
+	public int countLinesOfCode(String fileName, RevCommit commit, String repo) throws IOException {
         int linesOfCode = 0;
-        try (Repository repository = new FileRepository(new File(filepath + "/.git"))) {
+        try (Repository repository = new FileRepository(new File(filepath + repo + "\\" + "/.git"))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -187,9 +168,9 @@ public class MetricsController {
         return nonEmptyLines;
     }
     
-    public int countLinesOfComments(String fileName, RevCommit commit) throws IOException {
+    public int countLinesOfComments(String fileName, RevCommit commit, String repo) throws IOException {
         int linesOfComments = 0;
-        try (Repository repository = new FileRepository(new File(filepath + "/.git"))) {
+        try (Repository repository = new FileRepository(new File(filepath + repo + "\\" + "/.git"))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -219,133 +200,15 @@ public class MetricsController {
 		 return commentLines;		
 	}
 	
-	public int countNrMethods(String fileName, RevCommit commit) throws IOException {
-        int nrOfMethods = 0;
-        try (Repository repository = new FileRepository(new File(filepath + "/.git"))) {
-        	try (TreeWalk treeWalk = new TreeWalk(repository)) {
-        		treeWalk.addTree(commit.getTree());
-                treeWalk.setRecursive(true);
-                while (treeWalk.next()) {
-                	if (treeWalk.getPathString().equals(fileName)) {
-                		String content = new String(repository.open(treeWalk.getObjectId(0)).getBytes());
-                        nrOfMethods = countMethods(content);
-                        break;
-                    }
-                }
-            }
-        }
-        return nrOfMethods;
-    }
-	
-	public int countMethods(String code) {
-	    int methodCount = 0;
-
-	    // Rimuovi i commenti multilinea
-	    String codeWithoutComments = code.replaceAll("/\\*(?:.|[\\n\\r])*?\\*/", "");
-
-	    // Rimuovi i commenti singola riga
-	    codeWithoutComments = codeWithoutComments.replaceAll("//.*", "");
-
-	    // Divide il codice in righe
-	    String[] lines = codeWithoutComments.split("\\r?\\n");
-
-	    // Indica se siamo all'interno di un metodo
-	    boolean insideMethod = false;
-
-	    // Loop attraverso le linee di codice
-	    for (String line : lines) {
-	        // Rimuovi spazi iniziali e finali dalla linea
-	        String trimmedLine = line.trim();
-
-	        // Controlla se la linea inizia con la firma di un metodo
-	        if (trimmedLine.startsWith("public") || trimmedLine.startsWith("protected") || trimmedLine.startsWith("private") || trimmedLine.startsWith("static")) {
-	            insideMethod = true;
-	            methodCount++;
-	        } else if (trimmedLine.startsWith("{")) {
-	            // Se la linea inizia con '{', potrebbe essere la definizione del corpo di un metodo
-	            if (insideMethod) {
-	                methodCount++;
-	            }
-	        } else if (trimmedLine.startsWith("}")) {
-	            // Se la linea inizia con '}', potrebbe indicare la fine di un metodo
-	            if (insideMethod) {
-	                insideMethod = false;
-	            }
-	        }
-	    }
-	    return methodCount;
-    }
-	
-	public int countNrAttributes(String fileName, RevCommit commit) throws IOException {
-        int nrOfAttributes = 0;
-        try (Repository repository = new FileRepository(new File(filepath + "/.git"))) {
-        	try (TreeWalk treeWalk = new TreeWalk(repository)) {
-        		treeWalk.addTree(commit.getTree());
-                treeWalk.setRecursive(true);
-                while (treeWalk.next()) {
-                	if (treeWalk.getPathString().equals(fileName)) {
-                		String content = new String(repository.open(treeWalk.getObjectId(0)).getBytes());
-                        nrOfAttributes = countAttributes(content);
-                        break;
-                    }
-                }
-            }
-        }
-        return nrOfAttributes;
-    }
-	
-	public int countAttributes(String code) {
-	    int attributeCount = 0;
-
-	    // Rimuovi i commenti multilinea
-	    String codeWithoutComments = code.replaceAll("/\\*(?:.|[\\n\\r])*?\\*/", "");
-
-	    // Rimuovi i commenti singola riga
-	    codeWithoutComments = codeWithoutComments.replaceAll("//.*", "");
-
-	    // Trova l'inizio e la fine del corpo della classe
-	    int classBodyStartIndex = codeWithoutComments.indexOf("{");
-	    int classBodyEndIndex = codeWithoutComments.lastIndexOf("}");
-
-	    if (classBodyStartIndex != -1 && classBodyEndIndex != -1) {
-	        // Estrai il corpo della classe
-	        String classBody = codeWithoutComments.substring(classBodyStartIndex + 1, classBodyEndIndex);
-
-	        // Dividi il corpo della classe in righe
-	        String[] lines = classBody.split("\\r?\\n");
-
-	        // Loop attraverso le linee di codice nel corpo della classe
-	        for (String line : lines) {
-	            // Rimuovi spazi iniziali e finali dalla linea
-	            String trimmedLine = line.trim();
-
-	            // Controlla se la linea contiene una dichiarazione di attributo
-	            if (!trimmedLine.isEmpty() && !trimmedLine.startsWith("public") && !trimmedLine.startsWith("private") &&
-	                    !trimmedLine.startsWith("protected") && !trimmedLine.startsWith("static") &&
-	                    !trimmedLine.startsWith("class") && !trimmedLine.startsWith("interface") &&
-	                    !trimmedLine.startsWith("enum") && !trimmedLine.startsWith("}") &&
-	                    !trimmedLine.startsWith("{") && !trimmedLine.startsWith("/*") &&
-	                    !trimmedLine.startsWith("*")) {
-	                attributeCount++;
-	            }
-	         }
-	     }
-	     return attributeCount;
-      }
-	
+		
 	public void linkLinesClass(String className, ArrayList<Integer> lines, Commit lastCommit) {
 		 ArrayList<JavaClass> jc = lastCommit.getClassesTouched();
 		 int LOC = lines.get(0);
 		 int linesOfComments = lines.get(1);
-		 int numberOfMethods = lines.get(2);
-		 int numberOfAttributes = lines.get(3);
 		 for (JavaClass jClass: jc) {
 			 if (jClass.getNamePath().equals(className)) {
 				 jClass.setLOC(LOC);
 				 jClass.setLinesOfComments(linesOfComments);
-				 jClass.setNumberOfMethods(numberOfMethods);
-				 jClass.setNumberOfAttributes(numberOfAttributes);
-				 
 		     }
 	     }
 	 }
