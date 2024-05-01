@@ -13,7 +13,6 @@ import org.json.JSONException;
 import logic.model.entity.Release;
 import logic.model.entity.Ticket;
 import logic.model.entity.Commit;
-import logic.model.entity.JavaClass;
 import logic.utils.Printer;
 
 public class HandlerController {
@@ -35,7 +34,7 @@ public class HandlerController {
 	    printer.printReleases(releaseList);
 	  
 	   
-	  //RECUPERO TUTTI I COMMIT DI OGNI RELEASE
+	    //RECUPERO TUTTI I COMMIT DI OGNI RELEASE
 	    printer.printString("Recupero dei commit relativi ad ogni release in corso...");
 	    String lastReleaseDate = null;
 	    int iteration = 0;
@@ -46,6 +45,7 @@ public class HandlerController {
 	    	System.out.println("\n");
 	    	lastReleaseDate = r.getReleaseDate();
 	    	iteration++;
+	    	//IL PRIMO ELEMENTO DELLA LISTA DI COMMIT è IL PIù RECENTE, QUINDI L'ULTIMO. NEL CASO DA RIORDINARE
 	    }
 	    
 	    //RECUPERO TUTTI I TICKET 
@@ -53,9 +53,6 @@ public class HandlerController {
 	    ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
 		ticketList = Tc.retrieveTicketsID(repository.toUpperCase(), releaseList);
 		Collections.reverse(ticketList);
-		for (Ticket t: ticketList) {
-			System.out.println("Ticket: "+t.getKey());
-		}
 		System.out.println("I ticket trovati (CON FIX VERSION) sono in tutto "+ticketList.size());
 		
 		//ASSOCIO I COMMIT AD I RELATIVI TICKET
@@ -118,50 +115,38 @@ public class HandlerController {
 	    	System.out.println("FV: "+t.getFixVersion().getNumberOfRelease());
 	    	System.out.println("\n"); 	
 	    }
-	    /*
+	    
 	    //CONSIDERO SOLO LA PRIMA METà DELLE RELEASE
 	    int halfSize = releaseList.size() / 2;
 		ArrayList<Release> myReleaseList = new ArrayList<>(releaseList.subList(0, halfSize));
 		
-		printer.printString("Recupero delle classi toccate da ogni commit di ogni release in corso...");
+		printer.printString("Recupero di tutte le classi toccate da ogni commit nelle varie release in corso...");
 		for (Release r: myReleaseList) {
-			printer.printString("\n");
-			printer.printString("In corso l'analisi della release: " + r.getNameRelease());
-			ArrayList<String> myClassList = new ArrayList<String>();//lista che conterrà tutte le classi del progetto nella release.
-	    	for (Commit c: r.getCommits()) {
-	    		printer.printString("In corso l'analisi del commit: "+ c.getId());
-	    		c.setClassesTouched(Cc.getClasses(c.getCommit(), repository));
-	    		for (JavaClass jvc: c.getClassesTouched()) {
-	    			jvc.setRelease(r);
-	    			if (!myClassList.contains(jvc.getNamePath())) {
-	    				myClassList.add(jvc.getNamePath());
-	    			}
-	    		}
-	    		if(c.getTicket() != null && myTicketList.contains(c.getTicket())) {//Verifico che il ticket sia congruo
-	    			if (c.getTicket().getAffversions().size() != 0) {
-	    				if (c.getTicket().getAffversions().contains(r)) {
-	    					for (JavaClass jclass: c.getClassesTouched()) {
-	    						jclass.setBuggy(true);
-	    					}
-                    	}
-                    }
-                    else {
-                    	if (r.getNumberOfRelease() >= c.getTicket().getInjectedVersion().getNumberOfRelease() && r.getNumberOfRelease() < c.getTicket().getFixVersion().getNumberOfRelease()) {
-                    		for (JavaClass jclass: c.getClassesTouched()) {
-                    			jclass.setBuggy(true);
-	    					}
-	    				}	
-                    }
-	    		}
-	    	}
-	    	//printer.printString("\nCalcolo delle metriche in corso...");
-	    	//Mc.calculateMetrics(r, myClassList, myTicketList, repository);
-	    }
+			if (r.getCommits().size() != 0) {
+				for (Commit c: r.getCommits()) {
+					c.setClassesTouched(Cc.getClasses(c.getCommit(), repository, r));
+			    }	
+			}
+		}
 		
+		printer.printString("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
+		ArrayList<String> nameClasses = new ArrayList<String>();
+		for (Release r: myReleaseList) {
+			if (r.getCommits().size() != 0) {
+				r.setLastCommit(Rc.retrieveLastCommit(r));
+				nameClasses = Rc.retrieveClassesForRelease(r);
+				r.setJavaClasses(Rc.createClasses(r, nameClasses));
+				System.out.println("NUMERO DI CLASSI RELEASE "+r.getNameRelease()+": "+r.getJavaClasses().size());
+			}
+		}
+		
+		for (Release r: myReleaseList) {
+			if (r.getCommits().size() != 0) {
+				Mc.calculateBuggyness(r, Cc, repository, myTicketList);
+				Mc.calculateMetrics(r, myTicketList, repository);
+			}
+		}		
 		printer.printString("Creazione del file csv in corso...");
-		csv.createDataset(myReleaseList, myTicketList, repository);*/
-	
-		
+		csv.createDataset(myReleaseList, repository);
 	}
-
 }

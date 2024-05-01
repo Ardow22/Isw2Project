@@ -13,6 +13,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import logic.model.entity.Commit;
+import logic.model.entity.JavaClass;
 import logic.model.entity.Release;
 import logic.utils.JsonFileHandler;
 
@@ -101,5 +103,26 @@ public class ReleaseController {
 		}
 	}
 
+	public ArrayList<String> retrieveClassesForRelease(Release release) throws JSONException, IOException {
+		Commit lastCommit = new Commit();
+		lastCommit = release.getLastCommit();
+		return lastCommit.getClassesTouched();
+	}
 
+	public ArrayList<JavaClass> createClasses(Release r, ArrayList<String> nameClasses) {
+		ArrayList<JavaClass> classList = new ArrayList<JavaClass>();
+		for (String className: nameClasses) {
+			JavaClass jClass = new JavaClass();
+			jClass.setNamePath(className);
+			jClass.setRelease(r);
+			jClass.setBuggy(false);
+			classList.add(jClass);
+		}
+		return classList;
+		
+	}
+
+	public Commit retrieveLastCommit(Release r) {
+		return r.getCommits().get(0);
+	}
 }

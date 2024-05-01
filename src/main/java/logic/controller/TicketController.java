@@ -178,7 +178,6 @@ public class TicketController {
   			  }
   		  } 
   	  }
-  	  
   	  return null;
     }
     
@@ -215,6 +214,9 @@ public class TicketController {
   			  difference = FV - OV;
   		  }
   		  P = (FV - IV) / difference;
+  		  if (P < 0) {
+  			P = 1;
+  		  }
   		  listP.add(P);
   	  }
   	 

@@ -2,16 +2,13 @@ package logic.model.entity;
 
 import java.util.ArrayList;
 
-import logic.model.entity.Commit;
-import logic.model.entity.JavaClass;
-import logic.model.entity.Ticket;
-
 public class Release {
 	private String releaseDate;
 	private String nameRelease;
 	private String idRelease;
 	private int numberOfRelease;
 	private long AgeOfRelease;
+	private Commit lastCommit;
 	private ArrayList<Commit> commits;
 	private ArrayList<Ticket> ticketsClosedBug;
 	private ArrayList<JavaClass> javaClasses;
@@ -64,6 +61,12 @@ public class Release {
 	}
 	public void setAgeOfRelease(long ageOfRelease) {
 		AgeOfRelease = ageOfRelease;
+	}
+	public Commit getLastCommit() {
+		return lastCommit;
+	}
+	public void setLastCommit(Commit lastCommit) {
+		this.lastCommit = lastCommit;
 	}
 	
 

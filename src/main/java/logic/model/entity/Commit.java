@@ -11,7 +11,7 @@ public class Commit {
 	private String date;
 	private String message;
 	private RevCommit commit;
-	private ArrayList<JavaClass> classesTouched;
+	private ArrayList<String> classesTouched;
 	
 	
 	public String getId() {
@@ -45,11 +45,11 @@ public class Commit {
 		this.message = message;
 	}
 
-	public ArrayList<JavaClass> getClassesTouched() {
+	public ArrayList<String> getClassesTouched() {
 		return classesTouched;
 	}
 
-	public void setClassesTouched(ArrayList<JavaClass> classesTouched) {
+	public void setClassesTouched(ArrayList<String> classesTouched) {
 		this.classesTouched = classesTouched;
 	}
 

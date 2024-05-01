@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 
 
+
 public class JavaClass {
 	
 	private String namePath;
@@ -15,8 +16,6 @@ public class JavaClass {
 	private int numberOfFixDefects;
 	private int changeSetSize;
 	private int maxChangeSetSize;
-	private int addedLOC;
-	private int maxAddedLOC;
 	private int numberOfMethods;
 	private int numberOfAttributes;
 	private boolean buggy;
@@ -104,22 +103,6 @@ public class JavaClass {
 
 	public void setMaxChangeSetSize(int maxChangeSetSize) {
 		this.maxChangeSetSize = maxChangeSetSize;
-	}
-
-	public int getAddedLOC() {
-		return addedLOC;
-	}
-
-	public void setAddedLOC(int addedLOC) {
-		this.addedLOC = addedLOC;
-	}
-
-	public int getMaxAddedLOC() {
-		return maxAddedLOC;
-	}
-
-	public void setMaxAddedLOC(int maxAddedLOC) {
-		this.maxAddedLOC = maxAddedLOC;
 	}
 
 	public int getNumberOfMethods() {
