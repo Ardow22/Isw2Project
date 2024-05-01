@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Comparator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,6 +83,7 @@ public class TicketController {
 	        	 
 	        	 int len2 = issues.getJSONObject(i%1000).getJSONObject("fields").getJSONArray("fixVersions").length();
 	        	 if (len2 > 0) {
+	        		 ArrayList<Release> fixV = new ArrayList<Release>();
 	        		 JSONArray fixVersions = fields.getJSONArray("fixVersions");
 	        		 for (int y = 0; y < fixVersions.length(); y++) {
 	        			 JSONObject fixVersion = fixVersions.getJSONObject(y);
@@ -92,16 +94,36 @@ public class TicketController {
 	        			 for (Release r: releaseList) {
 	        				 if (fixVersion.has("releaseDate")) {
 	                    		 if (r.getReleaseDate().equals(fixReleaseDate) || r.getNameRelease().equals(fixName)) {
-	                    			 tk.setFixVersion(r);
+	                    			 if (len2 == 1) {
+	                    				tk.setFixVersion(r); 
+	                    			 }
+	                    			 else {
+	                    				fixV.add(r);
+	                    			 }
 	                             }
 	                    	 }
 	                    	 else {
 	                    		 if (r.getNameRelease().equals(fixName)) {
-	                    			 tk.setFixVersion(r);
+	                    			 if (len2 == 1) {
+	                    				 tk.setFixVersion(r); 
+		                    		 }
+		                    		 else {
+		                    			 fixV.add(r);
+		                    		 }
 	                    		 }
 	                    	 } 
 	        			 }
-	        		 }	 
+	        		 }
+	        		 if (fixV.size() > 1) {
+	        			 Release maxFv = new Release();
+		        		 maxFv.setNumberOfRelease(-1);
+		        		 for (Release fv: fixV) {
+		        			 if (fv.getNumberOfRelease() > maxFv.getNumberOfRelease()) {
+		        				 maxFv = fv;
+		        			 }
+		        		 }
+		        		 tk.setFixVersion(maxFv);
+	        		 }
 	        	 }
 	        	 ticketList.add(tk);
 	          }  
@@ -151,7 +173,7 @@ public class TicketController {
 	
 	public Release calculateInjectedVersion(Ticket ticket, ArrayList<Release> releaseList, ArrayList<Ticket> ticketList, ReleaseController Rc) throws JSONException, IOException, ParseException {
   	  if (ticket.getAffversions().size() != 0) {
-  		  //ticket.getAffversions.sort(Comparator.comparing(Release::getVersionNumber));
+  		  //ticket.getAffversions().sort(Comparator.comparing(release -> release.getNumberOfRelease()));
   		  return ticket.getAffversions().get(0);//nel caso aggiungere codice per verificare quale versione venga prima   
   	  }
   	  else if (ticket.getFixVersion().getNumberOfRelease() == 0) {
