@@ -17,19 +17,17 @@ import logic.model.entity.JavaClass;
 import logic.model.entity.Commit;
 import logic.model.entity.Release;
 import logic.model.entity.Ticket;
-import logic.utils.JsonFileHandler;
 import logic.utils.Printer;
 
 public class MetricsController {
-    public static JsonFileHandler J_FH;
     private static final String FILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
     String SUFFIX1 = "\\";
     String SUFFIX2 = "/.git";
 	
 	
 	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo, Printer printer) throws IOException, JSONException {
-		int N_R = 0;
-		int N_Fix = 0;
+		int Nr = 0;
+		int Nfix = 0;
 		int changeSetSize = 0;
 		int maxChangeSetSize = 0;
 		printer.printStringInfo("Calcolo delle metriche nella release "+release.getNameRelease());
@@ -38,39 +36,31 @@ public class MetricsController {
 			
 			//1 CALCOLO NUMERO DI AUTORI [Nauth]
 			List<String> totAuth = calculateAuthors(release, jClass);
-			printer.printStringInfo("Il numero di autori è: "+totAuth);
 			jClass.setAuthors(totAuth);
 
 			//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
 			//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
 			List<Integer> lines = countInClass(jClass, lastCommit, repo);
-			printer.printStringInfo("Il numero di linee di codice è: "+lines.get(0));
-			printer.printStringInfo("Il numero di linee di commenti è: "+lines.get(1));
 			jClass.setLOC(lines.get(0));
 			jClass.setLinesOfComments(lines.get(1));
 
 			//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
-			N_R = countCommits(release, jClass);
-			printer.printStringInfo("Il numero di commit contenente la classe è: "+N_R);
-			jClass.setNumberOfCommits(N_R);
+			Nr = countCommits(release, jClass);
+			jClass.setNumberOfCommits(Nr);
 
 			//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
-			N_Fix = countFixCommits(myTicketList, release, jClass);
-			printer.printStringInfo("Il numero di commit fixanti in cui compare la classe è: "+N_Fix);
-			jClass.setNumberOfFixDefects(N_Fix);
+			Nfix = countFixCommits(myTicketList, release, jClass);
+			jClass.setNumberOfFixDefects(Nfix);
 
 			//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
 			release.setAgeOfRelease(calculateAgeOfRelease(release));
-			printer.printStringInfo("L'età della release è: "+release.getAgeOfRelease());
 
 			//7 CALCOLO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE (PRENDI ULTIMO COMMIT) [CHANGE SET SIZE]
 			changeSetSize = countFiles(lastCommit);
-			printer.printStringInfo("Il numero di file committed insieme alla classe è: "+changeSetSize);
 			jClass.setChangeSetSize(changeSetSize);
 
 			//8 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
 			maxChangeSetSize = maxCountFiles(jClass, release);
-			printer.printStringInfo("Il numero massimo di file committed insieme alla classe è: "+maxChangeSetSize);
 			jClass.setMaxChangeSetSize(maxChangeSetSize);
 			
 			}
@@ -105,8 +95,7 @@ public class MetricsController {
 	     total.add(numMethods);
 	     numAttributes = countLinesOfAttributes(jClass, lastCommit.getCommit(), repo);
 	     total.add(numMethods);*/
-		 List<Integer> total = countAll(jClass, lastCommit.getCommit(), repo);
-		 return total;
+		 return countAll(jClass, lastCommit.getCommit(), repo);
 	}
 	
 	public List<Integer> countAll(JavaClass jClass, RevCommit commit, String repo) throws IOException {
@@ -310,32 +299,23 @@ public class MetricsController {
 			lastCommit = release.getLastCommit();
 			//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
 			//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
-			printer.printStringInfo("Il numero di linee di codice è: "+jClass.getLOC());
-			printer.printStringInfo("Il numero di linee di commenti è: "+jClass.getLinesOfComments());
 			lines = countInClass(jClass, lastCommit, repo);
-			printer.printStringInfo("Il numero di linee di codice è: "+lines.get(0));
-			printer.printStringInfo("Il numero di linee di commenti è: "+lines.get(1));
 			jClass.setLOC(lines.get(0));
 			jClass.setLinesOfComments(lines.get(1));
 
 			//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
-			printer.printStringInfo("Il numero di commit contenente la classe è: "+0);
 			jClass.setNumberOfCommits(0);
 
 			//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
-			printer.printStringInfo("Il numero di commit fixanti in cui compare la classe è: "+0);
 			jClass.setNumberOfFixDefects(0);
 
 			//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
 			release.setAgeOfRelease(calculateAgeOfRelease(release));
-			printer.printStringInfo("L'età della release è: "+release.getAgeOfRelease());
 
 			//7 CALCOLO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE (PRENDI ULTIMO COMMIT) [CHANGE SET SIZE]
-			printer.printStringInfo("Il numero di file committed insieme alla classe è: "+0);
 			jClass.setChangeSetSize(0);
 
 			//8 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
-			printer.printStringInfo("Il numero massimo di file committed insieme alla classe è: "+0);
 			jClass.setMaxChangeSetSize(0);
 		}
 	}

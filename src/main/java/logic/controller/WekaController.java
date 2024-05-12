@@ -2,7 +2,6 @@ package logic.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,29 +30,26 @@ import weka.core.Instance;
 
 public class WekaController {
 	
-	public static final ArrayList<String> FeatureSelection = new ArrayList<>(Arrays.asList("No selection", "Backward Search", "Forward Search", "Bidirectional"));
-	public static final ArrayList<String> Sampling = new ArrayList<>(Arrays.asList("No sampling", "Oversampling", "Undersampling", "SMOTE"));
-	public static final ArrayList<String> CostSensitive = new ArrayList<>(Arrays.asList("No cost sensitive", "Sensitive Threshold", "Sensitive Learning"));
-	public static final ArrayList<String> Classifiers = new ArrayList<>(Arrays.asList("Random Forest", "NaiveBayes", "IBK"));
-	public static final ArrayList<String> Accuracy = new ArrayList<>(Arrays.asList("Precision", "Recall", "AUC", "Kappa"));
+	protected static final List<String> FeatureSelection = new ArrayList<>(Arrays.asList("No selection", "Backward Search", "Forward Search", "Bidirectional"));
+	protected static final List<String> Sampling = new ArrayList<>(Arrays.asList("No sampling", "Oversampling", "Undersampling", "SMOTE"));
+	protected static final List<String> CostSensitive = new ArrayList<>(Arrays.asList("No cost sensitive", "Sensitive Threshold", "Sensitive Learning"));
+	protected static final List<String> Classifiers = new ArrayList<>(Arrays.asList("Random Forest", "NaiveBayes", "IBK"));
+	protected static final List<String> Accuracy = new ArrayList<>(Arrays.asList("Precision", "Recall", "AUC", "Kappa"));
 
 	public void walkForward(List<Release> myReleaseList, String repo, CSVController csv, Printer printer) throws Exception {
 		for (Release r: myReleaseList) {
 			if (r.getNumberOfRelease() > 0) { //la prima release la consideriamo solo come training
 				
-				List<Release> trainingSet = new ArrayList<>();
 				List<Release> testingSet = new ArrayList<>();
-				trainingSet = retrieveTrainingSet(r, myReleaseList);
+				List<Release> trainingSet = retrieveTrainingSet(r, myReleaseList);
 			    //if (r.getCommits().size() != 0) {
 			    	testingSet.add(r);
 			    /*}
 			    else {
 			    	testingSet.add(trainingSet.get(trainingSet.size() - 1));
 			    }*/
-			    List<String> arffFiles = new ArrayList<>();
-				List<Instances> trainingSet_testingSet = new ArrayList<>();
-				arffFiles = createFileArff(trainingSet, testingSet, repo, csv, printer);
-				trainingSet_testingSet = retrieveDataSet(arffFiles);
+			    List<String> arffFiles = createFileArff(trainingSet, testingSet, csv, printer);
+				List<Instances> trainingSet_testingSet = retrieveDataSet(arffFiles);
 				
 				printer.printStringInfo("TRAINING SET: ");
 				for (Release re: trainingSet) {
@@ -370,7 +366,7 @@ public class WekaController {
 
 
 
-	private ArrayList<String> createFileArff(List<Release> trainingSet, List<Release> testingSet, String repo, CSVController csv, Printer printer) throws Exception {
+	private ArrayList<String> createFileArff(List<Release> trainingSet, List<Release> testingSet, CSVController csv, Printer printer) throws Exception {
 		ArrayList<String> csvFileNames = new ArrayList<>();
 		ArrayList<String> arffFileNames = new ArrayList<>();
 		String trS = "trainingSet";
@@ -402,7 +398,7 @@ public class WekaController {
 		
 	}
 
-	public List<Release> retrieveTrainingSet(Release testingRelease, List<Release> myReleaseList) throws ParseException {
+	public List<Release> retrieveTrainingSet(Release testingRelease, List<Release> myReleaseList) {
 		List<Release> myTrainingSet = new ArrayList<>();
 		for (Release r: myReleaseList) {
 			if (r.getNumberOfRelease() < testingRelease.getNumberOfRelease()) {

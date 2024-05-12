@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import org.json.JSONArray;
@@ -21,7 +22,7 @@ public class JsonFileHandler {
 		URLConnection uc = url2.openConnection(); 
 		
 		try (InputStream is = uc.getInputStream()) {
-			BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8"))); 
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)); 
 			String jsonText = readAll(rd); 
 			return new JSONObject(jsonText); 
 		} catch (Exception e) { 
@@ -54,7 +55,7 @@ public class JsonFileHandler {
 		} 
 		
 		try (InputStream is = uc.getInputStream()) {
-			BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8"))); 
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)); 
 			String jsonText = readAll(rd); 
 			return new JSONArray(jsonText); 
 		} catch (Exception e) { 
