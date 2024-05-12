@@ -10,7 +10,7 @@ public class Commit {
 	private String author;
 	private String date;
 	private String message;
-	private RevCommit commit;
+	private RevCommit rCommit;
 	private Release release;
 	private List<String> classesTouched;
 	
@@ -63,11 +63,11 @@ public class Commit {
 	}
 
 	public RevCommit getCommit() {
-		return commit;
+		return rCommit;
 	}
 
 	public void setCommit(RevCommit commit) {
-		this.commit = commit;
+		this.rCommit = commit;
 	}
 
 	public Release getRelease() {

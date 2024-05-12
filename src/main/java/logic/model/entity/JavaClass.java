@@ -5,9 +5,9 @@ import java.util.List;
 public class JavaClass {
 	
 	private String namePath;
-	private int LOC;
+	private int lOC;
 	private int linesOfComments;
-	private List<String> Authors;
+	private List<String> authors;
 	private Release release;
 	private int numberOfCommits;
 	private int numberOfFixDefects;
@@ -24,23 +24,23 @@ public class JavaClass {
 	}
 
 	public int getLOC() {
-		return LOC;
+		return lOC;
 	}
 
-	public void setLOC(int lOC) {
-		LOC = lOC;
+	public void setLOC(int loC) {
+		lOC = loC;
 	}
 
 	public int getNumberOfAuthors() {
-		return Authors.size();
+		return authors.size();
 	}
 	
 	public List<String> getAuthors() {
-		return Authors;
+		return authors;
 	}
 
-	public void setAuthors(List<String> authors) {
-		this.Authors = authors;
+	public void setAuthors(List<String> auth) {
+		this.authors = auth;
 	}
 
 

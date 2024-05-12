@@ -351,16 +351,16 @@ public class WekaController {
 	
 
 	private List<Instances> retrieveDataSet(List<String> arffFiles) throws IOException {
-		List<Instances> trainingData_testingData = new ArrayList<>();
+		List<Instances> trainingDataAndTestingData = new ArrayList<>();
 		
 		for (String arffFile : arffFiles) {
             ArffLoader loader = new ArffLoader();
             loader.setFile(new File(arffFile));
             Instances data = loader.getDataSet();
-            trainingData_testingData.add(data);
+            trainingDataAndTestingData.add(data);
         }
 
-        return trainingData_testingData;
+        return trainingDataAndTestingData;
 	}
 
 
