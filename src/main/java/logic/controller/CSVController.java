@@ -5,16 +5,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.Logger;
+
 import logic.model.entity.JavaClass;
 import logic.model.entity.Release;
-import logic.utils.Printer;
 
 public class CSVController {
 	
 	String alert1 = "Error in csv writer";
 	String alert2 = "Error while flushing/closing fileWriter !!!";
 	
-	public String createDataset(List<Release> releaseList, String projName, Printer printer) {
+	public String createDataset(List<Release> releaseList, String projName, Logger logger) {
 		 FileWriter fileWriter = null;
 		 String outname = "";
 		 try {
@@ -38,28 +39,26 @@ public class CSVController {
 	            			else {
 	            				buggyness = "No";
 	            			}
-		                    fileWriter.append(String.format("%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s", projName, jvc.getNamePath(), releaseNumber, jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), 
-		                    		jvc.getLinesOfComments(), jvc.getLOC(),jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), 
-		                    		jvc.getNumberOfFixDefects(), r.getAgeOfRelease(), buggyness + " %n"));
+		                    fileWriter.append(String.format("%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s \n", projName, jvc.getNamePath(), releaseNumber, jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), jvc.getLinesOfComments(), jvc.getLOC(),jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), jvc.getNumberOfFixDefects(), r.getAgeOfRelease(), buggyness));
 		            	}
 	            	//}
 	            }
 	         } catch (Exception e) {
-	            printer.printStringSevere(alert1);
+	            logger.info(alert1);
 	            e.printStackTrace();
 	         } finally {
 	            try {
 	               fileWriter.flush();
 	               fileWriter.close();
 	            } catch (IOException e) {
-	               printer.printStringSevere(alert2);
+	               logger.info(alert2);
 	               e.printStackTrace();
 	            }
 	         }
 	         return outname;
 	   }
 	
-	public String createWekaDataset(List<Release> releaseList, String projName, Printer printer) {
+	public String createWekaDataset(List<Release> releaseList, String projName, Logger logger) {
 		 FileWriter fileWriter = null;
 		 String outname = "";
 		 try {
@@ -81,26 +80,26 @@ public class CSVController {
 	            			else {
 	            				buggyness = "No";
 	            			}
-		                    fileWriter.append(String.format("%d,%d,%d,%d,%d,%d,%d,%d,%s", jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), jvc.getLinesOfComments(), jvc.getLOC(),jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), jvc.getNumberOfFixDefects(), r.getAgeOfRelease(), buggyness + " %n"));
+		                    fileWriter.append(String.format("%d,%d,%d,%d,%d,%d,%d,%d,%s \n", jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), jvc.getLinesOfComments(), jvc.getLOC(),jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), jvc.getNumberOfFixDefects(), r.getAgeOfRelease(), buggyness));
 		            	}
 	            	//}
 	            }
 	         } catch (Exception e) {
-	            printer.printStringSevere(alert1);
+	            logger.info(alert1);
 	            e.printStackTrace();
 	         } finally {
 	            try {
 	               fileWriter.flush();
 	               fileWriter.close();
 	            } catch (IOException e) {
-	               printer.printStringSevere(alert2);
+	               logger.info(alert2);
 	               e.printStackTrace();
 	            }
 	         }
 	         return outname;
 	   }
 
-	public void writeResults(String repo, int nRelease, String classifier, double precision, double recall, double kappa, double auc, Printer printer) {
+	public void writeResults(String repo, int nRelease, String classifier, double precision, double recall, double kappa, double auc, Logger logger) {
 	    FileWriter fileWriter = null;
 	    String outname = repo.equals("bookkeeper") || repo.equals("openjpa") ? repo + "MachineLearning.csv" : "";
 
@@ -118,10 +117,10 @@ public class CSVController {
 	        }
 	        
 	        // Scrive i dati
-	        fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f", repo, nRelease, classifier, precision, recall, kappa, auc + "%n"));
+	        fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f \n", repo, nRelease, classifier, precision, recall, kappa, auc));
 
 	    } catch (IOException e) {
-	        printer.printStringSevere(alert1);
+	        logger.info(alert1);
 	        e.printStackTrace();
 	    } finally {
 	        try {
@@ -130,7 +129,7 @@ public class CSVController {
 	                fileWriter.close();
 	            }
 	        } catch (IOException e) {
-	            printer.printStringSevere(alert2);
+	            logger.info(alert2);
 	            e.printStackTrace();
 	        }
 	    }

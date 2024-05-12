@@ -6,8 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+
 import logic.model.entity.Release;
-import logic.utils.Printer;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffSaver;
@@ -36,7 +37,7 @@ public class WekaController {
 	protected static final List<String> Classifiers = new ArrayList<>(Arrays.asList("Random Forest", "NaiveBayes", "IBK"));
 	protected static final List<String> Accuracy = new ArrayList<>(Arrays.asList("Precision", "Recall", "AUC", "Kappa"));
 
-	public void walkForward(List<Release> myReleaseList, String repo, CSVController csv, Printer printer) throws Exception {
+	public void walkForward(List<Release> myReleaseList, String repo, CSVController csv, Logger logger) throws Exception {
 		for (Release r: myReleaseList) {
 			if (r.getNumberOfRelease() > 0) { //la prima release la consideriamo solo come training
 				
@@ -48,34 +49,34 @@ public class WekaController {
 			    else {
 			    	testingSet.add(trainingSet.get(trainingSet.size() - 1));
 			    }*/
-			    List<String> arffFiles = createFileArff(trainingSet, testingSet, csv, printer);
+			    List<String> arffFiles = createFileArff(trainingSet, testingSet, csv, logger);
 				List<Instances> trainingSetANDtestingSet = retrieveDataSet(arffFiles);
 				
-				printer.printStringInfo("TRAINING SET: ");
+				logger.info("TRAINING SET: ");
 				for (Release re: trainingSet) {
-					System.out.println(re.getNumberOfRelease());
+					logger.info("NUMERO RELEASE "+re.getNumberOfRelease());
 				}
-				printer.printStringInfo("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
+				logger.info("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
 			    
 				for (String feature: FeatureSelection) {
 			    	for (String sampling: Sampling) {
 			    		for (String costSensitive: CostSensitive) {
 			    			for (String classifier: Classifiers) {
-			    				execute(trainingSetANDtestingSet, feature, sampling, costSensitive, classifier, repo, csv, testingSet.get(0), printer);
-			    				printer.printStringInfo("%n%n");
+			    				execute(trainingSetANDtestingSet, feature, sampling, costSensitive, classifier, repo, csv, testingSet.get(0), logger);
+			    				logger.info("%n%n");
 			    			}
 			    		}
 			    	}
 			    }
-				printer.printStringInfo("%n%n");
+				logger.info("%n%n");
 			}
 		}
 	}
 	
 	
 	
-	public void execute(List<Instances> trainingAndTesting, String feature, String sampling, String costSensitive, String classifier, String repo, CSVController csv, Release testingRelease, Printer printer) throws Exception {
-		printer.printStringInfo("EXECUTE CON TESTING: "+testingRelease.getNumberOfRelease());
+	public void execute(List<Instances> trainingAndTesting, String feature, String sampling, String costSensitive, String classifier, String repo, CSVController csv, Release testingRelease, Logger logger) throws Exception {
+		logger.info("EXECUTE CON TESTING: "+testingRelease.getNumberOfRelease());
 		Instances trainingSet = trainingAndTesting.get(0);
 		trainingSet.setClassIndex(trainingSet.numAttributes() - 1);
 		Instances testingSet = trainingAndTesting.get(1);
@@ -346,7 +347,7 @@ public class WekaController {
 		double recall = eval.recall(0);
 		double kappa = eval.kappa();
 		double auc = eval.areaUnderROC(0);
-		csv.writeResults(repo, testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc, printer);
+		csv.writeResults(repo, testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc, logger);
 	} 
 	
 
@@ -366,13 +367,13 @@ public class WekaController {
 
 
 
-	private ArrayList<String> createFileArff(List<Release> trainingSet, List<Release> testingSet, CSVController csv, Printer printer) throws Exception {
+	private ArrayList<String> createFileArff(List<Release> trainingSet, List<Release> testingSet, CSVController csv, Logger logger) throws Exception {
 		ArrayList<String> csvFileNames = new ArrayList<>();
 		ArrayList<String> arffFileNames = new ArrayList<>();
 		String trS = "trainingSet";
 		String tsS = "testingSet";
-	    csvFileNames.add(csv.createWekaDataset(trainingSet, trS, printer));
-		csvFileNames.add(csv.createWekaDataset(testingSet, tsS, printer));
+	    csvFileNames.add(csv.createWekaDataset(trainingSet, trS, logger));
+		csvFileNames.add(csv.createWekaDataset(testingSet, tsS, logger));
 		// Ciclo su ciascun nome di file CSV
         for (String csvFileName : csvFileNames) {
             // Carica il file CSV

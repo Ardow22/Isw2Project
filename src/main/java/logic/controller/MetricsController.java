@@ -17,7 +17,6 @@ import logic.model.entity.JavaClass;
 import logic.model.entity.Commit;
 import logic.model.entity.Release;
 import logic.model.entity.Ticket;
-import logic.utils.Printer;
 
 public class MetricsController {
     private static final String FILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
@@ -25,12 +24,11 @@ public class MetricsController {
     String sUFFIX2 = "/.git";
 	
 	
-	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo, Printer printer) throws IOException, JSONException {
+	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo) throws IOException, JSONException {
 		int nR = 0;
 		int nFix = 0;
 		int changeSetSize = 0;
 		int maxChangeSetSize = 0;
-		printer.printStringInfo("Calcolo delle metriche nella release "+release.getNameRelease());
 		Commit lastCommit = release.getLastCommit();
 		for (JavaClass jClass: release.getJavaClasses()) {			
 			
@@ -285,14 +283,12 @@ public class MetricsController {
 	}
 
 
-	public void setMetrics(Release release, String repo, Printer printer) throws JSONException, IOException {
+	public void setMetrics(Release release, String repo) throws JSONException, IOException {
 		for (JavaClass jClass: release.getJavaClasses()) {			
 			//1 CALCOLO NUMERO DI AUTORI [Nauth]
 			List<String> totAuth = new ArrayList<>();
-			printer.printStringInfo("Il numero di autori è: "+totAuth);
 			jClass.setAuthors(totAuth);
 
-			printer.printStringInfo("Calcolo delle metriche nella release "+release.getNameRelease());
 			Commit lastCommit = release.getLastCommit();
 			//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
 			//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT

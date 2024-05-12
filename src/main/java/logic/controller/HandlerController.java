@@ -9,7 +9,8 @@ import java.util.List;
 
 import logic.model.bean.ReleaseBean;
 import logic.model.entity.Commit;
-import logic.utils.Printer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HandlerController {
 	
@@ -19,19 +20,20 @@ public class HandlerController {
 	public static final MetricsController mc = new MetricsController();
 	public static final CSVController csv = new CSVController();
 	public static final WekaController wc = new WekaController();
-	public static final Printer printer = new Printer();
+	private static final Logger logger = LoggerFactory.getLogger(HandlerController.class);
 	
 	public void startAnalysis(String repository) throws Exception{
-		printer.printStringInfo("Analisi del progetto "+ repository);
+		logger.info("Analisi del progetto "+ repository);
 		
 		//RECUPERO LA LISTA DELLE RELEASE
 		List<Release> releaseList = ReleaseController.listRelease(repository.toUpperCase());
 	    rc.setNumberReleases(releaseList);
-	    printer.printReleases(releaseList);
+	    for (int i = 0; i < releaseList.size(); i++)
+			 logger.info("RELEASE NUMBER: "+ releaseList.get(i).getNumberOfRelease() +" = "+"RELEASE NAME: "+releaseList.get(i).getNameRelease() + " RELEASE DATE: "+releaseList.get(i).getReleaseDate()+ " RELEASE ID: "+releaseList.get(i).getIdRelease()); 	 	
 	  
 	   
 	    //RECUPERO TUTTI I COMMIT DI OGNI RELEASE
-	    printer.printStringInfo("Recupero dei commit relativi ad ogni release in corso...");
+	    logger.info("Recupero dei commit relativi ad ogni release in corso...");
 	    String lastReleaseDate = null;
 	    int iteration = 0;
 	    ReleaseBean rb = new ReleaseBean();
@@ -47,12 +49,12 @@ public class HandlerController {
 	    }
 	    
 	    //RECUPERO TUTTI I TICKET 
-	    printer.printStringInfo("Recupero dei ticket relativi ai bug chiusi del progetto in corso...");
+	    logger.info("Recupero dei ticket relativi ai bug chiusi del progetto in corso...");
 	    List<Ticket> ticketList = tc.retrieveTicketsID(repository.toUpperCase(), releaseList);
 		Collections.reverse(ticketList);
 		
 		//ASSOCIO I COMMIT AD I RELATIVI TICKET
-		printer.printStringInfo("Recupero dei commit associati al ticket specifico in corso...");
+		logger.info("Recupero dei commit associati al ticket specifico in corso...");
 		for (Ticket t: ticketList) {
 			t.setCommitsForTicket(tc.searchCommitsForTicket(t, releaseList));	
 		}
@@ -65,7 +67,7 @@ public class HandlerController {
 			}
 		}
 		
-		printer.printStringInfo("Calcolo delle Opening Version e delle Injected Version in corso...");
+		logger.info("Calcolo delle Opening Version e delle Injected Version in corso...");
 	    for (Ticket t: myTktList) {
 	    	//IL PRIMO AV DEVE ESSERE PRIMA DI OV, QUINDI IV <= OV
 	    	t.setOpeningVersion(tc.calculateOpeningVersion(t, releaseList));
@@ -102,18 +104,18 @@ public class HandlerController {
 	    
 	    //ELENCO DEI TICKET RIMASTI
 	    for (Ticket t: myTicketList) {
-	    	printer.printStringInfo("Ticket: "+t.getKey());
-	    	printer.printStringInfo("IV: "+t.getInjectedVersion().getNumberOfRelease());
-	    	printer.printStringInfo("OV: "+t.getOpeningVersion().getNumberOfRelease());
-	    	printer.printStringInfo("FV: "+t.getFixVersion().getNumberOfRelease());
-	    	printer.printStringInfo("%n"); 	
+	    	logger.info("Ticket: "+t.getKey());
+	    	logger.info("IV: "+t.getInjectedVersion().getNumberOfRelease());
+	    	logger.info("OV: "+t.getOpeningVersion().getNumberOfRelease());
+	    	logger.info("FV: "+t.getFixVersion().getNumberOfRelease());
+	    	logger.info("%n"); 	
 	    }
 	    
 	    //CONSIDERO SOLO LA PRIMA METà DELLE RELEASE
 	    int halfSize = releaseList.size() / 2;
 		ArrayList<Release> myReleaseList = new ArrayList<>(releaseList.subList(0, halfSize));
 		
-		printer.printStringInfo("Recupero di tutte le classi toccate da ogni commit nelle varie release in corso...");
+		logger.info("Recupero di tutte le classi toccate da ogni commit nelle varie release in corso...");
 		for (Release r: myReleaseList) {
 			if (!r.getCommits().isEmpty()) {
 				for (Commit c: r.getCommits()) {
@@ -134,7 +136,7 @@ public class HandlerController {
 			}
 		}
 		
-		printer.printStringInfo("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
+		logger.info("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
 		for (Release r: myReleaseList) {
 			//if (r.getCommits().size() != 0) {
 				r.setLastCommit(rc.retrieveLastCommit(r));
@@ -147,19 +149,19 @@ public class HandlerController {
 		mc.calculateBuggyness(myReleaseList, myTicketList);
 		for (Release r: myReleaseList) {
 			if (!r.getCommits().isEmpty()) {
-				mc.calculateMetrics(r, myTicketList, repository, printer);
+				mc.calculateMetrics(r, myTicketList, repository);
 			}
 			else {
-				mc.setMetrics(r, repository, printer);
+				mc.setMetrics(r, repository);
 			}
 		}	
 		
-		printer.printStringInfo("Creazione del file csv in corso...");
-		csv.createDataset(myReleaseList, repository, printer);
+		logger.info("Creazione del file csv in corso...");
+		csv.createDataset(myReleaseList, repository, logger);
 		
-		printer.printStringInfo("Analisi di Weka in corso...");
-		wc.walkForward(myReleaseList, repository, csv, printer);
+		logger.info("Analisi di Weka in corso...");
+		wc.walkForward(myReleaseList, repository, csv, logger);
 		
-		printer.printStringInfo("FINITOOOOO!");
+		logger.info("FINITOOOOO!");
 	}
 }
