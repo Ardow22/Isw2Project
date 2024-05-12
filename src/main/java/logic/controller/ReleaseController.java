@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,30 +22,31 @@ import logic.utils.JsonFileHandler;
 
 public class ReleaseController {
 	
-	public static HashMap<LocalDateTime, String> releaseNames;
-	public static HashMap<LocalDateTime, String> releaseID;
-	public static List<LocalDateTime> releases;
-	public static Integer numVersions;
+	protected static Map<LocalDateTime, String> releaseNames;
+	protected static Map<LocalDateTime, String> releaseID;
+	protected static List<LocalDateTime> releases;
+	protected static Integer numVersions;
+	protected static String releaseDate = "releaseDate";
 
 	
-	public List<Release> ListRelease(String projName) throws IOException, JSONException {
+	public static List<Release> listRelease(String projName) throws IOException, JSONException {
 		 //Fills the arraylist with releases dates and orders them
 		   //Ignores releases with missing dates
 		   List<Release> releaseList = new ArrayList<>();
-		   releases = new ArrayList<LocalDateTime>();
+		   releases = new ArrayList<>();
 		         Integer i;
 		         String url = "https://issues.apache.org/jira/rest/api/2/project/" + projName;
 		         JSONObject json = JsonFileHandler.readJsonFromUrl(url);
 		         JSONArray versions = json.getJSONArray("versions");
-		         releaseNames = new HashMap<LocalDateTime, String>();
-		         releaseID = new HashMap<LocalDateTime, String> ();
+		         releaseNames = new HashMap<>();
+		         releaseID = new HashMap<> ();
 		         for (i = 0; i < versions.length(); i++ ) {
 		            String name = "";
 		            String id = "";
 		            String date = "";
 		            Release release = new Release();
-		            if(versions.getJSONObject(i).has("releaseDate")) {
-		               date = versions.getJSONObject(i).get("releaseDate").toString();
+		            if(versions.getJSONObject(i).has(releaseDate)) {
+		               date = versions.getJSONObject(i).get(releaseDate).toString();
 		               release.setReleaseDate(date);
 		               
 		               if (versions.getJSONObject(i).has("name")) {
@@ -55,7 +57,7 @@ public class ReleaseController {
 		                  id = versions.getJSONObject(i).get("id").toString();
 		                  release.setIdRelease(id);
 		               }
-		               addRelease(versions.getJSONObject(i).get("releaseDate").toString(),
+		               addRelease(versions.getJSONObject(i).get(releaseDate).toString(),
 		                          name,id);
 		               releaseList.add(release);
 		            }
@@ -93,7 +95,6 @@ public class ReleaseController {
 	       releases.add(dateTime);
 	    releaseNames.put(dateTime, name);
 	    releaseID.put(dateTime, id);
-	    return;
 	}
 	
 	public void setNumberReleases(List<Release> releaseList) {
@@ -102,7 +103,7 @@ public class ReleaseController {
 		}
 	}
 
-	public List<String> retrieveClassesForRelease(Release release) throws JSONException, IOException {
+	public List<String> retrieveClassesForRelease(Release release) throws JSONException {
 		Commit lastCommit = release.getLastCommit();
 		return lastCommit.getClassesTouched();
 	}

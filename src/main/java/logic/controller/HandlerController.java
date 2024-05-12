@@ -25,7 +25,7 @@ public class HandlerController {
 		printer.printStringInfo("Analisi del progetto "+ repository);
 		
 		//RECUPERO LA LISTA DELLE RELEASE
-		List<Release> releaseList = rc.ListRelease(repository.toUpperCase());
+		List<Release> releaseList = ReleaseController.listRelease(repository.toUpperCase());
 	    rc.setNumberReleases(releaseList);
 	    printer.printReleases(releaseList);
 	  
@@ -144,7 +144,7 @@ public class HandlerController {
 			//}
 		}
 		
-		mc.calculateBuggyness(myReleaseList, cc, repository, myTicketList);
+		mc.calculateBuggyness(myReleaseList, myTicketList);
 		for (Release r: myReleaseList) {
 			if (!r.getCommits().isEmpty()) {
 				mc.calculateMetrics(r, myTicketList, repository, printer);

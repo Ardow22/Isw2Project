@@ -38,7 +38,9 @@ public class CSVController {
 	            			else {
 	            				buggyness = "No";
 	            			}
-		                    fileWriter.append(String.format("%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s \n", projName, jvc.getNamePath(), releaseNumber, jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), jvc.getLinesOfComments(), jvc.getLOC(),jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), jvc.getNumberOfFixDefects(), r.getAgeOfRelease(), buggyness));
+		                    fileWriter.append(String.format("%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s", projName, jvc.getNamePath(), releaseNumber, jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), 
+		                    		jvc.getLinesOfComments(), jvc.getLOC(),jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), 
+		                    		jvc.getNumberOfFixDefects(), r.getAgeOfRelease(), buggyness + " %n"));
 		            	}
 	            	//}
 	            }
@@ -79,7 +81,7 @@ public class CSVController {
 	            			else {
 	            				buggyness = "No";
 	            			}
-		                    fileWriter.append(String.format("%d,%d,%d,%d,%d,%d,%d,%d,%s \n", jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), jvc.getLinesOfComments(), jvc.getLOC(),jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), jvc.getNumberOfFixDefects(), r.getAgeOfRelease(), buggyness));
+		                    fileWriter.append(String.format("%d,%d,%d,%d,%d,%d,%d,%d,%s", jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), jvc.getLinesOfComments(), jvc.getLOC(),jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), jvc.getNumberOfFixDefects(), r.getAgeOfRelease(), buggyness + " %n"));
 		            	}
 	            	//}
 	            }
@@ -116,7 +118,7 @@ public class CSVController {
 	        }
 	        
 	        // Scrive i dati
-	        fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f\n", repo, nRelease, classifier, precision, recall, kappa, auc));
+	        fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f", repo, nRelease, classifier, precision, recall, kappa, auc + "%n"));
 
 	    } catch (IOException e) {
 	        printer.printStringSevere(alert1);

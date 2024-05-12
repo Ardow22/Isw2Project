@@ -21,13 +21,13 @@ import logic.utils.Printer;
 
 public class MetricsController {
     private static final String FILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
-    String SUFFIX1 = "\\";
-    String SUFFIX2 = "/.git";
+    String sUFFIX1 = "\\";
+    String sUFFIX2 = "/.git";
 	
 	
 	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo, Printer printer) throws IOException, JSONException {
-		int Nr = 0;
-		int Nfix = 0;
+		int nR = 0;
+		int nFix = 0;
 		int changeSetSize = 0;
 		int maxChangeSetSize = 0;
 		printer.printStringInfo("Calcolo delle metriche nella release "+release.getNameRelease());
@@ -45,12 +45,12 @@ public class MetricsController {
 			jClass.setLinesOfComments(lines.get(1));
 
 			//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
-			Nr = countCommits(release, jClass);
-			jClass.setNumberOfCommits(Nr);
+			nR = countCommits(release, jClass);
+			jClass.setNumberOfCommits(nR);
 
 			//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
-			Nfix = countFixCommits(myTicketList, release, jClass);
-			jClass.setNumberOfFixDefects(Nfix);
+			nFix = countFixCommits(myTicketList, release, jClass);
+			jClass.setNumberOfFixDefects(nFix);
 
 			//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
 			release.setAgeOfRelease(calculateAgeOfRelease(release));
@@ -102,7 +102,7 @@ public class MetricsController {
 		List<Integer> totalMetrics = new ArrayList<>();
 		int linesOfCode = 0;
 		int linesOfComment = 0;
-		try (Repository repository = new FileRepository(new File(FILE_PATH + repo + SUFFIX1 + SUFFIX2))) {
+		try (Repository repository = new FileRepository(new File(FILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -123,7 +123,7 @@ public class MetricsController {
 			
 	public int countLinesOfCode(JavaClass jClass, RevCommit commit, String repo) throws IOException {
         int linesOfCode = 0;
-        try (Repository repository = new FileRepository(new File(FILE_PATH + repo + SUFFIX1 + SUFFIX2))) {
+        try (Repository repository = new FileRepository(new File(FILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -153,7 +153,7 @@ public class MetricsController {
     
     public int countLinesOfComments(JavaClass jClass, RevCommit commit, String repo) throws IOException {
         int linesOfComments = 0;
-        try (Repository repository = new FileRepository(new File(FILE_PATH + repo + SUFFIX1 + SUFFIX2))) {
+        try (Repository repository = new FileRepository(new File(FILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -257,7 +257,7 @@ public class MetricsController {
 	 }
 
 
-	public void calculateBuggyness(List<Release> myReleaseList, CommitController cc, String repository, List<Ticket> myTicketList) {
+	public void calculateBuggyness(List<Release> myReleaseList, List<Ticket> myTicketList) {
 		for (Ticket t: myTicketList) {
 			for (Commit c: t.getCommitsForTicket()) {
 				for (String jName: c.getClassesTouched()) {
@@ -273,10 +273,9 @@ public class MetricsController {
 		for (Release r: myReleaseList) {
 			//if (r.getCommits().size() != 0) {
 				for (JavaClass jc: r.getJavaClasses()) {
-					if (jc.getNamePath().equals(jName)) {
-						if (r.getNumberOfRelease() < commitRelease.getNumberOfRelease()) {
-							jc.setBuggy(true);
-						}
+					if (jc.getNamePath().equals(jName) && r.getNumberOfRelease() < commitRelease.getNumberOfRelease()) {
+						jc.setBuggy(true);
+						
 					}
 				}
 			//}
@@ -293,13 +292,11 @@ public class MetricsController {
 			printer.printStringInfo("Il numero di autori è: "+totAuth);
 			jClass.setAuthors(totAuth);
 
-			List<Integer> lines = new ArrayList<>();
-			Commit lastCommit = new Commit();
 			printer.printStringInfo("Calcolo delle metriche nella release "+release.getNameRelease());
-			lastCommit = release.getLastCommit();
+			Commit lastCommit = release.getLastCommit();
 			//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
 			//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
-			lines = countInClass(jClass, lastCommit, repo);
+			List<Integer> lines = countInClass(jClass, lastCommit, repo);
 			jClass.setLOC(lines.get(0));
 			jClass.setLinesOfComments(lines.get(1));
 

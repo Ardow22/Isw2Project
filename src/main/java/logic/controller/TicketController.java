@@ -24,9 +24,9 @@ import logic.model.entity.Ticket;
 import logic.utils.JsonFileHandler;
 
 public class TicketController {
-	String FORMAT = "yyyy-MM-dd";
-	String ReleaseDate = "releaseDate";
-	String FIELDS = "fields";
+	String fORMAT = "yyyy-MM-dd";
+	String releaseDate = "releaseDate";
+	String fIELDS = "fields";
 	
 	public List<Ticket> retrieveTicketsID(String projName, List<Release> releaseList) throws IOException, JSONException {
 		   List<Ticket> ticketList = new ArrayList<>();
@@ -54,23 +54,23 @@ public class TicketController {
 	        	 List<Release> affVersList = new ArrayList<>();
 	        	 String key = issues.getJSONObject(i%1000).get("key").toString();
 	        	 tk.setKey(key);
-	        	 JSONObject fields = issues.getJSONObject(i%1000).getJSONObject(FIELDS);
+	        	 JSONObject fields = issues.getJSONObject(i%1000).getJSONObject(fIELDS);
 	        	 creationDate = fields.getString("created").substring(0, 10);
 	    		 resolutionDate = fields.getString("resolutiondate").substring(0, 10);
 	        	 tk.setCreationDate(creationDate);
 	             tk.setResolutionDate(resolutionDate);
 	        	 
-	        	 int len1 = issues.getJSONObject(i%1000).getJSONObject(FIELDS).getJSONArray("versions").length();
+	        	 int len1 = issues.getJSONObject(i%1000).getJSONObject(fIELDS).getJSONArray("versions").length();
 	        	 if (len1 > 0) {
 	        		 JSONArray versions = fields.getJSONArray("versions");
 	        		 for (int x = 0; x < versions.length(); x++) {
 	                     JSONObject version = versions.getJSONObject(x);
-	                     if (version.has(ReleaseDate)) {
-	                    	 releaseDate = version.getString(ReleaseDate);
+	                     if (version.has(releaseDate)) {
+	                    	 releaseDate = version.getString(releaseDate);
 	                     }
 	                     releaseName = version.getString("name");
 	                     for (Release r: releaseList) {
-	                    	 if (version.has(ReleaseDate)) {
+	                    	 if (version.has(releaseDate)) {
 	                    		 if (r.getReleaseDate().equals(releaseDate) || r.getNameRelease().equals(releaseName)) {
 	                    			 affVersList.add(r);
 	                             }
@@ -85,18 +85,18 @@ public class TicketController {
 	        	 }
 	        	 tk.setAffversions(affVersList);
 	        	 
-	        	 int len2 = issues.getJSONObject(i%1000).getJSONObject(FIELDS).getJSONArray("fixVersions").length();
+	        	 int len2 = issues.getJSONObject(i%1000).getJSONObject(fIELDS).getJSONArray("fixVersions").length();
 	        	 if (len2 > 0) {
 	        		 List<Release> fixV = new ArrayList<>();
 	        		 JSONArray fixVersions = fields.getJSONArray("fixVersions");
 	        		 for (int y = 0; y < fixVersions.length(); y++) {
 	        			 JSONObject fixVersion = fixVersions.getJSONObject(y);
-	        			 if (fixVersion.has(ReleaseDate)) {
-	        				 fixReleaseDate = fixVersion.getString(ReleaseDate);
+	        			 if (fixVersion.has(releaseDate)) {
+	        				 fixReleaseDate = fixVersion.getString(releaseDate);
 	        			 }
 	        			 fixName = fixVersion.getString("name");
 	        			 for (Release r: releaseList) {
-	        				 if (fixVersion.has(ReleaseDate)) {
+	        				 if (fixVersion.has(releaseDate)) {
 	                    		 if (r.getReleaseDate().equals(fixReleaseDate) || r.getNameRelease().equals(fixName)) {
 	                    			 if (len2 == 1) {
 	                    				tk.setFixVersion(r); 
@@ -166,7 +166,7 @@ public class TicketController {
 	}
 	
 	public Release calculateOpeningVersion(Ticket ticket, List<Release> releaseList) {
-  	  DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT);
+  	  DateTimeFormatter formatter = DateTimeFormatter.ofPattern(fORMAT);
   	  LocalDate creationDate = LocalDate.parse(ticket.getCreationDate(), formatter);
   	  for (Release r: releaseList) {
   		LocalDate releaseDate = LocalDate.parse(r.getReleaseDate(), formatter);
@@ -224,33 +224,33 @@ public class TicketController {
   	  }
   	  //INCREMENT PROPORTION
   	  List<Integer> listP = new ArrayList<>();
-  	  int FV = 1;
-  	  int IV = 1;
-  	  int OV = 1;
-  	  int P = 1;
+  	  int fV = 1;
+  	  int iV = 1;
+  	  int oV = 1;
+  	  int p = 1;
   	  for (Ticket t: subList) {
-  		  FV = t.getFixVersion().getNumberOfRelease();
+  		  fV = t.getFixVersion().getNumberOfRelease();
   		  if (t.getInjectedVersion() != null) {
-  			  IV = t.getInjectedVersion().getNumberOfRelease();
+  			  iV = t.getInjectedVersion().getNumberOfRelease();
   		  }
-  		  OV = t.getOpeningVersion().getNumberOfRelease();
+  		  oV = t.getOpeningVersion().getNumberOfRelease();
   		  int difference = 0;
-  		  if ((FV - OV) == 0) {
+  		  if ((fV - oV) == 0) {
   			  difference = 1;  
   	      }
   		  else {
-  			  difference = FV - OV;
+  			  difference = fV - oV;
   		  }
-  		  P = (FV - IV) / difference;
-  		  if (P < 0) {
-  			P = 1;
+  		  p = (fV - iV) / difference;
+  		  if (p < 0) {
+  			p = 1;
   		  }
-  		  listP.add(P);
+  		  listP.add(p);
   	  }
   	 
   	  int sum = 0;
-  	  for (int p: listP) {
-  		  sum += p;
+  	  for (int p2: listP) {
+  		  sum += p2;
   	  }
   	  int averageP = 0;
   	  if (!listP.isEmpty()) {
@@ -259,7 +259,7 @@ public class TicketController {
   	  return averageP;
     }
     
-    private List<Ticket> ColdStart(Ticket ticket, ReleaseController Rc) throws JSONException, IOException, ParseException {
+    private List<Ticket> ColdStart(Ticket ticket, ReleaseController rc) throws JSONException, IOException, ParseException {
     	 List<String> allProjects = new ArrayList<>(Arrays.asList("avro", "storm", "zookeeper", "syncope", "tajo"));
     	 List<Ticket> allTickets = new ArrayList<>();	
     	/*BOOKKEEPER: 2011 - 2017
@@ -272,8 +272,8 @@ public class TicketController {
     	 * TAJO: 2013 - 2019 */
     	String limitDate = ticket.getFixVersion().getReleaseDate();
     	for (String project: allProjects) {
-    		List<Release> releasesList = Rc.ListRelease(project.toUpperCase());
-    	    Rc.setNumberReleases(releasesList);
+    		List<Release> releasesList = ReleaseController.listRelease(project.toUpperCase());
+    	    rc.setNumberReleases(releasesList);
     	    
     	    List<Ticket> ticketsList = retrieveTicketsID(project.toUpperCase(), releasesList);
     		Collections.reverse(ticketsList);
@@ -326,7 +326,7 @@ public class TicketController {
     	
     	//PRENDO SOLO I TICKET FINO ALLA DATA CHE MI INTERESSA
     	List<Ticket> subTktList = new ArrayList<>();
-    	SimpleDateFormat dateFormat = new SimpleDateFormat(FORMAT);
+    	SimpleDateFormat dateFormat = new SimpleDateFormat(fORMAT);
         Date date2 = dateFormat.parse(limitDate);
     	for (Ticket t: allTickets) {
     		Date date1 = dateFormat.parse(t.getFixVersion().getReleaseDate());
@@ -340,7 +340,7 @@ public class TicketController {
     
     public Release coldStartInjectedVersion(Ticket ticket) {//DA CONTROLLARE, A ME SERVONO SOLO I TICKET CHE GIà HANNO LE AFFECTED VERSION
     	if (!ticket.getAffversions().isEmpty()) {
-    		final SimpleDateFormat sdf = new SimpleDateFormat(FORMAT);
+    		final SimpleDateFormat sdf = new SimpleDateFormat(fORMAT);
             Comparator<Release> comparator = new Comparator<Release>() {
                 @Override
                 public int compare(Release release1, Release release2) {
