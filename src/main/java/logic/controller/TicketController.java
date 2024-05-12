@@ -24,8 +24,6 @@ import logic.utils.JsonFileHandler;
 
 public class TicketController {
 	
-	public static JsonFileHandler JSFH;
-	
 	public ArrayList<Ticket> retrieveTicketsID(String projName, ArrayList<Release> releaseList) throws IOException, JSONException {
 		   ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
 		   String releaseDate = "";
@@ -41,7 +39,7 @@ public class TicketController {
 	              + projName + "%22AND%22issueType%22=%22Bug%22AND(%22status%22=%22closed%22OR"
 	              + "%22status%22=%22resolved%22)AND%22resolution%22=%22fixed%22&fields=key,resolutiondate,versions,created,fixVersions&startAt="
 	              + i.toString() + "&maxResults=" + j.toString();
-	          JSONObject json = JSFH.readJsonFromUrl(url);
+	          JSONObject json = JsonFileHandler.readJsonFromUrl(url);
 	          JSONArray issues = json.getJSONArray("issues");
 	          total = json.getInt("total");
 	          for (; i < total && i < j; i++) {
@@ -140,21 +138,24 @@ public class TicketController {
 	
 	public ArrayList<Commit> searchCommitsForTicket(Ticket ticket, ArrayList<Release> releaseList) {
 		ArrayList<Commit> commitsForTicket = new ArrayList<Commit> ();
+		ArrayList<Commit> commitList = new ArrayList<Commit> (); 
 		for (Release r: releaseList) {
-	    	ArrayList<Commit> commitList = r.getCommits();
-	    	for (Commit c: commitList) {
-	    		Pattern pattern = Pattern.compile("\\b" + Pattern.quote(ticket.getKey()) + "\\b");
-	            Matcher matcher = pattern.matcher(c.getMessage());
-	    		while(matcher.find()) {
-	    			String match = matcher.group();
-	    			if (match.equals(ticket.getKey())) {
-	    				c.setTicket(ticket);
-		    			commitsForTicket.add(c);
-	    				break;
-	    			}
-	    			
-	    		} 
-	    	}
+			if (r.getCommits().size() != 0) {
+				commitList = r.getCommits();
+				for (Commit c: commitList) {
+					Pattern pattern = Pattern.compile("\\b" + Pattern.quote(ticket.getKey()) + "\\b");
+					Matcher matcher = pattern.matcher(c.getMessage());
+					while(matcher.find()) {
+						String match = matcher.group();
+						if (match.equals(ticket.getKey())) {
+							c.setTicket(ticket);
+							commitsForTicket.add(c);
+							break;
+						}
+
+					} 
+				}
+			}
 		}
 		return commitsForTicket;
 	}
@@ -337,8 +338,24 @@ public class TicketController {
     
     public Release coldStartInjectedVersion(Ticket ticket) {//DA CONTROLLARE, A ME SERVONO SOLO I TICKET CHE GIà HANNO LE AFFECTED VERSION
     	if (ticket.getAffversions().size() != 0) {
-    		//ticket.getAffversions.sort(Comparator.comparing(Release::getVersionNumber));
-    		return ticket.getAffversions().get(0);//nel caso aggiungere codice per verificare quale versione venga prima   
+    		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Comparator<Release> comparator = new Comparator<Release>() {
+                @Override
+                public int compare(Release release1, Release release2) {
+                    try {
+                        // Converti le date in oggetti Date
+                        Date date1 = sdf.parse(release1.getReleaseDate());
+                        Date date2 = sdf.parse(release2.getReleaseDate());
+                        // Confronta le date
+                        return date2.compareTo(date1);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        return 0;
+                    }
+                }
+            };
+            Collections.sort(ticket.getAffversions(), comparator);
+    		return ticket.getAffversions().get(0);   
     	}
     	else if (ticket.getFixVersion().getNumberOfRelease() == 0) {
     		return ticket.getFixVersion();

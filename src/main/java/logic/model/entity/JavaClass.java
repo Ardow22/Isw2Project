@@ -16,8 +16,6 @@ public class JavaClass {
 	private int numberOfFixDefects;
 	private int changeSetSize;
 	private int maxChangeSetSize;
-	private int numberOfMethods;
-	private int numberOfAttributes;
 	private boolean buggy;
 
 	public String getNamePath() {
@@ -103,21 +101,5 @@ public class JavaClass {
 
 	public void setMaxChangeSetSize(int maxChangeSetSize) {
 		this.maxChangeSetSize = maxChangeSetSize;
-	}
-
-	public int getNumberOfMethods() {
-		return numberOfMethods;
-	}
-
-	public void setNumberOfMethods(int numberOfMethods) {
-		this.numberOfMethods = numberOfMethods;
-	}
-
-	public int getNumberOfAttributes() {
-		return numberOfAttributes;
-	}
-
-	public void setNumberOfAttributes(int numberOfAttributes) {
-		this.numberOfAttributes = numberOfAttributes;
 	}
 }

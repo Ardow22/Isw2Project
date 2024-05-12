@@ -1,8 +1,12 @@
-package logic.model.entity;
+package logic.model.bean;
 
 import java.util.ArrayList;
 
-public class Release {
+import logic.model.entity.Commit;
+import logic.model.entity.JavaClass;
+import logic.model.entity.Ticket;
+
+public class ReleaseBean {
 	private String releaseDate;
 	private String nameRelease;
 	private String idRelease;
@@ -10,7 +14,6 @@ public class Release {
 	private long AgeOfRelease;
 	private Commit lastCommit;
 	private ArrayList<Commit> commits;
-	private ArrayList<Commit> fakeCommits;
 	private ArrayList<Ticket> ticketsClosedBug;
 	private ArrayList<JavaClass> javaClasses;
 	
@@ -69,12 +72,5 @@ public class Release {
 	public void setLastCommit(Commit lastCommit) {
 		this.lastCommit = lastCommit;
 	}
-	public ArrayList<Commit> getFakeCommits() {
-		return fakeCommits;
-	}
-	public void setFakeCommits(ArrayList<Commit> fakeCommits) {
-		this.fakeCommits = fakeCommits;
-	}
-	
 
 }

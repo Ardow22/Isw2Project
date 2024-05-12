@@ -1,18 +1,14 @@
 package logic.controller;
 
-import java.io.IOException;
-import java.text.ParseException;
+import logic.model.entity.Release;
+import logic.model.entity.Ticket;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.NoHeadException;
-import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.json.JSONException;
-
-import logic.model.entity.Release;
-import logic.model.entity.Ticket;
+import logic.model.bean.ReleaseBean;
 import logic.model.entity.Commit;
+import logic.model.entity.JavaClass;
 import logic.utils.Printer;
 
 public class HandlerController {
@@ -22,9 +18,10 @@ public class HandlerController {
 	public static final TicketController Tc = new TicketController();
 	public static final MetricsController Mc = new MetricsController();
 	public static final CSVController csv = new CSVController();
+	public static final WekaController Wc = new WekaController();
 	public static final Printer printer = new Printer();
 	
-	public void startAnalysis(String repository) throws IOException, JSONException, RevisionSyntaxException, NoHeadException, GitAPIException, ParseException{
+	public void startAnalysis(String repository) throws Exception{
 		System.out.println("Analisi del progetto "+ repository);
 		
 		//RECUPERO LA LISTA DELLE RELEASE
@@ -38,14 +35,16 @@ public class HandlerController {
 	    printer.printString("Recupero dei commit relativi ad ogni release in corso...");
 	    String lastReleaseDate = null;
 	    int iteration = 0;
+	    ReleaseBean rb = new ReleaseBean();
 	    for (Release r: releaseList) {
 	    	r.setCommits(Cc.getCommitsForRelease(r, repository, lastReleaseDate, iteration));
-	    	System.out.println("RELEASE " + r.getNameRelease());
-	    	System.out.println("COMMIT TOTALI:"+r.getCommits().size());
-	    	System.out.println("\n");
 	    	lastReleaseDate = r.getReleaseDate();
 	    	iteration++;
-	    	//IL PRIMO ELEMENTO DELLA LISTA DI COMMIT è IL PIù RECENTE, QUINDI L'ULTIMO. NEL CASO DA RIORDINARE
+	    	if (r.getCommits().size() == 0) {
+	    		r.setFakeCommits(rb.getCommits());
+	    	}
+	    	rb.setCommits(r.getCommits());
+	    	//IL PRIMO ELEMENTO DELLA LISTA DI COMMIT è IL PIù RECENTE, QUINDI L'ULTIMO
 	    }
 	    
 	    //RECUPERO TUTTI I TICKET 
@@ -53,15 +52,11 @@ public class HandlerController {
 	    ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
 		ticketList = Tc.retrieveTicketsID(repository.toUpperCase(), releaseList);
 		Collections.reverse(ticketList);
-		System.out.println("I ticket trovati (CON FIX VERSION) sono in tutto "+ticketList.size());
 		
 		//ASSOCIO I COMMIT AD I RELATIVI TICKET
 		printer.printString("Recupero dei commit associati al ticket specifico in corso...");
 		for (Ticket t: ticketList) {
 			t.setCommitsForTicket(Tc.searchCommitsForTicket(t, releaseList));	
-			System.out.println("TICKET: "+t.getKey());
-			System.out.println("COMMIT TROVATI: "+t.getCommitsForTicket().size());
-			System.out.println("\n");
 		}
 		
 		//ELIMINO TUTTI I TICKET CHE NON HANNO COMMIT ASSOCIATI
@@ -124,29 +119,51 @@ public class HandlerController {
 		for (Release r: myReleaseList) {
 			if (r.getCommits().size() != 0) {
 				for (Commit c: r.getCommits()) {
-					c.setClassesTouched(Cc.getClasses(c.getCommit(), repository, r));
+					//c.setClassesTouched(Cc.getClasses(c.getCommit(), repository, r));
+					c.setClassesTouched(Cc.getModifiedClasses(c.getCommit(), repository));
 			    }	
+			}
+			else {
+				for (Commit c2: r.getFakeCommits()) {
+					c2.setClassesTouched(Cc.getModifiedClasses(c2.getCommit(), repository));
+				}	
+			}
+		}
+		
+		for (Ticket tk: myTicketList) {
+			for (Commit c: tk.getCommitsForTicket()) {
+				c.setClassesTouched(Cc.getModifiedClasses(c.getCommit(), repository));
 			}
 		}
 		
 		printer.printString("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
 		ArrayList<String> nameClasses = new ArrayList<String>();
 		for (Release r: myReleaseList) {
-			if (r.getCommits().size() != 0) {
+			//if (r.getCommits().size() != 0) {
 				r.setLastCommit(Rc.retrieveLastCommit(r));
-				nameClasses = Rc.retrieveClassesForRelease(r);
+				//nameClasses = Rc.retrieveClassesForRelease(r);
+				nameClasses = Rc.retrieveClassesForRelease2(r, Cc, repository);
 				r.setJavaClasses(Rc.createClasses(r, nameClasses));
-				System.out.println("NUMERO DI CLASSI RELEASE "+r.getNameRelease()+": "+r.getJavaClasses().size());
-			}
+			//}
 		}
 		
+		Mc.calculateBuggyness2(myReleaseList, Cc, repository, myTicketList);
 		for (Release r: myReleaseList) {
 			if (r.getCommits().size() != 0) {
-				Mc.calculateBuggyness(r, Cc, repository, myTicketList);
+				//Mc.calculateBuggyness(r, Cc, repository, myTicketList);
 				Mc.calculateMetrics(r, myTicketList, repository);
 			}
-		}		
+			else {
+				Mc.setMetrics(r, repository);
+			}
+		}	
+		
 		printer.printString("Creazione del file csv in corso...");
 		csv.createDataset(myReleaseList, repository);
+		
+		printer.printString("Analisi di Weka in corso...");
+		Wc.walkForward(myReleaseList, repository, csv);
+		
+		printer.printString("FINITOOOOO!");
 	}
 }

@@ -11,6 +11,7 @@ public class Commit {
 	private String date;
 	private String message;
 	private RevCommit commit;
+	private Release release;
 	private ArrayList<String> classesTouched;
 	
 	
@@ -67,6 +68,14 @@ public class Commit {
 
 	public void setCommit(RevCommit commit) {
 		this.commit = commit;
+	}
+
+	public Release getRelease() {
+		return release;
+	}
+
+	public void setRelease(Release release) {
+		this.release = release;
 	}
 
 

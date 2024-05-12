@@ -40,7 +40,17 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
         <version>1.6.4</version>
-</dependency>
+    </dependency>
+    <dependency>
+        <groupId>nz.ac.waikato.cms.weka</groupId>
+        <artifactId>weka-dev</artifactId>
+        <version>3.9.6</version>
+    </dependency>
+    <dependency>
+	    <groupId>nz.ac.waikato.cms.weka</groupId>
+	    <artifactId>SMOTE</artifactId>
+	    <version>1.0.3</version>
+    </dependency>
     
   </dependencies>
 </project>

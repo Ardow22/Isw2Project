@@ -24,7 +24,6 @@ public class ReleaseController {
 	public static HashMap<LocalDateTime, String> releaseID;
 	public static ArrayList<LocalDateTime> releases;
 	public static Integer numVersions;
-	public static JsonFileHandler JSFH;
 
 	
 	public ArrayList<Release> ListRelease(String projName) throws IOException, JSONException {
@@ -34,7 +33,7 @@ public class ReleaseController {
 		   releases = new ArrayList<LocalDateTime>();
 		         Integer i;
 		         String url = "https://issues.apache.org/jira/rest/api/2/project/" + projName;
-		         JSONObject json = JSFH.readJsonFromUrl(url);
+		         JSONObject json = JsonFileHandler.readJsonFromUrl(url);
 		         JSONArray versions = json.getJSONArray("versions");
 		         releaseNames = new HashMap<LocalDateTime, String>();
 		         releaseID = new HashMap<LocalDateTime, String> ();
@@ -81,7 +80,6 @@ public class ReleaseController {
 		                 return data1.compareTo(data2);
 		             }
 		         }); 
-		         //System.out.println("DOPO " + releases);
 		         if (releases.size() < 6)
 		            return new ArrayList<>();
 		         return releaseList;	    
@@ -108,6 +106,12 @@ public class ReleaseController {
 		lastCommit = release.getLastCommit();
 		return lastCommit.getClassesTouched();
 	}
+	
+	public ArrayList<String> retrieveClassesForRelease2(Release release, CommitController Cc, String repo) throws JSONException, IOException {
+		Commit lastCommit = new Commit();
+		lastCommit = release.getLastCommit();
+		return Cc.getClasses(lastCommit.getCommit(), repo, release);
+	}
 
 	public ArrayList<JavaClass> createClasses(Release r, ArrayList<String> nameClasses) {
 		ArrayList<JavaClass> classList = new ArrayList<JavaClass>();
@@ -123,6 +127,11 @@ public class ReleaseController {
 	}
 
 	public Commit retrieveLastCommit(Release r) {
-		return r.getCommits().get(0);
+		if (r.getCommits().size() != 0) {
+			return r.getCommits().get(0);
+		}
+		else {
+			return r.getFakeCommits().get(0);
+		}
 	}
 }
