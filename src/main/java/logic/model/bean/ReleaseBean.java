@@ -1,6 +1,6 @@
 package logic.model.bean;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import logic.model.entity.Commit;
 import logic.model.entity.JavaClass;
@@ -13,9 +13,9 @@ public class ReleaseBean {
 	private int numberOfRelease;
 	private long AgeOfRelease;
 	private Commit lastCommit;
-	private ArrayList<Commit> commits;
-	private ArrayList<Ticket> ticketsClosedBug;
-	private ArrayList<JavaClass> javaClasses;
+	private List<Commit> commits;
+	private List<Ticket> ticketsClosedBug;
+	private List<JavaClass> javaClasses;
 	
 	public String getReleaseDate() {
 		return releaseDate;
@@ -36,16 +36,16 @@ public class ReleaseBean {
 		this.idRelease = idRelease;
 	}
 	
-	public ArrayList<Commit> getCommits() {
+	public List<Commit> getCommits() {
 		return commits;
 	}
-	public void setCommits(ArrayList<Commit> commits) {
+	public void setCommits(List<Commit> commits) {
 		this.commits = commits;
 	}
-	public ArrayList<Ticket> getTicketsClosedBug() {
+	public List<Ticket> getTicketsClosedBug() {
 		return ticketsClosedBug;
 	}
-	public void setTicketsClosedBug(ArrayList<Ticket> ticketsClosedBug) {
+	public void setTicketsClosedBug(List<Ticket> ticketsClosedBug) {
 		this.ticketsClosedBug = ticketsClosedBug;
 	}
 	public int getNumberOfRelease() {
@@ -54,10 +54,10 @@ public class ReleaseBean {
 	public void setNumberOfRelease(int numberOfRelease) {
 		this.numberOfRelease = numberOfRelease;
 	}
-	public ArrayList<JavaClass> getJavaClasses() {
+	public List<JavaClass> getJavaClasses() {
 		return javaClasses;
 	}
-	public void setJavaClasses(ArrayList<JavaClass> javaClasses) {
+	public void setJavaClasses(List<JavaClass> javaClasses) {
 		this.javaClasses = javaClasses;
 	}
 	public long getAgeOfRelease() {

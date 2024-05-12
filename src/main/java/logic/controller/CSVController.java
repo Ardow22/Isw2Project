@@ -43,21 +43,21 @@ public class CSVController {
 	            	//}
 	            }
 	         } catch (Exception e) {
-	            printer.printString(alert1);
+	            printer.printStringSevere(alert1);
 	            e.printStackTrace();
 	         } finally {
 	            try {
 	               fileWriter.flush();
 	               fileWriter.close();
 	            } catch (IOException e) {
-	               printer.printString(alert2);
+	               printer.printStringSevere(alert2);
 	               e.printStackTrace();
 	            }
 	         }
 	         return outname;
 	   }
 	
-	public String createWekaDataset(List<Release> releaseList, String projName) {
+	public String createWekaDataset(List<Release> releaseList, String projName, Printer printer) {
 		 FileWriter fileWriter = null;
 		 String outname = "";
 		 try {
@@ -84,14 +84,14 @@ public class CSVController {
 	            	//}
 	            }
 	         } catch (Exception e) {
-	            System.out.println(alert1);
+	            printer.printStringSevere(alert1);
 	            e.printStackTrace();
 	         } finally {
 	            try {
 	               fileWriter.flush();
 	               fileWriter.close();
 	            } catch (IOException e) {
-	               System.out.println(alert2);
+	               printer.printStringSevere(alert2);
 	               e.printStackTrace();
 	            }
 	         }
@@ -119,7 +119,7 @@ public class CSVController {
 	        fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f\n", repo, nRelease, classifier, precision, recall, kappa, auc));
 
 	    } catch (IOException e) {
-	        printer.printString(alert1);
+	        printer.printStringSevere(alert1);
 	        e.printStackTrace();
 	    } finally {
 	        try {
@@ -128,7 +128,7 @@ public class CSVController {
 	                fileWriter.close();
 	            }
 	        } catch (IOException e) {
-	            printer.printString(alert2);
+	            printer.printStringSevere(alert2);
 	            e.printStackTrace();
 	        }
 	    }

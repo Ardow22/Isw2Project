@@ -22,17 +22,17 @@ public class HandlerController {
 	public static final Printer printer = new Printer();
 	
 	public void startAnalysis(String repository) throws Exception{
-		printer.printString("Analisi del progetto "+ repository);
+		printer.printStringInfo("Analisi del progetto "+ repository);
 		
 		//RECUPERO LA LISTA DELLE RELEASE
-		List<Release> releaseList = new ArrayList<Release>();
+		List<Release> releaseList = new ArrayList<>();
 	    releaseList = rc.ListRelease(repository.toUpperCase());
 	    rc.setNumberReleases(releaseList);
 	    printer.printReleases(releaseList);
 	  
 	   
 	    //RECUPERO TUTTI I COMMIT DI OGNI RELEASE
-	    printer.printString("Recupero dei commit relativi ad ogni release in corso...");
+	    printer.printStringInfo("Recupero dei commit relativi ad ogni release in corso...");
 	    String lastReleaseDate = null;
 	    int iteration = 0;
 	    ReleaseBean rb = new ReleaseBean();
@@ -48,33 +48,33 @@ public class HandlerController {
 	    }
 	    
 	    //RECUPERO TUTTI I TICKET 
-	    printer.printString("Recupero dei ticket relativi ai bug chiusi del progetto in corso...");
-	    ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
+	    printer.printStringInfo("Recupero dei ticket relativi ai bug chiusi del progetto in corso...");
+	    ArrayList<Ticket> ticketList = new ArrayList<>();
 		ticketList = tc.retrieveTicketsID(repository.toUpperCase(), releaseList);
 		Collections.reverse(ticketList);
 		
 		//ASSOCIO I COMMIT AD I RELATIVI TICKET
-		printer.printString("Recupero dei commit associati al ticket specifico in corso...");
+		printer.printStringInfo("Recupero dei commit associati al ticket specifico in corso...");
 		for (Ticket t: ticketList) {
 			t.setCommitsForTicket(tc.searchCommitsForTicket(t, releaseList));	
 		}
 		
 		//ELIMINO TUTTI I TICKET CHE NON HANNO COMMIT ASSOCIATI
-		ArrayList<Ticket> myTktList = new ArrayList<Ticket>();
+		ArrayList<Ticket> myTktList = new ArrayList<>();
 		for (Ticket t: ticketList) {
 			if (t.getCommitsForTicket().size() != 0) {
 				myTktList.add(t);
 			}
 		}
 		
-		printer.printString("Calcolo delle Opening Version e delle Injected Version in corso...");
+		printer.printStringInfo("Calcolo delle Opening Version e delle Injected Version in corso...");
 	    for (Ticket t: myTktList) {
 	    	//IL PRIMO AV DEVE ESSERE PRIMA DI OV, QUINDI IV <= OV
 	    	t.setOpeningVersion(tc.calculateOpeningVersion(t, releaseList));
 	    }
 	    
 	    //TOLGO TUTTI I TICKET CON VALORI DI FV E OV NON CONGRUI
-	    ArrayList<Ticket> myTktList2 = new ArrayList<Ticket>();
+	    ArrayList<Ticket> myTktList2 = new ArrayList<>();
 	    for (Ticket t: myTktList) {
 	    	if (t.getFixVersion().getNumberOfRelease() >= t.getOpeningVersion().getNumberOfRelease()) {
 	    		myTktList2.add(t);
@@ -87,7 +87,7 @@ public class HandlerController {
 	   
 	    
 	    //CONSIDERO SOLO I TICKET CHE HANNO IV E OV CONGRUI
-	    List<Ticket> myTktList3 = new ArrayList<Ticket>();
+	    List<Ticket> myTktList3 = new ArrayList<>();
 	    for (Ticket t: myTktList2) {
 	    	if (t.getInjectedVersion().getNumberOfRelease() < t.getOpeningVersion().getNumberOfRelease()) {
 	    		myTktList3.add(t);
@@ -95,7 +95,7 @@ public class HandlerController {
 	    }
 	    
 	    //TOLGO ANCHE I TICKET CHE HANNO INJECTED VERSION E FIX VERSION UGUALI, PERCHé SIGNIFICA CHE IL BUG NON C'è
-	    List<Ticket> myTicketList = new ArrayList<Ticket>();
+	    List<Ticket> myTicketList = new ArrayList<>();
 	    for (Ticket t: myTktList3) {
 	    	if (t.getInjectedVersion().getNumberOfRelease() != t.getFixVersion().getNumberOfRelease()) {
 	    		myTicketList.add(t);
@@ -104,18 +104,18 @@ public class HandlerController {
 	    
 	    //ELENCO DEI TICKET RIMASTI
 	    for (Ticket t: myTicketList) {
-	    	printer.printString("Ticket: "+t.getKey());
-	    	printer.printString("IV: "+t.getInjectedVersion().getNumberOfRelease());
-	    	printer.printString("OV: "+t.getOpeningVersion().getNumberOfRelease());
-	    	printer.printString("FV: "+t.getFixVersion().getNumberOfRelease());
-	    	printer.printString("%n"); 	
+	    	printer.printStringInfo("Ticket: "+t.getKey());
+	    	printer.printStringInfo("IV: "+t.getInjectedVersion().getNumberOfRelease());
+	    	printer.printStringInfo("OV: "+t.getOpeningVersion().getNumberOfRelease());
+	    	printer.printStringInfo("FV: "+t.getFixVersion().getNumberOfRelease());
+	    	printer.printStringInfo("%n"); 	
 	    }
 	    
 	    //CONSIDERO SOLO LA PRIMA METà DELLE RELEASE
 	    int halfSize = releaseList.size() / 2;
 		ArrayList<Release> myReleaseList = new ArrayList<>(releaseList.subList(0, halfSize));
 		
-		printer.printString("Recupero di tutte le classi toccate da ogni commit nelle varie release in corso...");
+		printer.printStringInfo("Recupero di tutte le classi toccate da ogni commit nelle varie release in corso...");
 		for (Release r: myReleaseList) {
 			if (r.getCommits().size() != 0) {
 				for (Commit c: r.getCommits()) {
@@ -136,8 +136,8 @@ public class HandlerController {
 			}
 		}
 		
-		printer.printString("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
-		ArrayList<String> nameClasses = new ArrayList<String>();
+		printer.printStringInfo("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
+		ArrayList<String> nameClasses = new ArrayList<>();
 		for (Release r: myReleaseList) {
 			//if (r.getCommits().size() != 0) {
 				r.setLastCommit(rc.retrieveLastCommit(r));
@@ -158,12 +158,12 @@ public class HandlerController {
 			}
 		}	
 		
-		printer.printString("Creazione del file csv in corso...");
+		printer.printStringInfo("Creazione del file csv in corso...");
 		csv.createDataset(myReleaseList, repository, printer);
 		
-		printer.printString("Analisi di Weka in corso...");
+		printer.printStringInfo("Analisi di Weka in corso...");
 		wc.walkForward(myReleaseList, repository, csv, printer);
 		
-		printer.printString("FINITOOOOO!");
+		printer.printStringInfo("FINITOOOOO!");
 	}
 }

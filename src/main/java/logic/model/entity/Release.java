@@ -1,6 +1,6 @@
 package logic.model.entity;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Release {
 	private String releaseDate;
@@ -9,10 +9,10 @@ public class Release {
 	private int numberOfRelease;
 	private long AgeOfRelease;
 	private Commit lastCommit;
-	private ArrayList<Commit> commits;
-	private ArrayList<Commit> fakeCommits;
-	private ArrayList<Ticket> ticketsClosedBug;
-	private ArrayList<JavaClass> javaClasses;
+	private List<Commit> commits;
+	private List<Commit> fakeCommits;
+	private List<Ticket> ticketsClosedBug;
+	private List<JavaClass> javaClasses;
 	
 	public String getReleaseDate() {
 		return releaseDate;
@@ -33,16 +33,16 @@ public class Release {
 		this.idRelease = idRelease;
 	}
 	
-	public ArrayList<Commit> getCommits() {
+	public List<Commit> getCommits() {
 		return commits;
 	}
-	public void setCommits(ArrayList<Commit> commits) {
+	public void setCommits(List<Commit> commits) {
 		this.commits = commits;
 	}
-	public ArrayList<Ticket> getTicketsClosedBug() {
+	public List<Ticket> getTicketsClosedBug() {
 		return ticketsClosedBug;
 	}
-	public void setTicketsClosedBug(ArrayList<Ticket> ticketsClosedBug) {
+	public void setTicketsClosedBug(List<Ticket> ticketsClosedBug) {
 		this.ticketsClosedBug = ticketsClosedBug;
 	}
 	public int getNumberOfRelease() {
@@ -51,10 +51,10 @@ public class Release {
 	public void setNumberOfRelease(int numberOfRelease) {
 		this.numberOfRelease = numberOfRelease;
 	}
-	public ArrayList<JavaClass> getJavaClasses() {
+	public List<JavaClass> getJavaClasses() {
 		return javaClasses;
 	}
-	public void setJavaClasses(ArrayList<JavaClass> javaClasses) {
+	public void setJavaClasses(List<JavaClass> javaClasses) {
 		this.javaClasses = javaClasses;
 	}
 	public long getAgeOfRelease() {
@@ -69,10 +69,10 @@ public class Release {
 	public void setLastCommit(Commit lastCommit) {
 		this.lastCommit = lastCommit;
 	}
-	public ArrayList<Commit> getFakeCommits() {
+	public List<Commit> getFakeCommits() {
 		return fakeCommits;
 	}
-	public void setFakeCommits(ArrayList<Commit> fakeCommits) {
+	public void setFakeCommits(List<Commit> fakeCommits) {
 		this.fakeCommits = fakeCommits;
 	}
 	

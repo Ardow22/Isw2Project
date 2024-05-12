@@ -31,18 +31,18 @@ import weka.core.Instance;
 
 public class WekaController {
 	
-	public static final ArrayList<String> FeatureSelection = new ArrayList<String>(Arrays.asList("No selection", "Backward Search", "Forward Search", "Bidirectional"));
-	public static final ArrayList<String> Sampling = new ArrayList<String>(Arrays.asList("No sampling", "Oversampling", "Undersampling", "SMOTE"));
-	public static final ArrayList<String> CostSensitive = new ArrayList<String>(Arrays.asList("No cost sensitive", "Sensitive Threshold", "Sensitive Learning"));
-	public static final ArrayList<String> Classifiers = new ArrayList<String>(Arrays.asList("Random Forest", "NaiveBayes", "IBK"));
-	public static final ArrayList<String> Accuracy = new ArrayList<String>(Arrays.asList("Precision", "Recall", "AUC", "Kappa"));
+	public static final ArrayList<String> FeatureSelection = new ArrayList<>(Arrays.asList("No selection", "Backward Search", "Forward Search", "Bidirectional"));
+	public static final ArrayList<String> Sampling = new ArrayList<>(Arrays.asList("No sampling", "Oversampling", "Undersampling", "SMOTE"));
+	public static final ArrayList<String> CostSensitive = new ArrayList<>(Arrays.asList("No cost sensitive", "Sensitive Threshold", "Sensitive Learning"));
+	public static final ArrayList<String> Classifiers = new ArrayList<>(Arrays.asList("Random Forest", "NaiveBayes", "IBK"));
+	public static final ArrayList<String> Accuracy = new ArrayList<>(Arrays.asList("Precision", "Recall", "AUC", "Kappa"));
 
 	public void walkForward(List<Release> myReleaseList, String repo, CSVController csv, Printer printer) throws Exception {
 		for (Release r: myReleaseList) {
 			if (r.getNumberOfRelease() > 0) { //la prima release la consideriamo solo come training
 				
-				List<Release> trainingSet = new ArrayList<Release>();
-				List<Release> testingSet = new ArrayList<Release>();
+				List<Release> trainingSet = new ArrayList<>();
+				List<Release> testingSet = new ArrayList<>();
 				trainingSet = retrieveTrainingSet(r, myReleaseList);
 			    //if (r.getCommits().size() != 0) {
 			    	testingSet.add(r);
@@ -50,28 +50,28 @@ public class WekaController {
 			    else {
 			    	testingSet.add(trainingSet.get(trainingSet.size() - 1));
 			    }*/
-			    List<String> arffFiles = new ArrayList<String>();
-				List<Instances> trainingSet_testingSet = new ArrayList<Instances>();
-				arffFiles = createFileArff(trainingSet, testingSet, repo, csv);
+			    List<String> arffFiles = new ArrayList<>();
+				List<Instances> trainingSet_testingSet = new ArrayList<>();
+				arffFiles = createFileArff(trainingSet, testingSet, repo, csv, printer);
 				trainingSet_testingSet = retrieveDataSet(arffFiles);
 				
-				System.out.println("TRAINING SET: ");
+				printer.printStringInfo("TRAINING SET: ");
 				for (Release re: trainingSet) {
 					System.out.println(re.getNumberOfRelease());
 				}
-				System.out.println("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
+				printer.printStringInfo("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
 			    
 				for (String feature: FeatureSelection) {
 			    	for (String sampling: Sampling) {
 			    		for (String costSensitive: CostSensitive) {
 			    			for (String classifier: Classifiers) {
 			    				execute(trainingSet_testingSet, feature, sampling, costSensitive, classifier, repo, csv, testingSet.get(0), printer);
-			    				System.out.printf("%n%n");
+			    				printer.printStringInfo("%n%n");
 			    			}
 			    		}
 			    	}
 			    }
-				System.out.printf("%n%n");
+				printer.printStringInfo("%n%n");
 			}
 		}
 	}
@@ -79,7 +79,7 @@ public class WekaController {
 	
 	
 	public void execute(List<Instances> trainingAndTesting, String feature, String sampling, String costSensitive, String classifier, String repo, CSVController csv, Release testingRelease, Printer printer) throws Exception {
-		System.out.println("EXECUTE CON TESTING: "+testingRelease.getNumberOfRelease());
+		printer.printStringInfo("EXECUTE CON TESTING: "+testingRelease.getNumberOfRelease());
 		Instances trainingSet = trainingAndTesting.get(0);
 		trainingSet.setClassIndex(trainingSet.numAttributes() - 1);
 		Instances testingSet = trainingAndTesting.get(1);
@@ -355,7 +355,7 @@ public class WekaController {
 	
 
 	private List<Instances> retrieveDataSet(List<String> arffFiles) throws IOException {
-		List<Instances> trainingData_testingData = new ArrayList<Instances>();
+		List<Instances> trainingData_testingData = new ArrayList<>();
 		
 		for (String arffFile : arffFiles) {
             ArffLoader loader = new ArffLoader();
@@ -370,13 +370,13 @@ public class WekaController {
 
 
 
-	private ArrayList<String> createFileArff(List<Release> trainingSet, List<Release> testingSet, String repo, CSVController csv) throws Exception {
-		ArrayList<String> csvFileNames = new ArrayList<String>();
-		ArrayList<String> arffFileNames = new ArrayList<String>();
+	private ArrayList<String> createFileArff(List<Release> trainingSet, List<Release> testingSet, String repo, CSVController csv, Printer printer) throws Exception {
+		ArrayList<String> csvFileNames = new ArrayList<>();
+		ArrayList<String> arffFileNames = new ArrayList<>();
 		String trS = "trainingSet";
 		String tsS = "testingSet";
-	    csvFileNames.add(csv.createWekaDataset(trainingSet, trS));
-		csvFileNames.add(csv.createWekaDataset(testingSet, tsS));
+	    csvFileNames.add(csv.createWekaDataset(trainingSet, trS, printer));
+		csvFileNames.add(csv.createWekaDataset(testingSet, tsS, printer));
 		// Ciclo su ciascun nome di file CSV
         for (String csvFileName : csvFileNames) {
             // Carica il file CSV
@@ -403,7 +403,7 @@ public class WekaController {
 	}
 
 	public List<Release> retrieveTrainingSet(Release testingRelease, List<Release> myReleaseList) throws ParseException {
-		List<Release> myTrainingSet = new ArrayList<Release>();
+		List<Release> myTrainingSet = new ArrayList<>();
 		for (Release r: myReleaseList) {
 			if (r.getNumberOfRelease() < testingRelease.getNumberOfRelease()) {
 				//if (r.getCommits().size() != 0) {

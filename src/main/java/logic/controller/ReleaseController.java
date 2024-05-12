@@ -114,8 +114,8 @@ public class ReleaseController {
 		return Cc.getClasses(lastCommit.getCommit(), repo, release);
 	}
 
-	public ArrayList<JavaClass> createClasses(Release r, ArrayList<String> nameClasses) {
-		ArrayList<JavaClass> classList = new ArrayList<JavaClass>();
+	public List<JavaClass> createClasses(Release r, List<String> nameClasses) {
+		List<JavaClass> classList = new ArrayList<>();
 		for (String className: nameClasses) {
 			JavaClass jClass = new JavaClass();
 			jClass.setNamePath(className);
