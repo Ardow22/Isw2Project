@@ -3,15 +3,18 @@ package logic.controller;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import logic.model.entity.JavaClass;
 import logic.model.entity.Release;
+import logic.utils.Printer;
 
 public class CSVController {
 	
-	public String createDataset(List<Release> releaseList, String projName) {
+	String alert1 = "Error in csv writer";
+	String alert2 = "Error while flushing/closing fileWriter !!!";
+	
+	public String createDataset(List<Release> releaseList, String projName, Printer printer) {
 		 FileWriter fileWriter = null;
 		 String outname = "";
 		 try {
@@ -40,14 +43,14 @@ public class CSVController {
 	            	//}
 	            }
 	         } catch (Exception e) {
-	            System.out.println("Error in csv writer");
+	            printer.printString(alert1);
 	            e.printStackTrace();
 	         } finally {
 	            try {
 	               fileWriter.flush();
 	               fileWriter.close();
 	            } catch (IOException e) {
-	               System.out.println("Error while flushing/closing fileWriter !!!");
+	               printer.printString(alert2);
 	               e.printStackTrace();
 	            }
 	         }
@@ -81,21 +84,21 @@ public class CSVController {
 	            	//}
 	            }
 	         } catch (Exception e) {
-	            System.out.println("Error in csv writer");
+	            System.out.println(alert1);
 	            e.printStackTrace();
 	         } finally {
 	            try {
 	               fileWriter.flush();
 	               fileWriter.close();
 	            } catch (IOException e) {
-	               System.out.println("Error while flushing/closing fileWriter !!!");
+	               System.out.println(alert2);
 	               e.printStackTrace();
 	            }
 	         }
 	         return outname;
 	   }
 
-	public void writeResults(String repo, int nRelease, String classifier, double precision, double recall, double kappa, double auc) {
+	public void writeResults(String repo, int nRelease, String classifier, double precision, double recall, double kappa, double auc, Printer printer) {
 	    FileWriter fileWriter = null;
 	    String outname = repo.equals("bookkeeper") || repo.equals("openjpa") ? repo + "MachineLearning.csv" : "";
 
@@ -116,7 +119,7 @@ public class CSVController {
 	        fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f\n", repo, nRelease, classifier, precision, recall, kappa, auc));
 
 	    } catch (IOException e) {
-	        System.out.println("Error in csv writer");
+	        printer.printString(alert1);
 	        e.printStackTrace();
 	    } finally {
 	        try {
@@ -125,7 +128,7 @@ public class CSVController {
 	                fileWriter.close();
 	            }
 	        } catch (IOException e) {
-	            System.out.println("Error while flushing/closing fileWriter !!!");
+	            printer.printString(alert2);
 	            e.printStackTrace();
 	        }
 	    }

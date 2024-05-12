@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import logic.model.entity.Release;
+import logic.utils.Printer;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffSaver;
@@ -36,7 +37,7 @@ public class WekaController {
 	public static final ArrayList<String> Classifiers = new ArrayList<String>(Arrays.asList("Random Forest", "NaiveBayes", "IBK"));
 	public static final ArrayList<String> Accuracy = new ArrayList<String>(Arrays.asList("Precision", "Recall", "AUC", "Kappa"));
 
-	public void walkForward(List<Release> myReleaseList, String repo, CSVController csv) throws Exception {
+	public void walkForward(List<Release> myReleaseList, String repo, CSVController csv, Printer printer) throws Exception {
 		for (Release r: myReleaseList) {
 			if (r.getNumberOfRelease() > 0) { //la prima release la consideriamo solo come training
 				
@@ -64,20 +65,20 @@ public class WekaController {
 			    	for (String sampling: Sampling) {
 			    		for (String costSensitive: CostSensitive) {
 			    			for (String classifier: Classifiers) {
-			    				execute(trainingSet_testingSet, feature, sampling, costSensitive, classifier, repo, csv, testingSet.get(0));
-			    				System.out.println("\n\n");
+			    				execute(trainingSet_testingSet, feature, sampling, costSensitive, classifier, repo, csv, testingSet.get(0), printer);
+			    				System.out.printf("%n%n");
 			    			}
 			    		}
 			    	}
 			    }
-				System.out.println("\n\n");
+				System.out.printf("%n%n");
 			}
 		}
 	}
 	
 	
 	
-	public void execute(List<Instances> trainingAndTesting, String feature, String sampling, String costSensitive, String classifier, String repo, CSVController csv, Release testingRelease) throws Exception {
+	public void execute(List<Instances> trainingAndTesting, String feature, String sampling, String costSensitive, String classifier, String repo, CSVController csv, Release testingRelease, Printer printer) throws Exception {
 		System.out.println("EXECUTE CON TESTING: "+testingRelease.getNumberOfRelease());
 		Instances trainingSet = trainingAndTesting.get(0);
 		trainingSet.setClassIndex(trainingSet.numAttributes() - 1);
@@ -349,7 +350,7 @@ public class WekaController {
 		double recall = eval.recall(0);
 		double kappa = eval.kappa();
 		double auc = eval.areaUnderROC(0);
-		csv.writeResults(repo, testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc);
+		csv.writeResults(repo, testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc, printer);
 	} 
 	
 

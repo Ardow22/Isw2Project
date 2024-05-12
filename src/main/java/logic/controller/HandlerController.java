@@ -9,7 +9,6 @@ import java.util.List;
 
 import logic.model.bean.ReleaseBean;
 import logic.model.entity.Commit;
-import logic.model.entity.JavaClass;
 import logic.utils.Printer;
 
 public class HandlerController {
@@ -23,7 +22,7 @@ public class HandlerController {
 	public static final Printer printer = new Printer();
 	
 	public void startAnalysis(String repository) throws Exception{
-		System.out.println("Analisi del progetto "+ repository);
+		printer.printString("Analisi del progetto "+ repository);
 		
 		//RECUPERO LA LISTA DELLE RELEASE
 		List<Release> releaseList = new ArrayList<Release>();
@@ -105,11 +104,11 @@ public class HandlerController {
 	    
 	    //ELENCO DEI TICKET RIMASTI
 	    for (Ticket t: myTicketList) {
-	    	System.out.println("Ticket: "+t.getKey());
-	    	System.out.println("IV: "+t.getInjectedVersion().getNumberOfRelease());
-	    	System.out.println("OV: "+t.getOpeningVersion().getNumberOfRelease());
-	    	System.out.println("FV: "+t.getFixVersion().getNumberOfRelease());
-	    	System.out.println("\n"); 	
+	    	printer.printString("Ticket: "+t.getKey());
+	    	printer.printString("IV: "+t.getInjectedVersion().getNumberOfRelease());
+	    	printer.printString("OV: "+t.getOpeningVersion().getNumberOfRelease());
+	    	printer.printString("FV: "+t.getFixVersion().getNumberOfRelease());
+	    	printer.printString("%n"); 	
 	    }
 	    
 	    //CONSIDERO SOLO LA PRIMA METà DELLE RELEASE
@@ -160,10 +159,10 @@ public class HandlerController {
 		}	
 		
 		printer.printString("Creazione del file csv in corso...");
-		csv.createDataset(myReleaseList, repository);
+		csv.createDataset(myReleaseList, repository, printer);
 		
 		printer.printString("Analisi di Weka in corso...");
-		wc.walkForward(myReleaseList, repository, csv);
+		wc.walkForward(myReleaseList, repository, csv, printer);
 		
 		printer.printString("FINITOOOOO!");
 	}
