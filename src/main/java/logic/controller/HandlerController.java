@@ -151,10 +151,10 @@ public class HandlerController {
 		for (Release r: myReleaseList) {
 			if (r.getCommits().size() != 0) {
 				//Mc.calculateBuggyness(r, Cc, repository, myTicketList);
-				mc.calculateMetrics(r, myTicketList, repository);
+				mc.calculateMetrics(r, myTicketList, repository, printer);
 			}
 			else {
-				mc.setMetrics(r, repository);
+				mc.setMetrics(r, repository, printer);
 			}
 		}	
 		

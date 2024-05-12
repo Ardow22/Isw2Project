@@ -18,59 +18,60 @@ import logic.model.entity.Commit;
 import logic.model.entity.Release;
 import logic.model.entity.Ticket;
 import logic.utils.JsonFileHandler;
+import logic.utils.Printer;
 
 public class MetricsController {
     public static JsonFileHandler JSFH;
     private static final String filepath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
 	
 	
-	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo) throws IOException, JSONException {
-		ArrayList<String> totAuth = new ArrayList<String>();
+	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo, Printer printer) throws IOException, JSONException {
+		List<String> totAuth = new ArrayList<>();
 		int NR = 0;
 		int NFix = 0;
 		int changeSetSize = 0;
 		int maxChangeSetSize = 0;
-		ArrayList<Integer> lines = new ArrayList<Integer>();
+		List<Integer> lines = new ArrayList<>();
 		Commit lastCommit = new Commit();
-		System.out.println("Calcolo delle metriche nella release "+release.getNameRelease());
+		printer.printStringInfo("Calcolo delle metriche nella release "+release.getNameRelease());
 		lastCommit = release.getLastCommit();
 		for (JavaClass jClass: release.getJavaClasses()) {			
 			
 			//1 CALCOLO NUMERO DI AUTORI [Nauth]
 			totAuth = calculateAuthors(release, jClass);
-			System.out.println("Il numero di autori è: "+totAuth);
+			printer.printStringInfo("Il numero di autori è: "+totAuth);
 			jClass.setAuthors(totAuth);
 
 			//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
 			//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
 			lines = countInClass(jClass, lastCommit, repo);
-			System.out.println("Il numero di linee di codice è: "+lines.get(0));
-			System.out.println("Il numero di linee di commenti è: "+lines.get(1));
+			printer.printStringInfo("Il numero di linee di codice è: "+lines.get(0));
+			printer.printStringInfo("Il numero di linee di commenti è: "+lines.get(1));
 			jClass.setLOC(lines.get(0));
 			jClass.setLinesOfComments(lines.get(1));
 
 			//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
 			NR = countCommits(release, jClass);
-			System.out.println("Il numero di commit contenente la classe è: "+NR);
+			printer.printStringInfo("Il numero di commit contenente la classe è: "+NR);
 			jClass.setNumberOfCommits(NR);
 
 			//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
 			NFix = countFixCommits(myTicketList, release, jClass);
-			System.out.println("Il numero di commit fixanti in cui compare la classe è: "+NFix);
+			printer.printStringInfo("Il numero di commit fixanti in cui compare la classe è: "+NFix);
 			jClass.setNumberOfFixDefects(NFix);
 
 			//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
 			release.setAgeOfRelease(calculateAgeOfRelease(release));
-			System.out.println("L'età della release è: "+release.getAgeOfRelease());
+			printer.printStringInfo("L'età della release è: "+release.getAgeOfRelease());
 
 			//7 CALCOLO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE (PRENDI ULTIMO COMMIT) [CHANGE SET SIZE]
 			changeSetSize = countFiles(lastCommit);
-			System.out.println("Il numero di file committed insieme alla classe è: "+changeSetSize);
+			printer.printStringInfo("Il numero di file committed insieme alla classe è: "+changeSetSize);
 			jClass.setChangeSetSize(changeSetSize);
 
 			//8 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
 			maxChangeSetSize = maxCountFiles(jClass, release);
-			System.out.println("Il numero massimo di file committed insieme alla classe è: "+maxChangeSetSize);
+			printer.printStringInfo("Il numero massimo di file committed insieme alla classe è: "+maxChangeSetSize);
 			jClass.setMaxChangeSetSize(maxChangeSetSize);
 			
 			}
@@ -78,10 +79,10 @@ public class MetricsController {
 	}
 	
 	
-	public ArrayList<String> calculateAuthors(Release r, JavaClass jClass) {
-		 ArrayList<String> totAuthors = new ArrayList<String>();
+	public List<String> calculateAuthors(Release r, JavaClass jClass) {
+		 List<String> totAuthors = new ArrayList<>();
 		 for (Commit c: r.getCommits()) {
-			 ArrayList<String> jc = c.getClassesTouched();
+			 List<String> jc = c.getClassesTouched();
 		     for (String jName: jc) {
 		    	 if (jClass.getNamePath().equals(jName))  {
 		    		 if (!totAuthors.contains(c.getAuthor())) {
@@ -93,12 +94,12 @@ public class MetricsController {
 		 return totAuthors;
 	 }
 	
-	public ArrayList<Integer> countInClass(JavaClass jClass, Commit lastCommit, String repo) throws IOException, JSONException {
+	public List<Integer> countInClass(JavaClass jClass, Commit lastCommit, String repo) throws IOException, JSONException {
 		 /*int LOC = 0;
 		 int linesOfComments = 0;
 		 int numMethods = 0;
 		 int numAttributes = 0;*/
-		 ArrayList<Integer> total = new ArrayList<Integer>();
+		 List<Integer> total = new ArrayList<>();
 		 /*LOC = countLinesOfCode(jClass, lastCommit.getCommit(), repo);
 	     total.add(LOC);
 	     linesOfComments = countLinesOfComments(jClass, lastCommit.getCommit(), repo);
@@ -111,8 +112,8 @@ public class MetricsController {
 		 return total;
 	}
 	
-	public ArrayList<Integer> countAll(JavaClass jClass, RevCommit commit, String repo) throws IOException {
-		ArrayList<Integer> totalMetrics = new ArrayList<Integer>();
+	public List<Integer> countAll(JavaClass jClass, RevCommit commit, String repo) throws IOException {
+		List<Integer> totalMetrics = new ArrayList<>();
 		int linesOfCode = 0;
 		int linesOfComment = 0;
 		try (Repository repository = new FileRepository(new File(filepath + repo + "\\" + "/.git"))) {
@@ -263,8 +264,8 @@ public class MetricsController {
 		 return max;
 	 }
  
-	 public void calculateBuggyness(Release release, CommitController Cc, String repository, ArrayList<Ticket> myTicketList) throws JSONException, IOException {
-		 ArrayList<Commit> correctCommits = new ArrayList<Commit>();
+	 public void calculateBuggyness(Release release, CommitController Cc, String repository, List<Ticket> myTicketList) throws JSONException, IOException {
+		 List<Commit> correctCommits = new ArrayList<>();
 		 correctCommits = selectCommitsWithTicket(release.getCommits(), myTicketList);
 		 for (JavaClass jClass: release.getJavaClasses()) {
 			 boolean result = checkBuggyness(jClass.getNamePath(), correctCommits, release);
@@ -274,8 +275,8 @@ public class MetricsController {
 		 }
 	 }
 	 
-	 public ArrayList<Commit> selectCommitsWithTicket(ArrayList<Commit> listCommit, ArrayList<Ticket> myTicketList) {
-		 ArrayList<Commit> commits = new ArrayList<Commit>();
+	 public List<Commit> selectCommitsWithTicket(List<Commit> listCommit, List<Ticket> myTicketList) {
+		 List<Commit> commits = new ArrayList<>();
 		 for (Commit c: listCommit) {
 			 if (c.getTicket() != null && myTicketList.contains(c.getTicket())) {
 				 commits.add(c);
@@ -284,7 +285,7 @@ public class MetricsController {
 		 return commits; 
 	 }
 	 
-	 public boolean checkBuggyness(String className, ArrayList<Commit> listCorrectCommit, Release release) {
+	 public boolean checkBuggyness(String className, List<Commit> listCorrectCommit, Release release) {
 		 for (Commit c: listCorrectCommit) {
 			 if (c.getClassesTouched().contains(className)) {
 				 if (c.getTicket().getAffversions().size() != 0) {
@@ -333,45 +334,45 @@ public class MetricsController {
 	}
 
 
-	public void setMetrics(Release release, String repo) throws JSONException, IOException {
+	public void setMetrics(Release release, String repo, Printer printer) throws JSONException, IOException {
 		for (JavaClass jClass: release.getJavaClasses()) {			
 			//1 CALCOLO NUMERO DI AUTORI [Nauth]
-			ArrayList<String> totAuth = new ArrayList<String>();
-			System.out.println("Il numero di autori è: "+totAuth);
+			List<String> totAuth = new ArrayList<>();
+			printer.printStringInfo("Il numero di autori è: "+totAuth);
 			jClass.setAuthors(totAuth);
 
-			ArrayList<Integer> lines = new ArrayList<Integer>();
+			List<Integer> lines = new ArrayList<>();
 			Commit lastCommit = new Commit();
-			System.out.println("Calcolo delle metriche nella release "+release.getNameRelease());
+			printer.printStringInfo("Calcolo delle metriche nella release "+release.getNameRelease());
 			lastCommit = release.getLastCommit();
 			//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
 			//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
-			System.out.println("Il numero di linee di codice è: "+jClass.getLOC());
-			System.out.println("Il numero di linee di commenti è: "+jClass.getLinesOfComments());
+			printer.printStringInfo("Il numero di linee di codice è: "+jClass.getLOC());
+			printer.printStringInfo("Il numero di linee di commenti è: "+jClass.getLinesOfComments());
 			lines = countInClass(jClass, lastCommit, repo);
-			System.out.println("Il numero di linee di codice è: "+lines.get(0));
-			System.out.println("Il numero di linee di commenti è: "+lines.get(1));
+			printer.printStringInfo("Il numero di linee di codice è: "+lines.get(0));
+			printer.printStringInfo("Il numero di linee di commenti è: "+lines.get(1));
 			jClass.setLOC(lines.get(0));
 			jClass.setLinesOfComments(lines.get(1));
 
 			//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
-			System.out.println("Il numero di commit contenente la classe è: "+0);
+			printer.printStringInfo("Il numero di commit contenente la classe è: "+0);
 			jClass.setNumberOfCommits(0);
 
 			//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
-			System.out.println("Il numero di commit fixanti in cui compare la classe è: "+0);
+			printer.printStringInfo("Il numero di commit fixanti in cui compare la classe è: "+0);
 			jClass.setNumberOfFixDefects(0);
 
 			//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
 			release.setAgeOfRelease(calculateAgeOfRelease(release));
-			System.out.println("L'età della release è: "+release.getAgeOfRelease());
+			printer.printStringInfo("L'età della release è: "+release.getAgeOfRelease());
 
 			//7 CALCOLO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE (PRENDI ULTIMO COMMIT) [CHANGE SET SIZE]
-			System.out.println("Il numero di file committed insieme alla classe è: "+0);
+			printer.printStringInfo("Il numero di file committed insieme alla classe è: "+0);
 			jClass.setChangeSetSize(0);
 
 			//8 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
-			System.out.println("Il numero massimo di file committed insieme alla classe è: "+0);
+			printer.printStringInfo("Il numero massimo di file committed insieme alla classe è: "+0);
 			jClass.setMaxChangeSetSize(0);
 		}
 	}

@@ -1,16 +1,13 @@
 package logic.model.entity;
 
-import java.util.ArrayList;
-
-
-
+import java.util.List;
 
 public class JavaClass {
 	
 	private String namePath;
 	private int LOC;
 	private int linesOfComments;
-	private ArrayList<String> Authors;
+	private List<String> Authors;
 	private Release release;
 	private int numberOfCommits;
 	private int numberOfFixDefects;
@@ -38,11 +35,11 @@ public class JavaClass {
 		return Authors.size();
 	}
 	
-	public ArrayList<String> getAuthors() {
+	public List<String> getAuthors() {
 		return Authors;
 	}
 
-	public void setAuthors(ArrayList<String> authors) {
+	public void setAuthors(List<String> authors) {
 		this.Authors = authors;
 	}
 
