@@ -25,8 +25,7 @@ public class HandlerController {
 		printer.printStringInfo("Analisi del progetto "+ repository);
 		
 		//RECUPERO LA LISTA DELLE RELEASE
-		List<Release> releaseList = new ArrayList<>();
-	    releaseList = rc.ListRelease(repository.toUpperCase());
+		List<Release> releaseList = rc.ListRelease(repository.toUpperCase());
 	    rc.setNumberReleases(releaseList);
 	    printer.printReleases(releaseList);
 	  
@@ -40,7 +39,7 @@ public class HandlerController {
 	    	r.setCommits(cc.getCommitsForRelease(r, repository, lastReleaseDate, iteration));
 	    	lastReleaseDate = r.getReleaseDate();
 	    	iteration++;
-	    	if (r.getCommits().size() == 0) {
+	    	if (r.getCommits().isEmpty()) {
 	    		r.setFakeCommits(rb.getCommits());
 	    	}
 	    	rb.setCommits(r.getCommits());
@@ -49,8 +48,7 @@ public class HandlerController {
 	    
 	    //RECUPERO TUTTI I TICKET 
 	    printer.printStringInfo("Recupero dei ticket relativi ai bug chiusi del progetto in corso...");
-	    ArrayList<Ticket> ticketList = new ArrayList<>();
-		ticketList = tc.retrieveTicketsID(repository.toUpperCase(), releaseList);
+	    List<Ticket> ticketList = tc.retrieveTicketsID(repository.toUpperCase(), releaseList);
 		Collections.reverse(ticketList);
 		
 		//ASSOCIO I COMMIT AD I RELATIVI TICKET
@@ -62,7 +60,7 @@ public class HandlerController {
 		//ELIMINO TUTTI I TICKET CHE NON HANNO COMMIT ASSOCIATI
 		ArrayList<Ticket> myTktList = new ArrayList<>();
 		for (Ticket t: ticketList) {
-			if (t.getCommitsForTicket().size() != 0) {
+			if (!t.getCommitsForTicket().isEmpty()) {
 				myTktList.add(t);
 			}
 		}
@@ -117,7 +115,7 @@ public class HandlerController {
 		
 		printer.printStringInfo("Recupero di tutte le classi toccate da ogni commit nelle varie release in corso...");
 		for (Release r: myReleaseList) {
-			if (r.getCommits().size() != 0) {
+			if (!r.getCommits().isEmpty()) {
 				for (Commit c: r.getCommits()) {
 					//c.setClassesTouched(Cc.getClasses(c.getCommit(), repository, r));
 					c.setClassesTouched(cc.getModifiedClasses(c.getCommit(), repository));
@@ -137,20 +135,18 @@ public class HandlerController {
 		}
 		
 		printer.printStringInfo("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
-		List<String> nameClasses = new ArrayList<>();
 		for (Release r: myReleaseList) {
 			//if (r.getCommits().size() != 0) {
 				r.setLastCommit(rc.retrieveLastCommit(r));
 				//nameClasses = Rc.retrieveClassesForRelease(r);
-				nameClasses = rc.retrieveClassesForRelease2(r, cc, repository);
+				List<String> nameClasses = rc.retrieveClassesForRelease2(r, cc, repository);
 				r.setJavaClasses(rc.createClasses(r, nameClasses));
 			//}
 		}
 		
-		mc.calculateBuggyness2(myReleaseList, cc, repository, myTicketList);
+		mc.calculateBuggyness(myReleaseList, cc, repository, myTicketList);
 		for (Release r: myReleaseList) {
-			if (r.getCommits().size() != 0) {
-				//Mc.calculateBuggyness(r, Cc, repository, myTicketList);
+			if (!r.getCommits().isEmpty()) {
 				mc.calculateMetrics(r, myTicketList, repository, printer);
 			}
 			else {

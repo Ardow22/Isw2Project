@@ -111,7 +111,7 @@ public class ReleaseController {
 	public List<String> retrieveClassesForRelease2(Release release, CommitController Cc, String repo) throws JSONException, IOException {
 		Commit lastCommit = new Commit();
 		lastCommit = release.getLastCommit();
-		return Cc.getClasses(lastCommit.getCommit(), repo, release);
+		return Cc.getClasses(lastCommit.getCommit(), repo);
 	}
 
 	public List<JavaClass> createClasses(Release r, List<String> nameClasses) {

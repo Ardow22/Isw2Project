@@ -21,44 +21,43 @@ import logic.utils.JsonFileHandler;
 import logic.utils.Printer;
 
 public class MetricsController {
-    public static JsonFileHandler JSFH;
-    private static final String filepath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+    public static JsonFileHandler J_FH;
+    private static final String FILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+    String SUFFIX1 = "\\";
+    String SUFFIX2 = "/.git";
 	
 	
 	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo, Printer printer) throws IOException, JSONException {
-		List<String> totAuth = new ArrayList<>();
-		int NR = 0;
-		int NFix = 0;
+		int N_R = 0;
+		int N_Fix = 0;
 		int changeSetSize = 0;
 		int maxChangeSetSize = 0;
-		List<Integer> lines = new ArrayList<>();
-		Commit lastCommit = new Commit();
 		printer.printStringInfo("Calcolo delle metriche nella release "+release.getNameRelease());
-		lastCommit = release.getLastCommit();
+		Commit lastCommit = release.getLastCommit();
 		for (JavaClass jClass: release.getJavaClasses()) {			
 			
 			//1 CALCOLO NUMERO DI AUTORI [Nauth]
-			totAuth = calculateAuthors(release, jClass);
+			List<String> totAuth = calculateAuthors(release, jClass);
 			printer.printStringInfo("Il numero di autori è: "+totAuth);
 			jClass.setAuthors(totAuth);
 
 			//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
 			//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
-			lines = countInClass(jClass, lastCommit, repo);
+			List<Integer> lines = countInClass(jClass, lastCommit, repo);
 			printer.printStringInfo("Il numero di linee di codice è: "+lines.get(0));
 			printer.printStringInfo("Il numero di linee di commenti è: "+lines.get(1));
 			jClass.setLOC(lines.get(0));
 			jClass.setLinesOfComments(lines.get(1));
 
 			//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
-			NR = countCommits(release, jClass);
-			printer.printStringInfo("Il numero di commit contenente la classe è: "+NR);
-			jClass.setNumberOfCommits(NR);
+			N_R = countCommits(release, jClass);
+			printer.printStringInfo("Il numero di commit contenente la classe è: "+N_R);
+			jClass.setNumberOfCommits(N_R);
 
 			//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
-			NFix = countFixCommits(myTicketList, release, jClass);
-			printer.printStringInfo("Il numero di commit fixanti in cui compare la classe è: "+NFix);
-			jClass.setNumberOfFixDefects(NFix);
+			N_Fix = countFixCommits(myTicketList, release, jClass);
+			printer.printStringInfo("Il numero di commit fixanti in cui compare la classe è: "+N_Fix);
+			jClass.setNumberOfFixDefects(N_Fix);
 
 			//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
 			release.setAgeOfRelease(calculateAgeOfRelease(release));
@@ -84,10 +83,9 @@ public class MetricsController {
 		 for (Commit c: r.getCommits()) {
 			 List<String> jc = c.getClassesTouched();
 		     for (String jName: jc) {
-		    	 if (jClass.getNamePath().equals(jName))  {
-		    		 if (!totAuthors.contains(c.getAuthor())) {
-							 totAuthors.add(c.getAuthor());
-					 }	
+		    	 if (jClass.getNamePath().equals(jName) && !totAuthors.contains(c.getAuthor()))  {
+		    		 totAuthors.add(c.getAuthor());
+					 	
 				 }
 			 }
 		 }
@@ -99,7 +97,6 @@ public class MetricsController {
 		 int linesOfComments = 0;
 		 int numMethods = 0;
 		 int numAttributes = 0;*/
-		 List<Integer> total = new ArrayList<>();
 		 /*LOC = countLinesOfCode(jClass, lastCommit.getCommit(), repo);
 	     total.add(LOC);
 	     linesOfComments = countLinesOfComments(jClass, lastCommit.getCommit(), repo);
@@ -108,7 +105,7 @@ public class MetricsController {
 	     total.add(numMethods);
 	     numAttributes = countLinesOfAttributes(jClass, lastCommit.getCommit(), repo);
 	     total.add(numMethods);*/
-		 total = countAll(jClass, lastCommit.getCommit(), repo);
+		 List<Integer> total = countAll(jClass, lastCommit.getCommit(), repo);
 		 return total;
 	}
 	
@@ -116,7 +113,7 @@ public class MetricsController {
 		List<Integer> totalMetrics = new ArrayList<>();
 		int linesOfCode = 0;
 		int linesOfComment = 0;
-		try (Repository repository = new FileRepository(new File(filepath + repo + "\\" + "/.git"))) {
+		try (Repository repository = new FileRepository(new File(FILE_PATH + repo + SUFFIX1 + SUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -137,7 +134,7 @@ public class MetricsController {
 			
 	public int countLinesOfCode(JavaClass jClass, RevCommit commit, String repo) throws IOException {
         int linesOfCode = 0;
-        try (Repository repository = new FileRepository(new File(filepath + repo + "\\" + "/.git"))) {
+        try (Repository repository = new FileRepository(new File(FILE_PATH + repo + SUFFIX1 + SUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -167,7 +164,7 @@ public class MetricsController {
     
     public int countLinesOfComments(JavaClass jClass, RevCommit commit, String repo) throws IOException {
         int linesOfComments = 0;
-        try (Repository repository = new FileRepository(new File(filepath + repo + "\\" + "/.git"))) {
+        try (Repository repository = new FileRepository(new File(FILE_PATH + repo + SUFFIX1 + SUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -240,9 +237,7 @@ public class MetricsController {
         LocalDate releaseDate = LocalDate.parse(release.getReleaseDate(), formatter);
         LocalDate currentDate = LocalDate.now();
         long daysSinceRelease = currentDate.toEpochDay() - releaseDate.toEpochDay();
-        // Conversione dei giorni in anni, mesi e giorni
-        long yearsSinceRelease = daysSinceRelease / 365;
-        return yearsSinceRelease;  
+        return daysSinceRelease / 365;  
     }
 	
 	public int countFiles(Commit lastCommit) {
@@ -254,25 +249,12 @@ public class MetricsController {
 		int max = 0;
 		for (Commit c: r.getCommits()) {
 			for (String jName: c.getClassesTouched()) {
-				if (jName.equals(jClass.getNamePath())) {
-					if (c.getClassesTouched().size() > max) {
-					     max = c.getClassesTouched().size();
-					}
+				if (jName.equals(jClass.getNamePath()) && c.getClassesTouched().size() > max) {
+					max = c.getClassesTouched().size();
 				}
 			} 
 		 }
 		 return max;
-	 }
- 
-	 public void calculateBuggyness(Release release, CommitController Cc, String repository, List<Ticket> myTicketList) throws JSONException, IOException {
-		 List<Commit> correctCommits = new ArrayList<>();
-		 correctCommits = selectCommitsWithTicket(release.getCommits(), myTicketList);
-		 for (JavaClass jClass: release.getJavaClasses()) {
-			 boolean result = checkBuggyness(jClass.getNamePath(), correctCommits, release);
-			 if (result) {
-				 jClass.setBuggy(true);
-			 }
-		 }
 	 }
 	 
 	 public List<Commit> selectCommitsWithTicket(List<Commit> listCommit, List<Ticket> myTicketList) {
@@ -284,28 +266,9 @@ public class MetricsController {
 		 }
 		 return commits; 
 	 }
-	 
-	 public boolean checkBuggyness(String className, List<Commit> listCorrectCommit, Release release) {
-		 for (Commit c: listCorrectCommit) {
-			 if (c.getClassesTouched().contains(className)) {
-				 if (c.getTicket().getAffversions().size() != 0) {
-					 if (c.getTicket().getAffversions().contains(release)) {
-						 return true;
-	    		     }
-                 }
-                 else {
-                 	if (release.getNumberOfRelease() >= c.getTicket().getInjectedVersion().getNumberOfRelease() 
-                 			&& release.getNumberOfRelease() < c.getTicket().getFixVersion().getNumberOfRelease()) {
-                 		return true;	
-	    			}	
-                 } 
-			 } 
-		 }
-		 return false;
-	 }
 
 
-	public void calculateBuggyness2(List<Release> myReleaseList, CommitController cc, String repository, List<Ticket> myTicketList) {
+	public void calculateBuggyness(List<Release> myReleaseList, CommitController cc, String repository, List<Ticket> myTicketList) {
 		for (Ticket t: myTicketList) {
 			for (Commit c: t.getCommitsForTicket()) {
 				for (String jName: c.getClassesTouched()) {
