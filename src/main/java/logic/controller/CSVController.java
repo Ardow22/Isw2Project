@@ -4,13 +4,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import logic.model.entity.JavaClass;
 import logic.model.entity.Release;
 
 public class CSVController {
 	
-	public String createDataset(ArrayList<Release> releaseList, String projName) {
+	public String createDataset(List<Release> releaseList, String projName) {
 		 FileWriter fileWriter = null;
 		 String outname = "";
 		 try {
