@@ -1,6 +1,6 @@
 package logic.model.entity;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -12,7 +12,7 @@ public class Commit {
 	private String message;
 	private RevCommit commit;
 	private Release release;
-	private ArrayList<String> classesTouched;
+	private List<String> classesTouched;
 	
 	
 	public String getId() {
@@ -46,11 +46,11 @@ public class Commit {
 		this.message = message;
 	}
 
-	public ArrayList<String> getClassesTouched() {
+	public List<String> getClassesTouched() {
 		return classesTouched;
 	}
 
-	public void setClassesTouched(ArrayList<String> classesTouched) {
+	public void setClassesTouched(List<String> classesTouched) {
 		this.classesTouched = classesTouched;
 	}
 

@@ -13,8 +13,6 @@ import logic.model.entity.Commit;
 import logic.model.entity.Release;
 
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -31,12 +29,14 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 public class CommitController {
-	private static final String filepath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+	private static final String File_path = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+	String suffix1 = "\\";
+	String suffix2 = "/.git";
 		
-	public ArrayList<Commit> getCommitsForRelease(Release release, String repo, String releaseDateSince, int iter) 
-			throws IOException, JSONException, RevisionSyntaxException, NoHeadException, GitAPIException, ParseException {
-		ArrayList<Commit> commitsForThisRelease = new ArrayList<Commit>();
-        try (Repository repository = new FileRepository(new File(filepath + repo +"\\"+"/.git"))) {
+	public List<Commit> getCommitsForRelease(Release release, String repo, String releaseDateSince, int iter) 
+			throws IOException, JSONException, RevisionSyntaxException, ParseException {
+		List<Commit> commitsForThisRelease = new ArrayList<>();
+        try (Repository repository = new FileRepository(new File(File_path + repo +suffix1+suffix2))) {
             try (Git git = new Git(repository)) {
                 try (RevWalk revWalk = new RevWalk(repository)) {
                     // Definiamo il formato della data
@@ -88,9 +88,9 @@ public class CommitController {
         return commitsForThisRelease;
     }
 	
-	public ArrayList<String> getClasses(RevCommit commit, String repo, Release release) throws IOException, JSONException {
-		ArrayList<String> classes = new ArrayList<String>();
-		 try (Repository repository = new FileRepository(new File(filepath + repo + "\\" + "/.git"))) {
+	public List<String> getClasses(RevCommit commit, String repo, Release release) throws IOException, JSONException {
+		List<String> classes = new ArrayList<>();
+		 try (Repository repository = new FileRepository(new File(File_path + repo + suffix1 + suffix2))) {
 			 try (TreeWalk treeWalk = new TreeWalk(repository)) {
 	            treeWalk.addTree(commit.getTree());
 	            treeWalk.setRecursive(true);
@@ -106,9 +106,9 @@ public class CommitController {
 	 }
 
 	
-	public ArrayList<String> getModifiedClasses(RevCommit commit, String project) throws IOException {
-		ArrayList<String> modifiedClasses = new ArrayList<>();	
-		try (Repository repo = new FileRepository(new File(filepath + project + "\\" + "/.git"))) {
+	public List<String> getModifiedClasses(RevCommit commit, String project) throws IOException {
+		List<String> modifiedClasses = new ArrayList<>();	
+		try (Repository repo = new FileRepository(new File(File_path + project + suffix1 + suffix2))) {
 			try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE); 
 			ObjectReader reader = repo.newObjectReader()) {			
 			CanonicalTreeParser newTreeIter = new CanonicalTreeParser();

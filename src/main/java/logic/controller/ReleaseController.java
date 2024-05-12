@@ -23,14 +23,14 @@ public class ReleaseController {
 	
 	public static HashMap<LocalDateTime, String> releaseNames;
 	public static HashMap<LocalDateTime, String> releaseID;
-	public static ArrayList<LocalDateTime> releases;
+	public static List<LocalDateTime> releases;
 	public static Integer numVersions;
 
 	
-	public ArrayList<Release> ListRelease(String projName) throws IOException, JSONException {
+	public List<Release> ListRelease(String projName) throws IOException, JSONException {
 		 //Fills the arraylist with releases dates and orders them
 		   //Ignores releases with missing dates
-		   ArrayList<Release> releaseList = new ArrayList<Release>();
+		   List<Release> releaseList = new ArrayList<>();
 		   releases = new ArrayList<LocalDateTime>();
 		         Integer i;
 		         String url = "https://issues.apache.org/jira/rest/api/2/project/" + projName;
@@ -102,13 +102,13 @@ public class ReleaseController {
 		}
 	}
 
-	public ArrayList<String> retrieveClassesForRelease(Release release) throws JSONException, IOException {
+	public List<String> retrieveClassesForRelease(Release release) throws JSONException, IOException {
 		Commit lastCommit = new Commit();
 		lastCommit = release.getLastCommit();
 		return lastCommit.getClassesTouched();
 	}
 	
-	public ArrayList<String> retrieveClassesForRelease2(Release release, CommitController Cc, String repo) throws JSONException, IOException {
+	public List<String> retrieveClassesForRelease2(Release release, CommitController Cc, String repo) throws JSONException, IOException {
 		Commit lastCommit = new Commit();
 		lastCommit = release.getLastCommit();
 		return Cc.getClasses(lastCommit.getCommit(), repo, release);
