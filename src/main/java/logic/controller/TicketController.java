@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Comparator;
@@ -24,7 +25,7 @@ import logic.utils.JsonFileHandler;
 
 public class TicketController {
 	
-	public ArrayList<Ticket> retrieveTicketsID(String projName, ArrayList<Release> releaseList) throws IOException, JSONException {
+	public ArrayList<Ticket> retrieveTicketsID(String projName, List<Release> releaseList) throws IOException, JSONException {
 		   ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
 		   String releaseDate = "";
 		   String releaseName = "";
@@ -136,9 +137,9 @@ public class TicketController {
 	         return listTicket;
 	 }
 	
-	public ArrayList<Commit> searchCommitsForTicket(Ticket ticket, ArrayList<Release> releaseList) {
-		ArrayList<Commit> commitsForTicket = new ArrayList<Commit> ();
-		ArrayList<Commit> commitList = new ArrayList<Commit> (); 
+	public List<Commit> searchCommitsForTicket(Ticket ticket, List<Release> releaseList) {
+		List<Commit> commitsForTicket = new ArrayList<Commit> ();
+		List<Commit> commitList = new ArrayList<Commit> (); 
 		for (Release r: releaseList) {
 			if (r.getCommits().size() != 0) {
 				commitList = r.getCommits();
@@ -160,7 +161,7 @@ public class TicketController {
 		return commitsForTicket;
 	}
 	
-	public Release calculateOpeningVersion(Ticket ticket, ArrayList<Release> releaseList) {
+	public Release calculateOpeningVersion(Ticket ticket, List<Release> releaseList) {
   	  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
   	  LocalDate creationDate = LocalDate.parse(ticket.getCreationDate(), formatter);
   	  for (Release r: releaseList) {
@@ -172,7 +173,7 @@ public class TicketController {
   	  return null;	  
     }
 	
-	public Release calculateInjectedVersion(Ticket ticket, ArrayList<Release> releaseList, ArrayList<Ticket> ticketList, ReleaseController Rc) throws JSONException, IOException, ParseException {
+	public Release calculateInjectedVersion(Ticket ticket, List<Release> releaseList, List<Ticket> ticketList, ReleaseController Rc) throws JSONException, IOException, ParseException {
   	  if (ticket.getAffversions().size() != 0) {
   		  //ticket.getAffversions().sort(Comparator.comparing(release -> release.getNumberOfRelease()));
   		  return ticket.getAffversions().get(0);//nel caso aggiungere codice per verificare quale versione venga prima   
@@ -204,7 +205,7 @@ public class TicketController {
   	  return null;
     }
     
-    public int Proportion(Ticket ticket, ArrayList <Release> releaseList, ArrayList <Ticket> ticketList, ReleaseController Rc) throws JSONException, IOException, ParseException {
+    public int Proportion(Ticket ticket, List <Release> releaseList, List <Ticket> ticketList, ReleaseController Rc) throws JSONException, IOException, ParseException {
   	  int limitRelease;
   	  limitRelease = ticket.getFixVersion().getNumberOfRelease();
   	  ArrayList<Ticket> subList = new ArrayList<Ticket>();

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -95,7 +96,7 @@ public class ReleaseController {
 	    return;
 	}
 	
-	public void setNumberReleases(ArrayList<Release> releaseList) {
+	public void setNumberReleases(List<Release> releaseList) {
 		for (int i = 0; i < releaseList.size(); i++) {
 			releaseList.get(i).setNumberOfRelease(i);
 		}

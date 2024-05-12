@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -23,7 +24,7 @@ public class MetricsController {
     private static final String filepath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
 	
 	
-	public void calculateMetrics(Release release, ArrayList<Ticket> myTicketList, String repo) throws IOException, JSONException {
+	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo) throws IOException, JSONException {
 		ArrayList<String> totAuth = new ArrayList<String>();
 		int NR = 0;
 		int NFix = 0;
@@ -207,7 +208,7 @@ public class MetricsController {
 		return count;
 	}
 	
-	public int countFixCommits(ArrayList<Ticket> ticketList, Release r, JavaClass jClass) {
+	public int countFixCommits(List<Ticket> ticketList, Release r, JavaClass jClass) {
 		int count = 0;
 		for (Commit c: r.getCommits()) {
 			boolean result = false;
@@ -223,7 +224,7 @@ public class MetricsController {
 		return count;
 	}
 	
-	public boolean checkCommitTicket(Commit c, ArrayList<Ticket> ticketList) {
+	public boolean checkCommitTicket(Commit c, List<Ticket> ticketList) {
 		for (Ticket t: ticketList) {
 			if (t.getCommitsForTicket().contains(c)) {
 				return true;
@@ -303,7 +304,7 @@ public class MetricsController {
 	 }
 
 
-	public void calculateBuggyness2(ArrayList<Release> myReleaseList, CommitController cc, String repository, ArrayList<Ticket> myTicketList) {
+	public void calculateBuggyness2(List<Release> myReleaseList, CommitController cc, String repository, List<Ticket> myTicketList) {
 		for (Ticket t: myTicketList) {
 			for (Commit c: t.getCommitsForTicket()) {
 				for (String jName: c.getClassesTouched()) {
@@ -315,7 +316,7 @@ public class MetricsController {
 	}
 
 
-	private void checkJavaClass(String jName, ArrayList<Release> myReleaseList, Release commitRelease) {
+	private void checkJavaClass(String jName, List<Release> myReleaseList, Release commitRelease) {
 		for (Release r: myReleaseList) {
 			//if (r.getCommits().size() != 0) {
 				for (JavaClass jc: r.getJavaClasses()) {

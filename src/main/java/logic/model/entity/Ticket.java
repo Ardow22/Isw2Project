@@ -1,9 +1,6 @@
 package logic.model.entity;
 
-import java.util.ArrayList;
-
-import logic.model.entity.Commit;
-import logic.model.entity.Release;
+import java.util.List;
 
 public class Ticket {
 	private String key;
@@ -12,8 +9,8 @@ public class Ticket {
 	private Release fixVersion;
 	private Release openingVersion;
 	private Release injectedVersion;
-	private ArrayList<Release> affversions;
-	private ArrayList<Commit> commitsForTicket;
+	private List<Release> affversions;
+	private List<Commit> commitsForTicket;
 	
 	public String getCreationDate() {
 		return creationDate;
@@ -39,11 +36,11 @@ public class Ticket {
 		this.fixVersion = fixVersion;
 	}
 
-	public ArrayList<Release> getAffversions() {
+	public List<Release> getAffversions() {
 		return affversions;
 	}
 
-	public void setAffversions(ArrayList<Release> affversions) {
+	public void setAffversions(List<Release> affversions) {
 		this.affversions = affversions;
 	}
 	
@@ -55,11 +52,11 @@ public class Ticket {
 		this.key = key;
 	}
 
-	public ArrayList<Commit> getCommitsForTicket() {
+	public List<Commit> getCommitsForTicket() {
 		return commitsForTicket;
 	}
 
-	public void setCommitsForTicket(ArrayList<Commit> commitsForTicket) {
+	public void setCommitsForTicket(List<Commit> commitsForTicket) {
 		this.commitsForTicket = commitsForTicket;
 	}
 

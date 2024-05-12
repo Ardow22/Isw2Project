@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import logic.model.entity.Release;
-import logic.model.entity.Ticket;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffSaver;
@@ -36,12 +36,12 @@ public class WekaController {
 	public static final ArrayList<String> Classifiers = new ArrayList<String>(Arrays.asList("Random Forest", "NaiveBayes", "IBK"));
 	public static final ArrayList<String> Accuracy = new ArrayList<String>(Arrays.asList("Precision", "Recall", "AUC", "Kappa"));
 
-	public void walkForward(ArrayList<Release> myReleaseList, String repo, CSVController csv) throws Exception {
+	public void walkForward(List<Release> myReleaseList, String repo, CSVController csv) throws Exception {
 		for (Release r: myReleaseList) {
 			if (r.getNumberOfRelease() > 0) { //la prima release la consideriamo solo come training
 				
-				ArrayList<Release> trainingSet = new ArrayList<Release>();
-				ArrayList<Release> testingSet = new ArrayList<Release>();
+				List<Release> trainingSet = new ArrayList<Release>();
+				List<Release> testingSet = new ArrayList<Release>();
 				trainingSet = retrieveTrainingSet(r, myReleaseList);
 			    //if (r.getCommits().size() != 0) {
 			    	testingSet.add(r);
@@ -49,8 +49,8 @@ public class WekaController {
 			    else {
 			    	testingSet.add(trainingSet.get(trainingSet.size() - 1));
 			    }*/
-			    ArrayList<String> arffFiles = new ArrayList<String>();
-				ArrayList<Instances> trainingSet_testingSet = new ArrayList<Instances>();
+			    List<String> arffFiles = new ArrayList<String>();
+				List<Instances> trainingSet_testingSet = new ArrayList<Instances>();
 				arffFiles = createFileArff(trainingSet, testingSet, repo, csv);
 				trainingSet_testingSet = retrieveDataSet(arffFiles);
 				
@@ -77,7 +77,7 @@ public class WekaController {
 	
 	
 	
-	public void execute(ArrayList<Instances> trainingAndTesting, String feature, String sampling, String costSensitive, String classifier, String repo, CSVController csv, Release testingRelease) throws Exception {
+	public void execute(List<Instances> trainingAndTesting, String feature, String sampling, String costSensitive, String classifier, String repo, CSVController csv, Release testingRelease) throws Exception {
 		System.out.println("EXECUTE CON TESTING: "+testingRelease.getNumberOfRelease());
 		Instances trainingSet = trainingAndTesting.get(0);
 		trainingSet.setClassIndex(trainingSet.numAttributes() - 1);
@@ -353,8 +353,8 @@ public class WekaController {
 	} 
 	
 
-	private ArrayList<Instances> retrieveDataSet(ArrayList<String> arffFiles) throws IOException {
-		ArrayList<Instances> trainingData_testingData = new ArrayList<Instances>();
+	private List<Instances> retrieveDataSet(List<String> arffFiles) throws IOException {
+		List<Instances> trainingData_testingData = new ArrayList<Instances>();
 		
 		for (String arffFile : arffFiles) {
             ArffLoader loader = new ArffLoader();
@@ -369,7 +369,7 @@ public class WekaController {
 
 
 
-	private ArrayList<String> createFileArff(ArrayList<Release> trainingSet, ArrayList<Release> testingSet, String repo, CSVController csv) throws Exception {
+	private ArrayList<String> createFileArff(List<Release> trainingSet, List<Release> testingSet, String repo, CSVController csv) throws Exception {
 		ArrayList<String> csvFileNames = new ArrayList<String>();
 		ArrayList<String> arffFileNames = new ArrayList<String>();
 		String trS = "trainingSet";
@@ -401,8 +401,8 @@ public class WekaController {
 		
 	}
 
-	public ArrayList<Release> retrieveTrainingSet(Release testingRelease, ArrayList<Release> myReleaseList) throws ParseException {
-		ArrayList<Release> myTrainingSet = new ArrayList<Release>();
+	public List<Release> retrieveTrainingSet(Release testingRelease, List<Release> myReleaseList) throws ParseException {
+		List<Release> myTrainingSet = new ArrayList<Release>();
 		for (Release r: myReleaseList) {
 			if (r.getNumberOfRelease() < testingRelease.getNumberOfRelease()) {
 				//if (r.getCommits().size() != 0) {

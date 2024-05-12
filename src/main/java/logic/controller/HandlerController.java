@@ -5,6 +5,7 @@ import logic.model.entity.Ticket;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import logic.model.bean.ReleaseBean;
 import logic.model.entity.Commit;
@@ -25,7 +26,7 @@ public class HandlerController {
 		System.out.println("Analisi del progetto "+ repository);
 		
 		//RECUPERO LA LISTA DELLE RELEASE
-		ArrayList<Release> releaseList = new ArrayList<Release>();
+		List<Release> releaseList = new ArrayList<Release>();
 	    releaseList = rc.ListRelease(repository.toUpperCase());
 	    rc.setNumberReleases(releaseList);
 	    printer.printReleases(releaseList);
@@ -87,7 +88,7 @@ public class HandlerController {
 	   
 	    
 	    //CONSIDERO SOLO I TICKET CHE HANNO IV E OV CONGRUI
-	    ArrayList<Ticket> myTktList3 = new ArrayList<Ticket>();
+	    List<Ticket> myTktList3 = new ArrayList<Ticket>();
 	    for (Ticket t: myTktList2) {
 	    	if (t.getInjectedVersion().getNumberOfRelease() < t.getOpeningVersion().getNumberOfRelease()) {
 	    		myTktList3.add(t);
@@ -95,7 +96,7 @@ public class HandlerController {
 	    }
 	    
 	    //TOLGO ANCHE I TICKET CHE HANNO INJECTED VERSION E FIX VERSION UGUALI, PERCHé SIGNIFICA CHE IL BUG NON C'è
-	    ArrayList<Ticket> myTicketList = new ArrayList<Ticket>();
+	    List<Ticket> myTicketList = new ArrayList<Ticket>();
 	    for (Ticket t: myTktList3) {
 	    	if (t.getInjectedVersion().getNumberOfRelease() != t.getFixVersion().getNumberOfRelease()) {
 	    		myTicketList.add(t);

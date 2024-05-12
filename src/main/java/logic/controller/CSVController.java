@@ -54,7 +54,7 @@ public class CSVController {
 	         return outname;
 	   }
 	
-	public String createWekaDataset(ArrayList<Release> releaseList, String projName) {
+	public String createWekaDataset(List<Release> releaseList, String projName) {
 		 FileWriter fileWriter = null;
 		 String outname = "";
 		 try {
