@@ -209,7 +209,7 @@ public class TicketController {
   	  return null;
     }
     
-    public int proportion(Ticket ticket, List <Ticket> ticketList, ReleaseController Rc) throws JSONException, IOException, ParseException {
+    public int proportion(Ticket ticket, List <Ticket> ticketList, ReleaseController rc) throws JSONException, IOException, ParseException {
   	  int limitRelease;
   	  limitRelease = ticket.getFixVersion().getNumberOfRelease();
   	  List<Ticket> subList = new ArrayList<>();
@@ -220,7 +220,7 @@ public class TicketController {
   	  }
   	  
   	  if (subList.size() < 5) {
-  		  subList = coldStart(ticket, Rc);//COLDSTART
+  		  subList = coldStart(ticket, rc);//COLDSTART
   	  }
   	  //INCREMENT PROPORTION
   	  List<Integer> listP = new ArrayList<>();
