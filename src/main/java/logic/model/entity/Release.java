@@ -7,7 +7,7 @@ public class Release {
 	private String nameRelease;
 	private String idRelease;
 	private int numberOfRelease;
-	private long AgeOfRelease;
+	private long ageOfRelease;
 	private Commit lastCommit;
 	private List<Commit> commits;
 	private List<Commit> fakeCommits;
@@ -58,10 +58,10 @@ public class Release {
 		this.javaClasses = javaClasses;
 	}
 	public long getAgeOfRelease() {
-		return AgeOfRelease;
+		return ageOfRelease;
 	}
-	public void setAgeOfRelease(long ageOfRelease) {
-		AgeOfRelease = ageOfRelease;
+	public void setAgeOfRelease(long ageofRelease) {
+		ageOfRelease = ageofRelease;
 	}
 	public Commit getLastCommit() {
 		return lastCommit;

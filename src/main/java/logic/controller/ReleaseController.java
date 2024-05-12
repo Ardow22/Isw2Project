@@ -103,15 +103,13 @@ public class ReleaseController {
 	}
 
 	public List<String> retrieveClassesForRelease(Release release) throws JSONException, IOException {
-		Commit lastCommit = new Commit();
-		lastCommit = release.getLastCommit();
+		Commit lastCommit = release.getLastCommit();
 		return lastCommit.getClassesTouched();
 	}
 	
-	public List<String> retrieveClassesForRelease2(Release release, CommitController Cc, String repo) throws JSONException, IOException {
-		Commit lastCommit = new Commit();
-		lastCommit = release.getLastCommit();
-		return Cc.getClasses(lastCommit.getCommit(), repo);
+	public List<String> retrieveClassesForRelease2(Release release, CommitController cc, String repo) throws JSONException, IOException {
+		Commit lastCommit = release.getLastCommit();
+		return cc.getClasses(lastCommit.getCommit(), repo);
 	}
 
 	public List<JavaClass> createClasses(Release r, List<String> nameClasses) {
@@ -128,7 +126,7 @@ public class ReleaseController {
 	}
 
 	public Commit retrieveLastCommit(Release r) {
-		if (r.getCommits().size() != 0) {
+		if (!r.getCommits().isEmpty()) {
 			return r.getCommits().get(0);
 		}
 		else {

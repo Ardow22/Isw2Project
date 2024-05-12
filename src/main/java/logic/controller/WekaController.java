@@ -49,7 +49,7 @@ public class WekaController {
 			    	testingSet.add(trainingSet.get(trainingSet.size() - 1));
 			    }*/
 			    List<String> arffFiles = createFileArff(trainingSet, testingSet, csv, printer);
-				List<Instances> trainingSet_testingSet = retrieveDataSet(arffFiles);
+				List<Instances> trainingSetANDtestingSet = retrieveDataSet(arffFiles);
 				
 				printer.printStringInfo("TRAINING SET: ");
 				for (Release re: trainingSet) {
@@ -61,7 +61,7 @@ public class WekaController {
 			    	for (String sampling: Sampling) {
 			    		for (String costSensitive: CostSensitive) {
 			    			for (String classifier: Classifiers) {
-			    				execute(trainingSet_testingSet, feature, sampling, costSensitive, classifier, repo, csv, testingSet.get(0), printer);
+			    				execute(trainingSetANDtestingSet, feature, sampling, costSensitive, classifier, repo, csv, testingSet.get(0), printer);
 			    				printer.printStringInfo("%n%n");
 			    			}
 			    		}
