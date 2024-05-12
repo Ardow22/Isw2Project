@@ -137,7 +137,7 @@ public class HandlerController {
 		}
 		
 		printer.printStringInfo("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
-		ArrayList<String> nameClasses = new ArrayList<>();
+		List<String> nameClasses = new ArrayList<>();
 		for (Release r: myReleaseList) {
 			//if (r.getCommits().size() != 0) {
 				r.setLastCommit(rc.retrieveLastCommit(r));

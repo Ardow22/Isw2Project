@@ -269,7 +269,7 @@ public class TicketController {
     	String limitDate = "";
     	limitDate = ticket.getFixVersion().getReleaseDate();
     	for (String project: allProjects) {
-    		ArrayList<Release> releasesList = new ArrayList<Release>();
+    		List<Release> releasesList = new ArrayList<>();
     	    releasesList = Rc.ListRelease(project.toUpperCase());
     	    Rc.setNumberReleases(releasesList);
     	    
