@@ -13,12 +13,12 @@ import logic.utils.Printer;
 
 public class HandlerController {
 	
-	public static final ReleaseController Rc = new ReleaseController();
-	public static final CommitController Cc = new CommitController();
-	public static final TicketController Tc = new TicketController();
-	public static final MetricsController Mc = new MetricsController();
+	public static final ReleaseController rc = new ReleaseController();
+	public static final CommitController cc = new CommitController();
+	public static final TicketController tc = new TicketController();
+	public static final MetricsController mc = new MetricsController();
 	public static final CSVController csv = new CSVController();
-	public static final WekaController Wc = new WekaController();
+	public static final WekaController wc = new WekaController();
 	public static final Printer printer = new Printer();
 	
 	public void startAnalysis(String repository) throws Exception{
@@ -26,8 +26,8 @@ public class HandlerController {
 		
 		//RECUPERO LA LISTA DELLE RELEASE
 		ArrayList<Release> releaseList = new ArrayList<Release>();
-	    releaseList = Rc.ListRelease(repository.toUpperCase());
-	    Rc.setNumberReleases(releaseList);
+	    releaseList = rc.ListRelease(repository.toUpperCase());
+	    rc.setNumberReleases(releaseList);
 	    printer.printReleases(releaseList);
 	  
 	   
@@ -37,7 +37,7 @@ public class HandlerController {
 	    int iteration = 0;
 	    ReleaseBean rb = new ReleaseBean();
 	    for (Release r: releaseList) {
-	    	r.setCommits(Cc.getCommitsForRelease(r, repository, lastReleaseDate, iteration));
+	    	r.setCommits(cc.getCommitsForRelease(r, repository, lastReleaseDate, iteration));
 	    	lastReleaseDate = r.getReleaseDate();
 	    	iteration++;
 	    	if (r.getCommits().size() == 0) {
@@ -50,13 +50,13 @@ public class HandlerController {
 	    //RECUPERO TUTTI I TICKET 
 	    printer.printString("Recupero dei ticket relativi ai bug chiusi del progetto in corso...");
 	    ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
-		ticketList = Tc.retrieveTicketsID(repository.toUpperCase(), releaseList);
+		ticketList = tc.retrieveTicketsID(repository.toUpperCase(), releaseList);
 		Collections.reverse(ticketList);
 		
 		//ASSOCIO I COMMIT AD I RELATIVI TICKET
 		printer.printString("Recupero dei commit associati al ticket specifico in corso...");
 		for (Ticket t: ticketList) {
-			t.setCommitsForTicket(Tc.searchCommitsForTicket(t, releaseList));	
+			t.setCommitsForTicket(tc.searchCommitsForTicket(t, releaseList));	
 		}
 		
 		//ELIMINO TUTTI I TICKET CHE NON HANNO COMMIT ASSOCIATI
@@ -70,7 +70,7 @@ public class HandlerController {
 		printer.printString("Calcolo delle Opening Version e delle Injected Version in corso...");
 	    for (Ticket t: myTktList) {
 	    	//IL PRIMO AV DEVE ESSERE PRIMA DI OV, QUINDI IV <= OV
-	    	t.setOpeningVersion(Tc.calculateOpeningVersion(t, releaseList));
+	    	t.setOpeningVersion(tc.calculateOpeningVersion(t, releaseList));
 	    }
 	    
 	    //TOLGO TUTTI I TICKET CON VALORI DI FV E OV NON CONGRUI
@@ -82,7 +82,7 @@ public class HandlerController {
 	    }
 	    
 	    for (Ticket t: myTktList2) {
-	    	t.setInjectedVersion(Tc.calculateInjectedVersion(t, releaseList, myTktList2, Rc));
+	    	t.setInjectedVersion(tc.calculateInjectedVersion(t, releaseList, myTktList2, rc));
 	    }
 	   
 	    
@@ -120,19 +120,19 @@ public class HandlerController {
 			if (r.getCommits().size() != 0) {
 				for (Commit c: r.getCommits()) {
 					//c.setClassesTouched(Cc.getClasses(c.getCommit(), repository, r));
-					c.setClassesTouched(Cc.getModifiedClasses(c.getCommit(), repository));
+					c.setClassesTouched(cc.getModifiedClasses(c.getCommit(), repository));
 			    }	
 			}
 			else {
 				for (Commit c2: r.getFakeCommits()) {
-					c2.setClassesTouched(Cc.getModifiedClasses(c2.getCommit(), repository));
+					c2.setClassesTouched(cc.getModifiedClasses(c2.getCommit(), repository));
 				}	
 			}
 		}
 		
 		for (Ticket tk: myTicketList) {
 			for (Commit c: tk.getCommitsForTicket()) {
-				c.setClassesTouched(Cc.getModifiedClasses(c.getCommit(), repository));
+				c.setClassesTouched(cc.getModifiedClasses(c.getCommit(), repository));
 			}
 		}
 		
@@ -140,21 +140,21 @@ public class HandlerController {
 		ArrayList<String> nameClasses = new ArrayList<String>();
 		for (Release r: myReleaseList) {
 			//if (r.getCommits().size() != 0) {
-				r.setLastCommit(Rc.retrieveLastCommit(r));
+				r.setLastCommit(rc.retrieveLastCommit(r));
 				//nameClasses = Rc.retrieveClassesForRelease(r);
-				nameClasses = Rc.retrieveClassesForRelease2(r, Cc, repository);
-				r.setJavaClasses(Rc.createClasses(r, nameClasses));
+				nameClasses = rc.retrieveClassesForRelease2(r, cc, repository);
+				r.setJavaClasses(rc.createClasses(r, nameClasses));
 			//}
 		}
 		
-		Mc.calculateBuggyness2(myReleaseList, Cc, repository, myTicketList);
+		mc.calculateBuggyness2(myReleaseList, cc, repository, myTicketList);
 		for (Release r: myReleaseList) {
 			if (r.getCommits().size() != 0) {
 				//Mc.calculateBuggyness(r, Cc, repository, myTicketList);
-				Mc.calculateMetrics(r, myTicketList, repository);
+				mc.calculateMetrics(r, myTicketList, repository);
 			}
 			else {
-				Mc.setMetrics(r, repository);
+				mc.setMetrics(r, repository);
 			}
 		}	
 		
@@ -162,7 +162,7 @@ public class HandlerController {
 		csv.createDataset(myReleaseList, repository);
 		
 		printer.printString("Analisi di Weka in corso...");
-		Wc.walkForward(myReleaseList, repository, csv);
+		wc.walkForward(myReleaseList, repository, csv);
 		
 		printer.printString("FINITOOOOO!");
 	}
