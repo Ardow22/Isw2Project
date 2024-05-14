@@ -28,7 +28,7 @@ import logic.model.entity.Release;
 import logic.model.entity.Ticket;
 
 public class MetricsController {
-    private static final String FILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+    String FILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
     String sUFFIX1 = "\\";
     String sUFFIX2 = "/.git";
 	

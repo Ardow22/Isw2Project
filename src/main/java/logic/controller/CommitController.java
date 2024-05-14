@@ -29,7 +29,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 public class CommitController {
-	private static final String FILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+	String FILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
 	String suffix1 = "\\";
 	String suffix2 = "/.git";
 		

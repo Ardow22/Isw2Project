@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,16 +61,17 @@ public class ReleaseController {
 		               releaseList.add(release);
 		            }
 		         }
+		         Collections.sort(releases, (o1, o2) -> o1.compareTo(o2));
 		         
-		         // order releases by date
+		         /*order releases by date
 		         Collections.sort(releases, new Comparator<LocalDateTime>(){
 		            //@Override
 		            public int compare(LocalDateTime o1, LocalDateTime o2) {
 		                return o1.compareTo(o2);
 		            }
-		         });
+		         });*/
 		         
-		         Collections.sort(releaseList, new Comparator<Release>() {
+		         /*Collections.sort(releaseList, new Comparator<Release>() {
 		        	 //@Override
 		             public int compare(Release r1, Release r2) {
 		            	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -82,7 +82,16 @@ public class ReleaseController {
 		                 // Ordina in base alla data
 		                 return data1.compareTo(data2);
 		             }
-		         }); 
+		         }); */
+		         Collections.sort(releaseList, (r1, r2) -> {
+		        	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		        	    // Converte le stringhe data in LocalDate
+		        	    LocalDate data1 = LocalDate.parse(r1.getReleaseDate(), formatter);
+		        	    LocalDate data2 = LocalDate.parse(r2.getReleaseDate(), formatter);
+
+		        	    // Ordina in base alla data
+		        	    return data1.compareTo(data2);
+		        	});
 		         if (releases.size() < 6)
 		            return new ArrayList<>();
 		         return releaseList;	    
