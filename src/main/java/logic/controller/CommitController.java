@@ -127,7 +127,7 @@ public class CommitController {
 				}
 			}
 		    } catch(ArrayIndexOutOfBoundsException e) {
-
+                e.printStackTrace();
 		     }
 		return modifiedClasses;
 	    }

@@ -43,32 +43,27 @@ public class WekaController {
 				
 				List<Release> testingSet = new ArrayList<>();
 				List<Release> trainingSet = retrieveTrainingSet(r, myReleaseList);
-			    //if (r.getCommits().size() != 0) {
-			    	testingSet.add(r);
-			    /*}
-			    else {
-			    	testingSet.add(trainingSet.get(trainingSet.size() - 1));
-			    }*/
+			    testingSet.add(r);
 			    List<String> arffFiles = createFileArff(trainingSet, testingSet, csv, logger);
 				List<Instances> trainingSetANDtestingSet = retrieveDataSet(arffFiles);
 				
-				logger.info("TRAINING SET: ");
+				System.out.println("TRAINING SET: ");
 				for (Release re: trainingSet) {
-					logger.info("NUMERO RELEASE "+re.getNumberOfRelease());
+					System.out.println("NUMERO RELEASE "+re.getNumberOfRelease());
 				}
-				logger.info("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
+				System.out.println("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
 			    
 				for (String feature: FeatureSelection) {
 			    	for (String sampling: Sampling) {
 			    		for (String costSensitive: CostSensitive) {
 			    			for (String classifier: Classifiers) {
 			    				execute(trainingSetANDtestingSet, feature, sampling, costSensitive, classifier, repo, csv, testingSet.get(0), logger);
-			    				logger.info("%n%n");
+			    				System.out.println("\n\n");
 			    			}
 			    		}
 			    	}
 			    }
-				logger.info("%n%n");
+				System.out.println("\n\n");
 			}
 		}
 	}
@@ -76,7 +71,7 @@ public class WekaController {
 	
 	
 	public void execute(List<Instances> trainingAndTesting, String feature, String sampling, String costSensitive, String classifier, String repo, CSVController csv, Release testingRelease, Logger logger) throws Exception {
-		logger.info("EXECUTE CON TESTING: "+testingRelease.getNumberOfRelease());
+		System.out.println("EXECUTE CON TESTING: "+testingRelease.getNumberOfRelease());
 		Instances trainingSet = trainingAndTesting.get(0);
 		trainingSet.setClassIndex(trainingSet.numAttributes() - 1);
 		Instances testingSet = trainingAndTesting.get(1);
@@ -115,111 +110,7 @@ public class WekaController {
             //System.out.println("BEST FIRST");
 			
 		}
-		/*else if (feature.equals("Backward Search")){
-			// Crea un oggetto CfsSubsetEval (valutatore)
-			CfsSubsetEval eval = new CfsSubsetEval();
-			// Crea un oggetto BestFirst (algoritmo di ricerca)
-			BestFirst search = new BestFirst();
-			String[] options = new String[]{"-D", "0"};
-			search.setOptions(options);
-
-			// Crea un oggetto AttributeSelection
-			AttributeSelection attsel = new AttributeSelection();
-			// Imposta il valutatore e l'algoritmo di ricerca
-			attsel.setEvaluator(eval);
-			attsel.setSearch(search);
-	        attsel.setInputFormat(trainingSet);
-			
-			// Creazione dell'oggetto AttributeSelection per il set di test
-		    AttributeSelection attselTest = new AttributeSelection();
-		    // Impostazione del valutatore e dell'algoritmo di ricerca per il set di test
-		    attselTest.setEvaluator(eval);
-		    attselTest.setSearch(search);
-		    attselTest.setInputFormat(testingSet);
-
-			
-			// Applica il filtro al dataset
-			Instances filteredData = Filter.useFilter(trainingSet, attsel);
-			trainingSet = filteredData;
-			trainingSet.setClassIndex(trainingSet.numAttributes() - 1);
-			
-			// Applicazione del filtro al set di test
-		    Instances filteredTestingData = Filter.useFilter(testingSet, attselTest);
-		    testingSet = filteredTestingData;
-		    // Impostazione dell'indice dell'attributo di classe per il set di test
-		    testingSet.setClassIndex(filteredTestingData.numAttributes() - 1);
-
-			System.out.println("BACKWARD SEARCH");
-		}
-		else if (feature.equals("Forward Search")){
-			// Crea un oggetto CfsSubsetEval (valutatore)
-			CfsSubsetEval eval = new CfsSubsetEval();
-			// Crea un oggetto BestFirst (algoritmo di ricerca)
-			BestFirst search = new BestFirst();
-			String[] options = new String[]{"-D", "1"};
-			search.setOptions(options);
-
-			// Crea un oggetto AttributeSelection
-			AttributeSelection attsel = new AttributeSelection();
-			// Imposta il valutatore e l'algoritmo di ricerca
-			attsel.setEvaluator(eval);
-			attsel.setSearch(search);
-			attsel.setInputFormat(trainingSet);
-			
-			// Creazione dell'oggetto AttributeSelection per il set di test
-		    AttributeSelection attselTest = new AttributeSelection();
-		    // Impostazione del valutatore e dell'algoritmo di ricerca per il set di test
-		    attselTest.setEvaluator(eval);
-		    attselTest.setSearch(search);
-		    attselTest.setInputFormat(testingSet);
-
-			// Applica il filtro al dataset
-			Instances filteredData = Filter.useFilter(trainingSet, attsel);
-			trainingSet = filteredData;
-			trainingSet.setClassIndex(trainingSet.numAttributes() - 1);   
-			
-			// Applicazione del filtro al set di test
-		    Instances filteredTestingData = Filter.useFilter(testingSet, attselTest);
-		    testingSet = filteredTestingData;
-		    // Impostazione dell'indice dell'attributo di classe per il set di test
-		    testingSet.setClassIndex(testingSet.numAttributes() - 1);
-			System.out.println("FORWARD SEARCH");
-		}
-		else if (feature.equals("Bidirectional")){
-			// Crea un oggetto CfsSubsetEval (valutatore)
-			CfsSubsetEval eval = new CfsSubsetEval();
-			// Crea un oggetto BestFirst (algoritmo di ricerca)
-			BestFirst search = new BestFirst();
-			String[] options = new String[]{"-D", "2"};
-			search.setOptions(options);
-
-			// Crea un oggetto AttributeSelection
-			AttributeSelection attsel = new AttributeSelection();
-			// Imposta il valutatore e l'algoritmo di ricerca
-			attsel.setEvaluator(eval);
-			attsel.setSearch(search);
-			attsel.setInputFormat(trainingSet);
-			
-			// Creazione dell'oggetto AttributeSelection per il set di test
-		    AttributeSelection attselTest = new AttributeSelection();
-		    // Impostazione del valutatore e dell'algoritmo di ricerca per il set di test
-		    attselTest.setEvaluator(eval);
-		    attselTest.setSearch(search);
-		    attselTest.setInputFormat(testingSet);
-		    
-			// Applica il filtro al dataset
-			Instances filteredData = Filter.useFilter(trainingSet, attsel);
-			trainingSet = filteredData;
-			trainingSet.setClassIndex(trainingSet.numAttributes() - 1);  
-			
-			// Applicazione del filtro al set di test
-		    Instances filteredTestingData = Filter.useFilter(testingSet, attselTest);
-		    testingSet = filteredTestingData;
-		    // Impostazione dell'indice dell'attributo di classe per il set di test
-		    testingSet.setClassIndex(testingSet.numAttributes() - 1);
-		        
-			System.out.println("BIDIRECTIONAL");
-		}*/
+		
 		Instances minorityClassInstances = new Instances(trainingSet, 0);
         Instances majorityClassInstances = new Instances(trainingSet, 0);
         for (Instance instance : trainingSet) {
@@ -239,7 +130,6 @@ public class WekaController {
 			//System.out.println("NO SAMPLING");
 		}
 		else if (sampling.equals("Oversampling")) {
-			// Apply Resample filter for oversampling
             Resample resampleFilter = new Resample();
             resampleFilter.setSampleSizePercent(oversamplingRatio*100);
             resampleFilter.setBiasToUniformClass(1.0);
@@ -248,7 +138,7 @@ public class WekaController {
             resampleFilter.setInputFormat(minorityClassInstances);
             Instances oversampledMinorityInstances = Filter.useFilter(minorityClassInstances, resampleFilter);
 
-            // Combine oversampled minority instances with majority instances
+            //Combina la minoranza delle istanze (maggiorata) con la maggioranza delle istanze
             Instances oversampledData = new Instances(trainingSet, 0);
             oversampledData.addAll(majorityClassInstances);
             oversampledData.addAll(oversampledMinorityInstances);
@@ -272,7 +162,7 @@ public class WekaController {
 			SMOTE smote = new SMOTE();
             smote.setInputFormat(trainingSet);
 
-            //make both groups the same dimension
+            //creazione di gruppi della stessa dimensione
             String percentageToCreate = "0";
             if(minoritySize !=0)
                 percentageToCreate= String.valueOf((majoritySize-minoritySize)/(double)minoritySize*100.0);
@@ -284,7 +174,7 @@ public class WekaController {
             //System.out.println("SMOTE");
 		}
 		
-		Classifier actualClassifier = null;
+		Classifier actualClassifier = new RandomForest();
 		if (classifier.equals("Random Forest")) {
 			actualClassifier = new RandomForest();
 			//System.out.println("RANDOM FOREST");
@@ -299,13 +189,13 @@ public class WekaController {
 			//System.out.println("IBK");		
 		}
 		
-		Evaluation eval = null;
+		Evaluation eval = new Evaluation(testingSet);
 		
 		if (costSensitive.equals("No cost sensitive")) {			
 			// Addestrare il modello utilizzando il training set
 			actualClassifier.buildClassifier(trainingSet);
 			// Valutazione delle prestazioni del modello utilizzando il testing set
-			eval = new Evaluation(testingSet);
+			//eval = new Evaluation(testingSet);
 			eval.evaluateModel(actualClassifier, testingSet);
 			//System.out.println("NO COST SENSITIVE");
 		}
@@ -338,7 +228,7 @@ public class WekaController {
 	        // Addestrare il modello utilizzando il training set
 	        c1.buildClassifier(trainingSet);
 	        // Valutare le prestazioni del modello utilizzando il testing set
-	        eval = new Evaluation(testingSet);
+	        //eval = new Evaluation(testingSet);
 	        eval.evaluateModel(c1, testingSet);
 	        //System.out.println("SENSITIVE LEARNING");
 		}
@@ -403,12 +293,7 @@ public class WekaController {
 		List<Release> myTrainingSet = new ArrayList<>();
 		for (Release r: myReleaseList) {
 			if (r.getNumberOfRelease() < testingRelease.getNumberOfRelease()) {
-				//if (r.getCommits().size() != 0) {
-					myTrainingSet.add(r);
-				/*}
-				else {
-					myTrainingSet.add(myTrainingSet.get(myTrainingSet.size() - 1));
-				}*/
+				myTrainingSet.add(r);
 			}
 			else {
 				break;

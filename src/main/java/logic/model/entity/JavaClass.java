@@ -14,6 +14,8 @@ public class JavaClass {
 	private int changeSetSize;
 	private int maxChangeSetSize;
 	private boolean buggy;
+	private int lOCadded;
+	private int maxLocAdded;
 
 	public String getNamePath() {
 		return namePath;
@@ -98,5 +100,21 @@ public class JavaClass {
 
 	public void setMaxChangeSetSize(int maxChangeSetSize) {
 		this.maxChangeSetSize = maxChangeSetSize;
+	}
+
+	public int getlOCadded() {
+		return lOCadded;
+	}
+
+	public void setlOCadded(int lOCadded) {
+		this.lOCadded = lOCadded;
+	}
+
+	public int getMaxLocAdded() {
+		return maxLocAdded;
+	}
+
+	public void setMaxLocAdded(int maxLocAdded) {
+		this.maxLocAdded = maxLocAdded;
 	}
 }

@@ -23,17 +23,17 @@ public class HandlerController {
 	private static final Logger logger = LoggerFactory.getLogger(HandlerController.class);
 	
 	public void startAnalysis(String repository) throws Exception{
-		logger.info("Analisi del progetto "+ repository);
+		System.out.println("Analisi del progetto "+ repository);
 		
 		//RECUPERO LA LISTA DELLE RELEASE
 		List<Release> releaseList = ReleaseController.listRelease(repository.toUpperCase());
 	    rc.setNumberReleases(releaseList);
 	    for (int i = 0; i < releaseList.size(); i++)
-			 logger.info("RELEASE NUMBER: "+ releaseList.get(i).getNumberOfRelease() +" = "+"RELEASE NAME: "+releaseList.get(i).getNameRelease() + " RELEASE DATE: "+releaseList.get(i).getReleaseDate()+ " RELEASE ID: "+releaseList.get(i).getIdRelease()); 	 	
+			 System.out.println("RELEASE NUMBER: "+ releaseList.get(i).getNumberOfRelease() +" = "+"RELEASE NAME: "+releaseList.get(i).getNameRelease() + " RELEASE DATE: "+releaseList.get(i).getReleaseDate()+ " RELEASE ID: "+releaseList.get(i).getIdRelease()); 	 	
 	  
 	   
 	    //RECUPERO TUTTI I COMMIT DI OGNI RELEASE
-	    logger.info("Recupero dei commit relativi ad ogni release in corso...");
+	    System.out.println("Recupero dei commit relativi ad ogni release in corso...");
 	    String lastReleaseDate = null;
 	    int iteration = 0;
 	    ReleaseBean rb = new ReleaseBean();
@@ -49,12 +49,12 @@ public class HandlerController {
 	    }
 	    
 	    //RECUPERO TUTTI I TICKET 
-	    logger.info("Recupero dei ticket relativi ai bug chiusi del progetto in corso...");
+	    System.out.println("Recupero dei ticket relativi ai bug chiusi del progetto in corso...");
 	    List<Ticket> ticketList = tc.retrieveTicketsID(repository.toUpperCase(), releaseList);
 		Collections.reverse(ticketList);
 		
 		//ASSOCIO I COMMIT AD I RELATIVI TICKET
-		logger.info("Recupero dei commit associati al ticket specifico in corso...");
+		System.out.println("Recupero dei commit associati al ticket specifico in corso...");
 		for (Ticket t: ticketList) {
 			t.setCommitsForTicket(tc.searchCommitsForTicket(t, releaseList));	
 		}
@@ -67,7 +67,7 @@ public class HandlerController {
 			}
 		}
 		
-		logger.info("Calcolo delle Opening Version e delle Injected Version in corso...");
+		System.out.println("Calcolo delle Opening Version e delle Injected Version in corso...");
 	    for (Ticket t: myTktList) {
 	    	//IL PRIMO AV DEVE ESSERE PRIMA DI OV, QUINDI IV <= OV
 	    	t.setOpeningVersion(tc.calculateOpeningVersion(t, releaseList));
@@ -104,23 +104,29 @@ public class HandlerController {
 	    
 	    //ELENCO DEI TICKET RIMASTI
 	    for (Ticket t: myTicketList) {
-	    	logger.info("Ticket: "+t.getKey());
-	    	logger.info("IV: "+t.getInjectedVersion().getNumberOfRelease());
-	    	logger.info("OV: "+t.getOpeningVersion().getNumberOfRelease());
-	    	logger.info("FV: "+t.getFixVersion().getNumberOfRelease());
-	    	logger.info("%n"); 	
+	    	System.out.println("Ticket: "+t.getKey());
+	    	System.out.println("IV: "+t.getInjectedVersion().getNumberOfRelease());
+	    	System.out.println("OV: "+t.getOpeningVersion().getNumberOfRelease());
+	    	System.out.println("FV: "+t.getFixVersion().getNumberOfRelease());
+	    	System.out.println("\n"); 	
 	    }
 	    
 	    //CONSIDERO SOLO LA PRIMA METà DELLE RELEASE
 	    int halfSize = releaseList.size() / 2;
 		ArrayList<Release> myReleaseList = new ArrayList<>(releaseList.subList(0, halfSize));
 		
-		logger.info("Recupero di tutte le classi toccate da ogni commit nelle varie release in corso...");
+		System.out.println("Recupero di tutte le classi toccate da ogni commit nelle varie release in corso...");
 		for (Release r: myReleaseList) {
+			System.out.println("\nRelease: "+r.getNameRelease());
 			if (!r.getCommits().isEmpty()) {
 				for (Commit c: r.getCommits()) {
-					//c.setClassesTouched(Cc.getClasses(c.getCommit(), repository, r));
-					c.setClassesTouched(cc.getModifiedClasses(c.getCommit(), repository));
+					boolean isLast = r.getCommits().get(r.getCommits().size() - 1).equals(c);
+					if (isLast) {
+						c.setClassesTouched(cc.getClasses(c.getCommit(), repository));
+					}
+					else {
+						c.setClassesTouched(cc.getModifiedClasses(c.getCommit(), repository));	
+					}
 			    }	
 			}
 			else {
@@ -136,16 +142,14 @@ public class HandlerController {
 			}
 		}
 		
-		logger.info("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
+		System.out.println("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
 		for (Release r: myReleaseList) {
-			//if (r.getCommits().size() != 0) {
-				r.setLastCommit(rc.retrieveLastCommit(r));
-				//nameClasses = Rc.retrieveClassesForRelease(r);
-				List<String> nameClasses = rc.retrieveClassesForRelease2(r, cc, repository);
-				r.setJavaClasses(rc.createClasses(r, nameClasses));
-			//}
+			r.setLastCommit(rc.retrieveLastCommit(r));
+			List<String> nameClasses = rc.retrieveClassesForRelease2(r, cc, repository);
+			r.setJavaClasses(rc.createClasses(r, nameClasses));
 		}
 		
+		System.out.println("Calcolo buggyness e metriche in corso....");
 		mc.calculateBuggyness(myReleaseList, myTicketList);
 		for (Release r: myReleaseList) {
 			if (!r.getCommits().isEmpty()) {
@@ -156,12 +160,12 @@ public class HandlerController {
 			}
 		}	
 		
-		logger.info("Creazione del file csv in corso...");
+		System.out.println("Creazione del file csv in corso...");
 		csv.createDataset(myReleaseList, repository, logger);
 		
-		logger.info("Analisi di Weka in corso...");
+		System.out.println("Analisi di Weka in corso...");
 		wc.walkForward(myReleaseList, repository, csv, logger);
 		
-		logger.info("FINITOOOOO!");
+		System.out.println("FINITOOOOO!");
 	}
 }

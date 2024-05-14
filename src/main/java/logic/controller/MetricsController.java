@@ -1,5 +1,6 @@
 package logic.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -7,10 +8,18 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.json.JSONException;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 
 import logic.model.entity.JavaClass;
@@ -24,7 +33,7 @@ public class MetricsController {
     String sUFFIX2 = "/.git";
 	
 	
-	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo) throws IOException, JSONException {
+	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo) throws IOException, JSONException, GitAPIException {
 		int nR = 0;
 		int nFix = 0;
 		int changeSetSize = 0;
@@ -61,10 +70,90 @@ public class MetricsController {
 			maxChangeSetSize = maxCountFiles(jClass, release);
 			jClass.setMaxChangeSetSize(maxChangeSetSize);
 			
-			}
-		
+			//9 CALCOLO NUMERO DI LOC AGGIUNTE
+			List<Integer> locAddedAndMax = countLocAddedAndMax(jClass, release, repo);
+			jClass.setlOCadded(locAddedAndMax.get(0));
+			
+			//10 CALCOLO MASSIMO NUMERO DI LOC AGGIUNTE
+			jClass.setMaxLocAdded(locAddedAndMax.get(1));
+		}
 	}
 	
+	public List<Integer> countLocAddedAndMax(JavaClass jClass, Release r, String repo) throws IOException, GitAPIException {
+		int addedLines = 0;
+		int max = 0;
+		List<Integer> dataLOC = new ArrayList<>();
+		for (Commit c: r.getCommits()) {
+			int newAddedLines = 0;
+		    for(String jName: c.getClassesTouched()) {
+		    	if (jName.equals(jClass.getNamePath())) {
+		    		newAddedLines = countAddedLines(c.getCommit(), repo);
+		    		addedLines += newAddedLines;
+		    		if (max < newAddedLines) {
+		    			max = newAddedLines;
+		    		}
+		    	}
+		    }
+		}
+		dataLOC.add(addedLines);
+		dataLOC.add(max);
+		return dataLOC;
+	}
+	
+	public int countAddedLines(RevCommit commit, String repository) throws IOException, GitAPIException {
+		try (Repository repo = new FileRepository(new File(FILE_PATH + repository + sUFFIX1 + sUFFIX2))) {
+            try (Git git = new Git(repo);
+                 RevWalk walk = new RevWalk(repo)) {
+                // Ottieni l'albero del commit
+                CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
+                ObjectId oldTree = commit.getParents()[0].getTree();
+                try (ObjectReader reader = repo.newObjectReader()) {
+                    oldTreeParser.reset(reader, oldTree);
+                }
+                // Ottieni l'albero del commit corrente
+                CanonicalTreeParser newTreeParser = new CanonicalTreeParser();
+                ObjectId newTree = commit.getTree();
+                try (ObjectReader reader = repo.newObjectReader()) {
+                    newTreeParser.reset(reader, newTree);
+                }
+
+                // Calcola le differenze tra l'albero vecchio e quello nuovo
+                List<DiffEntry> diffs = git.diff()
+                        .setOldTree(oldTreeParser)
+                        .setNewTree(newTreeParser)
+                        .call();
+
+                // Inizializza il conteggio delle linee aggiunte
+                int addedLinesCount = 0;
+
+                // Itera sulle differenze e controlla solo quelle che sono aggiunte
+                for (DiffEntry entry : diffs) {
+                    if (entry.getChangeType() == DiffEntry.ChangeType.ADD) {
+                        // Utilizza il formatter per ottenere le linee aggiunte
+                        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+                             DiffFormatter formatter = new DiffFormatter(out)) {
+                            formatter.setRepository(repo);
+                            formatter.format(entry);
+                            String diffText = out.toString("UTF-8");
+                            // Conta le linee aggiunte contando i caratteri di fine riga
+                            addedLinesCount += countNewLines(diffText);
+                        }
+                    }
+                }
+                return addedLinesCount;
+            }
+        }
+	}
+	
+	private int countNewLines(String diffText) {
+	    int count = 0;
+	    for (int i = 0; i < diffText.length(); i++) {
+	        if (diffText.charAt(i) == '\n') {
+	            count++;
+	        }
+	    }
+	    return count;
+	}
 	
 	public List<String> calculateAuthors(Release r, JavaClass jClass) {
 		 List<String> totAuthors = new ArrayList<>();
@@ -259,7 +348,7 @@ public class MetricsController {
 		for (Ticket t: myTicketList) {
 			for (Commit c: t.getCommitsForTicket()) {
 				for (String jName: c.getClassesTouched()) {
-					checkJavaClass(jName, myReleaseList, c.getRelease());	
+					checkJavaClass(jName, myReleaseList, c.getRelease(), t.getInjectedVersion());	
 				}
 			}
 		}
@@ -267,17 +356,14 @@ public class MetricsController {
 	}
 
 
-	private void checkJavaClass(String jName, List<Release> myReleaseList, Release commitRelease) {
+	private void checkJavaClass(String jName, List<Release> myReleaseList, Release commitRelease, Release iv) {
 		for (Release r: myReleaseList) {
-			//if (r.getCommits().size() != 0) {
-				for (JavaClass jc: r.getJavaClasses()) {
-					if (jc.getNamePath().equals(jName) && r.getNumberOfRelease() < commitRelease.getNumberOfRelease()) {
-						jc.setBuggy(true);
-						
-					}
+			for (JavaClass jc: r.getJavaClasses()) {
+				//if (jc.getNamePath().equals(jName) && r.getNumberOfRelease() < commitRelease.getNumberOfRelease() && jc.getRelease().getNumberOfRelease() >= iv.getNumberOfRelease()) {
+				if (jc.getNamePath().equals(jName) && r.getNumberOfRelease() < commitRelease.getNumberOfRelease()) {
+					jc.setBuggy(true);
 				}
-			//}
-			
+			}
 		}
 		
 	}
@@ -310,6 +396,10 @@ public class MetricsController {
 
 			//8 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
 			jClass.setMaxChangeSetSize(0);
+			//9 CALCOLO NUMERO DI LOC AGGIUNTE
+			jClass.setlOCadded(0);
+			//10 CALCOLO MASSIMO NUMERO DI LOC AGGIUNTE
+			jClass.setMaxLocAdded(0);
 		}
 	}
 } 
