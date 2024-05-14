@@ -28,7 +28,7 @@ import logic.model.entity.Release;
 import logic.model.entity.Ticket;
 
 public class MetricsController {
-    String FILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+    String fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
     String sUFFIX1 = "\\";
     String sUFFIX2 = "/.git";
 	
@@ -101,7 +101,7 @@ public class MetricsController {
 	}
 	
 	public int countAddedLines(RevCommit commit, String repository) throws IOException, GitAPIException {
-		try (Repository repo = new FileRepository(new File(FILE_PATH + repository + sUFFIX1 + sUFFIX2))) {
+		try (Repository repo = new FileRepository(new File(fILE_PATH + repository + sUFFIX1 + sUFFIX2))) {
             try (Git git = new Git(repo);
                  RevWalk walk = new RevWalk(repo)) {
                 // Ottieni l'albero del commit
@@ -189,7 +189,7 @@ public class MetricsController {
 		List<Integer> totalMetrics = new ArrayList<>();
 		int linesOfCode = 0;
 		int linesOfComment = 0;
-		try (Repository repository = new FileRepository(new File(FILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
+		try (Repository repository = new FileRepository(new File(fILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -210,7 +210,7 @@ public class MetricsController {
 			
 	public int countLinesOfCode(JavaClass jClass, RevCommit commit, String repo) throws IOException {
         int linesOfCode = 0;
-        try (Repository repository = new FileRepository(new File(FILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
+        try (Repository repository = new FileRepository(new File(fILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -240,7 +240,7 @@ public class MetricsController {
     
     public int countLinesOfComments(JavaClass jClass, RevCommit commit, String repo) throws IOException {
         int linesOfComments = 0;
-        try (Repository repository = new FileRepository(new File(FILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
+        try (Repository repository = new FileRepository(new File(fILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);

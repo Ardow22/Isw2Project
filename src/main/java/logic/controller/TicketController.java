@@ -341,7 +341,7 @@ public class TicketController {
     public Release coldStartInjectedVersion(Ticket ticket) {//DA CONTROLLARE, A ME SERVONO SOLO I TICKET CHE GIà HANNO LE AFFECTED VERSION
     	if (!ticket.getAffversions().isEmpty()) {
     		final SimpleDateFormat sdf = new SimpleDateFormat(fORMAT);
-            Comparator<Release> comparator = new Comparator<Release>() {
+            /*Comparator<Release> comparator = new Comparator<Release>() {
                 @Override
                 public int compare(Release release1, Release release2) {
                     try {
@@ -355,7 +355,19 @@ public class TicketController {
                         return 0;
                     }
                 }
-            };
+            };*/
+    		Comparator<Release> comparator = (release1, release2) -> {
+    		    try {
+    		        // Converti le date in oggetti Date
+    		        Date date1 = sdf.parse(release1.getReleaseDate());
+    		        Date date2 = sdf.parse(release2.getReleaseDate());
+    		        // Confronta le date
+    		        return date2.compareTo(date1);
+    		    } catch (ParseException e) {
+    		        e.printStackTrace();
+    		        return 0;
+    		    }
+    		};
             Collections.sort(ticket.getAffversions(), comparator);
     		return ticket.getAffversions().get(0);   
     	}
