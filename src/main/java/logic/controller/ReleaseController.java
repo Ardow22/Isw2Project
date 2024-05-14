@@ -61,7 +61,8 @@ public class ReleaseController {
 		               releaseList.add(release);
 		            }
 		         }
-		         Collections.sort(releases, (o1, o2) -> o1.compareTo(o2));
+		         //Collections.sort(releases, (o1, o2) -> o1.compareTo(o2));
+		         Collections.sort(releases, LocalDateTime::compareTo);
 		         
 		         /*order releases by date
 		         Collections.sort(releases, new Comparator<LocalDateTime>(){
