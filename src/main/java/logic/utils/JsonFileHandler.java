@@ -16,6 +16,11 @@ import org.json.JSONObject;
 
 public class JsonFileHandler {
 	
+	private JsonFileHandler() {
+        // Il costruttore privato è vuoto poiché non vogliamo che venga istanziata alcuna istanza di questa classe
+    }
+
+	
 	public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
 		URL url2 = new URL(url);
 		URLConnection uc = url2.openConnection(); 

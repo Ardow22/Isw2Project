@@ -53,11 +53,16 @@ public class WekaController {
 				}
 				System.out.println("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
 			    
+				List<String> parameters = new ArrayList<>();
 				for (String feature: FeatureSelection) {
 			    	for (String sampling: Sampling) {
 			    		for (String costSensitive: CostSensitive) {
 			    			for (String classifier: Classifiers) {
-			    				execute(trainingSetANDtestingSet, feature, sampling, costSensitive, classifier, repo, csv, testingSet.get(0), logger);
+			    				parameters.add(feature);
+			    				parameters.add(sampling);
+			    				parameters.add(costSensitive);
+			    				parameters.add(classifier);
+			    				execute(trainingSetANDtestingSet, parameters, repo, csv, testingSet.get(0), logger);
 			    				System.out.println("\n\n");
 			    			}
 			    		}
@@ -70,7 +75,11 @@ public class WekaController {
 	
 	
 	
-	public void execute(List<Instances> trainingAndTesting, String feature, String sampling, String costSensitive, String classifier, String repo, CSVController csv, Release testingRelease, Logger logger) throws Exception {
+	public void execute(List<Instances> trainingAndTesting, List<String> param, String repo, CSVController csv, Release testingRelease, Logger logger) throws Exception {
+		String feature = param.get(0); 
+		String sampling = param.get(1);
+		String costSensitive = param.get(2);
+		String classifier = param.get(3);
 		System.out.println("EXECUTE CON TESTING: "+testingRelease.getNumberOfRelease());
 		Instances trainingSet = trainingAndTesting.get(0);
 		trainingSet.setClassIndex(trainingSet.numAttributes() - 1);
@@ -237,7 +246,7 @@ public class WekaController {
 		double recall = eval.recall(0);
 		double kappa = eval.kappa();
 		double auc = eval.areaUnderROC(0);
-		csv.writeResults(repo, testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc, logger);
+		csv.writeResults(repo, testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc);
 	} 
 	
 
@@ -257,7 +266,7 @@ public class WekaController {
 
 
 
-	private ArrayList<String> createFileArff(List<Release> trainingSet, List<Release> testingSet, CSVController csv, Logger logger) throws Exception {
+	private ArrayList<String> createFileArff(List<Release> trainingSet, List<Release> testingSet, CSVController csv, Logger logger) throws IOException {
 		ArrayList<String> csvFileNames = new ArrayList<>();
 		ArrayList<String> arffFileNames = new ArrayList<>();
 		String trS = "trainingSet";

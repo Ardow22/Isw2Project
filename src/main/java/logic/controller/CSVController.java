@@ -72,7 +72,7 @@ public class CSVController {
 	    return outname;
 	   }
 
-	public void writeResults(String repo, int nRelease, String classifier, double precision, double recall, double kappa, double auc, Logger logger) {
+	public void writeResults(String repo, int nRelease, String classifier, double precision, double recall, double kappa, double auc) {
 		String outname = repo.equals("bookkeeper") || repo.equals("openjpa") ? repo + "MachineLearning.csv" : "";
 
 		try (FileWriter fileWriter = new FileWriter(outname, true)) {
@@ -89,7 +89,7 @@ public class CSVController {
 		    fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f \n", repo, nRelease, classifier, precision, recall, kappa, auc));
 
 		} catch (IOException e) {
-		    logger.info(alert1);
+		    System.out.println(alert1);
 		    e.printStackTrace();
 		}
 	}
