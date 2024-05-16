@@ -223,7 +223,7 @@ public class HandlerController {
 	    }	
 	}
 	
-	public void removeFvOvIncorrect(List<Ticket> myTktList, ArrayList<Ticket> myTktList2) {
+	public void removeFvOvIncorrect(List<Ticket> myTktList, List<Ticket> myTktList2) {
 		for (Ticket t: myTktList) {
 	    	if (t.getFixVersion().getNumberOfRelease() >= t.getOpeningVersion().getNumberOfRelease()) {
 	    		myTktList2.add(t);
