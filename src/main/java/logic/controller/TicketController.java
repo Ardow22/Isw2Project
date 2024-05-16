@@ -144,7 +144,7 @@ public class TicketController {
 	         return listTicket;
 	 }
 	
-	private void retrieveFixVersion(int len2, JSONObject fields2, String fixReleaseDate, String fixName,
+	private void retrieveFixVersion(int len2, JSONObject fields2, String fixReleaseD, String fixN,
 			List<Release> releaseList, Ticket tk) {
 		if (len2 > 0) {
 			List<Release> fixV = new ArrayList<>();
@@ -152,10 +152,11 @@ public class TicketController {
 			for (int y = 0; y < fixVersions.length(); y++) {
 				JSONObject fixVersion = fixVersions.getJSONObject(y);
 				if (fixVersion.has(stringReleaseDate)) {
-					fixReleaseDate = fixVersion.getString(stringReleaseDate);
+					fixReleaseD = fixVersion.getString(stringReleaseDate);
 				}
-				fixName = fixVersion.getString("name");
-				for (Release r: releaseList) {
+				fixN = fixVersion.getString("name");
+				checkForFixV(releaseList, fixVersion, fixN, fixReleaseD, tk, len2, fixV);
+				/*for (Release r: releaseList) {
 					if (fixVersion.has(stringReleaseDate)) {
 						if (r.getReleaseDate().equals(fixReleaseDate) || r.getNameRelease().equals(fixName)) {
 							if (len2 == 1) {
@@ -176,7 +177,7 @@ public class TicketController {
 							}
 						}
 					} 
-				}
+				}*/
 			}
 			if (fixV.size() > 1) {
 				Release maxFv = new Release();
@@ -192,16 +193,43 @@ public class TicketController {
 
 	}
 
-	private void retrieveAffVersion(int len1, JSONObject fields2, String releaseDate, String releaseName, List<Release> releaseList, List<Release> affVersList, Ticket tk) {
+	private void checkForFixV(List<Release> releaseList, JSONObject fixVersion, String fixN, String fixReleaseD,
+			Ticket tk, int len2, List<Release> fixV) {
+		for (Release r: releaseList) {
+			if (fixVersion.has(stringReleaseDate)) {
+				if (r.getReleaseDate().equals(fixReleaseD) || r.getNameRelease().equals(fixN)) {
+					if (len2 == 1) {
+						tk.setFixVersion(r); 
+					}
+					else {
+						fixV.add(r);
+					}
+				}
+			}
+			else {
+				if (r.getNameRelease().equals(fixN)) {
+					if (len2 == 1) {
+						tk.setFixVersion(r); 
+					}
+					else {
+						fixV.add(r);
+					}
+				}
+			} 
+		}	
+	}
+
+	private void retrieveAffVersion(int len1, JSONObject fields2, String releaseD, String releaseN, List<Release> releaseList, List<Release> affVersList, Ticket tk) {
 		if (len1 > 0) {
 			JSONArray versions = fields2.getJSONArray("versions");
 			for (int x = 0; x < versions.length(); x++) {
 				JSONObject version = versions.getJSONObject(x);
 				if (version.has(stringReleaseDate)) {
-					releaseDate = version.getString(stringReleaseDate);
+					releaseD = version.getString(stringReleaseDate);
 				}
-				releaseName = version.getString("name");
-				for (Release r: releaseList) {
+				releaseN = version.getString("name");
+				checkForAffVersion(releaseList, version, releaseD, releaseN, affVersList);
+				/*for (Release r: releaseList) {
 					if (version.has(stringReleaseDate)) {
 						if (r.getReleaseDate().equals(releaseDate) || r.getNameRelease().equals(releaseName)) {
 							affVersList.add(r);
@@ -212,11 +240,26 @@ public class TicketController {
 							affVersList.add(r);
 						}
 					}
-				}
+				}*/
 			}
 		}
    	  tk.setAffversions(affVersList);
 		
+	}
+
+	private void checkForAffVersion(List<Release> releaseList, JSONObject version, String releaseD, String releaseN, List<Release> affVersList) {
+		for (Release r: releaseList) {
+			if (version.has(stringReleaseDate)) {
+				if (r.getReleaseDate().equals(releaseD) || r.getNameRelease().equals(releaseN)) {
+					affVersList.add(r);
+				}
+			}
+			else {
+				if (r.getNameRelease().equals(releaseN)) {
+					affVersList.add(r);
+				}
+			}
+		}	
 	}
 
 	public List<Commit> searchCommitsForTicket(Ticket ticket, List<Release> releaseList) {
@@ -355,21 +398,24 @@ public class TicketController {
     	    List<Ticket> ticketsList = retrieveTicketsID(project.toUpperCase(), releasesList);
     		Collections.reverse(ticketsList);
     		
-    		for (Ticket t: ticketsList) {
+    		coldStarCalculateOpeningVersion(ticketsList, releasesList);
+    		/*for (Ticket t: ticketsList) {
     	    	t.setOpeningVersion(calculateOpeningVersion(t, releasesList));
-    	    }
+    	    }*/
     		
     		//TOLGO TUTTI I TICKET CON VALORI DI FV E OV NON CONGRUI
     		List<Ticket> myTktsList2 = new ArrayList<>();
-    	    for (Ticket t: ticketsList) {
+    		coldStartRemoveFvOvIncorrect(ticketsList, myTktsList2);
+    	    /*for (Ticket t: ticketsList) {
     	    	if (t.getFixVersion().getNumberOfRelease() >= t.getOpeningVersion().getNumberOfRelease()) {
     	    		myTktsList2.add(t);
     	    	}
-    	    }
+    	    }*/
     	    
     	    //I TICKET SENZA AFFECTED VERSION NON CI INTERESSANO
     	    List<Ticket> myTktsList3 = new ArrayList<>();
-    	    for (Ticket t: myTktsList2) {
+    	    coldStartRemoveTktWithoutAffVersion(myTktsList2, myTktsList3);
+    	    /*for (Ticket t: myTktsList2) {
     	    	if (!t.getAffversions().isEmpty()) {
     	    		myTktsList3.add(t);
     	    	}
@@ -377,28 +423,31 @@ public class TicketController {
     	    
     	    for (Ticket t: myTktsList3) {
     	    	t.setInjectedVersion(coldStartInjectedVersion(t));
-    	    }
+    	    }*/
     	    
     	    //CONSIDERO SOLO I TICKET CHE HANNO IV E OV CONGRUI
     	    List<Ticket> myTktsList4 = new ArrayList<>();
-    	    for (Ticket t: myTktsList3) {
+    	    coldStartIvOvCorrect(myTktsList4, myTktsList3);
+    	    /*for (Ticket t: myTktsList3) {
     	    	if (t.getInjectedVersion().getNumberOfRelease() < t.getOpeningVersion().getNumberOfRelease()) {
     	    		myTktsList4.add(t);
     	    	} 
-    	    }
+    	    }*/
     	    
     	    //TOLGO ANCHE I TICKET CHE HANNO INJECTED VERSION E FIX VERSION UGUALI, PERCHé SIGNIFICA CHE IL BUG NON C'è
     	    List<Ticket> myTktsList5 = new ArrayList<>();
-    	    for (Ticket t: myTktsList4) {
+    	    coldStartRemoveEqualIvFv(myTktsList5, myTktsList4);
+    	    /*for (Ticket t: myTktsList4) {
     	    	if (t.getInjectedVersion().getNumberOfRelease() != t.getFixVersion().getNumberOfRelease()) {
     	    		myTktsList5.add(t);
     	    	} 
-    	    }
+    	    }*/
     	    
     	    //AGGIUNGO I TICKET RIMASTI AI TICKET FINALI
-    	    for (Ticket t: myTktsList5) {
+    	    coldStartAddAllTickets(myTktsList5, allTickets);
+    	    /*for (Ticket t: myTktsList5) {
     	    	allTickets.add(t);
-    	    } 
+    	    } */
     	}
     	
     	//PRENDO SOLO I TICKET FINO ALLA DATA CHE MI INTERESSA
@@ -415,7 +464,55 @@ public class TicketController {
     	return subTktList;
     }
     
-    public Release coldStartInjectedVersion(Ticket ticket) {//DA CONTROLLARE, A ME SERVONO SOLO I TICKET CHE GIà HANNO LE AFFECTED VERSION
+    private void coldStartAddAllTickets(List<Ticket> myTktsList5, List<Ticket> allTickets) {
+    	for (Ticket t: myTktsList5) {
+	    	allTickets.add(t);
+	    }
+	}
+
+	private void coldStartRemoveEqualIvFv(List<Ticket> myTktsList5, List<Ticket> myTktsList4) {
+    	for (Ticket t: myTktsList4) {
+	    	if (t.getInjectedVersion().getNumberOfRelease() != t.getFixVersion().getNumberOfRelease()) {
+	    		myTktsList5.add(t);
+	    	} 
+	    }
+	}
+
+	private void coldStartIvOvCorrect(List<Ticket> myTktsList4, List<Ticket> myTktsList3) {
+    	for (Ticket t: myTktsList3) {
+	    	if (t.getInjectedVersion().getNumberOfRelease() < t.getOpeningVersion().getNumberOfRelease()) {
+	    		myTktsList4.add(t);
+	    	} 
+	    }
+	}
+
+	private void coldStartRemoveTktWithoutAffVersion(List<Ticket> myTktsList2, List<Ticket> myTktsList3) {
+    	for (Ticket t: myTktsList2) {
+	    	if (!t.getAffversions().isEmpty()) {
+	    		myTktsList3.add(t);
+	    	}
+	    }
+	    
+	    for (Ticket t: myTktsList3) {
+	    	t.setInjectedVersion(coldStartInjectedVersion(t));
+	    }
+	}
+
+	private void coldStartRemoveFvOvIncorrect(List<Ticket> ticketsList, List<Ticket> myTktsList2) {
+    	for (Ticket t: ticketsList) {
+	    	if (t.getFixVersion().getNumberOfRelease() >= t.getOpeningVersion().getNumberOfRelease()) {
+	    		myTktsList2.add(t);
+	    	}
+	    }
+	}
+
+	private void coldStarCalculateOpeningVersion(List<Ticket> ticketsList, List<Release> releasesList) {
+    	for (Ticket t: ticketsList) {
+	    	t.setOpeningVersion(calculateOpeningVersion(t, releasesList));
+	    }
+	}
+
+	public Release coldStartInjectedVersion(Ticket ticket) {//DA CONTROLLARE, A ME SERVONO SOLO I TICKET CHE GIà HANNO LE AFFECTED VERSION
     	if (!ticket.getAffversions().isEmpty()) {
     		final SimpleDateFormat sdf = new SimpleDateFormat(fORMAT);
             /*Comparator<Release> comparator = new Comparator<Release>() {

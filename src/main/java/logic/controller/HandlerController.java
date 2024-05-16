@@ -208,7 +208,7 @@ public class HandlerController {
 		}
 	}
 	
-	public void removeTicketWithoutCommit(List<Ticket> ticketList, ArrayList<Ticket> myTktList) {
+	public void removeTicketWithoutCommit(List<Ticket> ticketList, List<Ticket> myTktList) {
 		for (Ticket t: ticketList) {
 			if (!t.getCommitsForTicket().isEmpty()) {
 				myTktList.add(t);
@@ -216,14 +216,14 @@ public class HandlerController {
 		}
 	}
 	
-	public void calculateOvIv(ArrayList<Ticket> myTktList, TicketController tc, List<Release> releaseList) {
+	public void calculateOvIv(List<Ticket> myTktList, TicketController tc, List<Release> releaseList) {
 		for (Ticket t: myTktList) {
 	    	//IL PRIMO AV DEVE ESSERE PRIMA DI OV, QUINDI IV <= OV
 	    	t.setOpeningVersion(tc.calculateOpeningVersion(t, releaseList));
 	    }	
 	}
 	
-	public void removeFvOvIncorrect(ArrayList<Ticket> myTktList, ArrayList<Ticket> myTktList2) {
+	public void removeFvOvIncorrect(List<Ticket> myTktList, ArrayList<Ticket> myTktList2) {
 		for (Ticket t: myTktList) {
 	    	if (t.getFixVersion().getNumberOfRelease() >= t.getOpeningVersion().getNumberOfRelease()) {
 	    		myTktList2.add(t);
@@ -231,13 +231,13 @@ public class HandlerController {
 	    }
 	}
 	
-	public void calculateIv(ArrayList<Ticket> myTktList2, TicketController tc, List<Release> releaseList, ReleaseController rc) throws JSONException, IOException, ParseException {
+	public void calculateIv(List<Ticket> myTktList2, TicketController tc, List<Release> releaseList, ReleaseController rc) throws JSONException, IOException, ParseException {
 		for (Ticket t: myTktList2) {
 	    	t.setInjectedVersion(tc.calculateInjectedVersion(t, releaseList, myTktList2, rc));
 	    }	
 	}
 	
-	public void removeIvOvIncorrect(List<Ticket> myTktList3, ArrayList<Ticket> myTktList2) {
+	public void removeIvOvIncorrect(List<Ticket> myTktList3, List<Ticket> myTktList2) {
 		for (Ticket t: myTktList2) {
 			if (t.getInjectedVersion().getNumberOfRelease() < t.getOpeningVersion().getNumberOfRelease()) {
 				myTktList3.add(t);
@@ -253,7 +253,7 @@ public class HandlerController {
 	    }
 	}
 	
-	public void retrieveClassesFromCommit(ArrayList<Release> myReleaseList, CommitController cc, String repository) throws JSONException, IOException {
+	public void retrieveClassesFromCommit(List<Release> myReleaseList, CommitController cc, String repository) throws JSONException, IOException {
 		for (Release r: myReleaseList) {
 			System.out.println("\nRelease: "+r.getNameRelease());
 			if (!r.getCommits().isEmpty()) {
@@ -283,7 +283,7 @@ public class HandlerController {
 		}	
 	}
 	
-	public void retrieveClassesForRelease(ArrayList<Release> myReleaseList, ReleaseController rc, CommitController cc, String repository) throws JSONException, IOException {
+	public void retrieveClassesForRelease(List<Release> myReleaseList, ReleaseController rc, CommitController cc, String repository) throws JSONException, IOException {
 		for (Release r: myReleaseList) {
 			r.setLastCommit(rc.retrieveLastCommit(r));
 			List<String> nameClasses = rc.retrieveClassesForRelease2(r, cc, repository);
@@ -291,7 +291,7 @@ public class HandlerController {
 		}		
 	}
 	
-	public void calculateMetrics(ArrayList<Release> myReleaseList, List<Ticket> myTicketList, String repository, MetricsController mc) throws JSONException, IOException, GitAPIException {
+	public void calculateMetrics(List<Release> myReleaseList, List<Ticket> myTicketList, String repository, MetricsController mc) throws JSONException, IOException, GitAPIException {
 		for (Release r: myReleaseList) {
 			if (!r.getCommits().isEmpty()) {
 				mc.calculateMetrics(r, myTicketList, repository);
