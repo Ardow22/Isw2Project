@@ -61,29 +61,9 @@ public class ReleaseController {
 		               releaseList.add(release);
 		            }
 		         }
-		         //Collections.sort(releases, (o1, o2) -> o1.compareTo(o2));
+		         
 		         Collections.sort(releases, LocalDateTime::compareTo);
 		         
-		         /*order releases by date
-		         Collections.sort(releases, new Comparator<LocalDateTime>(){
-		            //@Override
-		            public int compare(LocalDateTime o1, LocalDateTime o2) {
-		                return o1.compareTo(o2);
-		            }
-		         });*/
-		         
-		         /*Collections.sort(releaseList, new Comparator<Release>() {
-		        	 //@Override
-		             public int compare(Release r1, Release r2) {
-		            	 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		                 // Converte le stringhe data in LocalDateTime
-		                 LocalDate data1 = LocalDate.parse(r1.getReleaseDate(), formatter);
-		                 LocalDate data2 = LocalDate.parse(r2.getReleaseDate(), formatter);
-
-		                 // Ordina in base alla data
-		                 return data1.compareTo(data2);
-		             }
-		         }); */
 		         Collections.sort(releaseList, (r1, r2) -> {
 		        	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		        	    // Converte le stringhe data in LocalDate

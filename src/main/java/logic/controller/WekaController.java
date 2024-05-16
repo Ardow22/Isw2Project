@@ -54,7 +54,8 @@ public class WekaController {
 				System.out.println("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
 			    
 				List<String> parameters = new ArrayList<>();
-				for (String feature: FeatureSelection) {
+				startWalkForward(trainingSetANDtestingSet, parameters, repo, csv, testingSet.get(0), logger);
+				/*for (String feature: FeatureSelection) {
 			    	for (String sampling: Sampling) {
 			    		for (String costSensitive: CostSensitive) {
 			    			for (String classifier: Classifiers) {
@@ -67,7 +68,7 @@ public class WekaController {
 			    			}
 			    		}
 			    	}
-			    }
+			    }*/
 				System.out.println("\n\n");
 			}
 		}
@@ -75,6 +76,27 @@ public class WekaController {
 	
 	
 	
+	private void startWalkForward(List<Instances> trainingSetANDtestingSet, List<String> parameters, String repo,
+			CSVController csv, Release testSet, Logger logger) throws Exception {
+		for (String feature: FeatureSelection) {
+	    	for (String sampling: Sampling) {
+	    		for (String costSensitive: CostSensitive) {
+	    			for (String classifier: Classifiers) {
+	    				parameters.add(feature);
+	    				parameters.add(sampling);
+	    				parameters.add(costSensitive);
+	    				parameters.add(classifier);
+	    				execute(trainingSetANDtestingSet, parameters, repo, csv, testSet, logger);
+	    				System.out.println("\n\n");
+	    			}
+	    		}
+	    	}
+	    }
+		
+	}
+
+
+
 	public void execute(List<Instances> trainingAndTesting, List<String> param, String repo, CSVController csv, Release testingRelease, Logger logger) throws Exception {
 		String feature = param.get(0); 
 		String sampling = param.get(1);
