@@ -190,7 +190,6 @@ public class TicketController {
 				tk.setFixVersion(maxFv);
 			}
 		}
-
 	}
 
 	private void checkForFixV(List<Release> releaseList, JSONObject fixVersion, String fixNa, String fixReleaseDa,

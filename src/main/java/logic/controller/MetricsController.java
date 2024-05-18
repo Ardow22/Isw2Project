@@ -28,9 +28,18 @@ import logic.model.entity.Release;
 import logic.model.entity.Ticket;
 
 public class MetricsController {
-    String fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+    /*String fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
     String sUFFIX1 = "\\";
-    String sUFFIX2 = "/.git";
+    String sUFFIX2 = "/.git";*/
+	String fILE_PATH;
+    String sUFFIX1;
+    String sUFFIX2;
+    
+    public MetricsController() {
+    	this.fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+        this.sUFFIX1 = "\\";
+        this.sUFFIX2 = "/.git";
+    } 
 	
 	
 	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo) throws IOException, JSONException, GitAPIException {

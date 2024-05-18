@@ -29,9 +29,19 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 public class CommitController {
-	String fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+	/*String fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
 	String suffix1 = "\\";
-	String suffix2 = "/.git";
+	String suffix2 = "/.git";*/
+	String fILE_PATH;
+    String suffix1;
+    String suffix2;
+    
+    public CommitController() {
+    	this.fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+        this.suffix1 = "\\";
+        this.suffix2 = "/.git";
+    }
+	
 		
 	public List<Commit> getCommitsForRelease(Release release, String repo, String releaseDateSince, int iter) 
 			throws IOException, JSONException, RevisionSyntaxException, ParseException {
