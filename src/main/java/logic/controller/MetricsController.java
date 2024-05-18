@@ -28,18 +28,14 @@ import logic.model.entity.Release;
 import logic.model.entity.Ticket;
 
 public class MetricsController {
-    /*String fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+    //String fILEPATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
     String sUFFIX1 = "\\";
-    String sUFFIX2 = "/.git";*/
-	String fILE_PATH;
-    String sUFFIX1;
-    String sUFFIX2;
+    String sUFFIX2 = "/.git";
     
-    public MetricsController() {
-    	this.fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
-        this.sUFFIX1 = "\\";
-        this.sUFFIX2 = "/.git";
-    } 
+   public String getFpath() {
+	   String fILEPATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+	   return fILEPATH;
+   }
 	
 	
 	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo) throws IOException, JSONException, GitAPIException {
@@ -110,7 +106,7 @@ public class MetricsController {
 	}
 	
 	public int countAddedLines(RevCommit commit, String repository) throws IOException, GitAPIException {
-		try (Repository repo = new FileRepository(new File(fILE_PATH + repository + sUFFIX1 + sUFFIX2))) {
+		try (Repository repo = new FileRepository(new File(getFpath() + repository + sUFFIX1 + sUFFIX2))) {
             try (Git git = new Git(repo);
                  RevWalk walk = new RevWalk(repo)) {
                 // Ottieni l'albero del commit
@@ -198,7 +194,7 @@ public class MetricsController {
 		List<Integer> totalMetrics = new ArrayList<>();
 		int linesOfCode = 0;
 		int linesOfComment = 0;
-		try (Repository repository = new FileRepository(new File(fILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
+		try (Repository repository = new FileRepository(new File(getFpath() + repo + sUFFIX1 + sUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -219,7 +215,7 @@ public class MetricsController {
 			
 	public int countLinesOfCode(JavaClass jClass, RevCommit commit, String repo) throws IOException {
         int linesOfCode = 0;
-        try (Repository repository = new FileRepository(new File(fILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
+        try (Repository repository = new FileRepository(new File(getFpath() + repo + sUFFIX1 + sUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
@@ -249,7 +245,7 @@ public class MetricsController {
     
     public int countLinesOfComments(JavaClass jClass, RevCommit commit, String repo) throws IOException {
         int linesOfComments = 0;
-        try (Repository repository = new FileRepository(new File(fILE_PATH + repo + sUFFIX1 + sUFFIX2))) {
+        try (Repository repository = new FileRepository(new File(getFpath() + repo + sUFFIX1 + sUFFIX2))) {
         	try (TreeWalk treeWalk = new TreeWalk(repository)) {
         		treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);

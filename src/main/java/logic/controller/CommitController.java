@@ -29,24 +29,19 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 public class CommitController {
-	/*String fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+	//String fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
 	String suffix1 = "\\";
-	String suffix2 = "/.git";*/
-	String fILE_PATH;
-    String suffix1;
-    String suffix2;
-    
-    public CommitController() {
-    	this.fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
-        this.suffix1 = "\\";
-        this.suffix2 = "/.git";
-    }
+	String suffix2 = "/.git";
 	
+	public String getFpath() {
+		String fILEPATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+		return fILEPATH;
+	}
 		
 	public List<Commit> getCommitsForRelease(Release release, String repo, String releaseDateSince, int iter) 
 			throws IOException, JSONException, RevisionSyntaxException, ParseException {
 		List<Commit> commitsForThisRelease = new ArrayList<>();
-        try (Repository repository = new FileRepository(new File(fILE_PATH + repo +suffix1+suffix2))) {
+        try (Repository repository = new FileRepository(new File(getFpath() + repo +suffix1+suffix2))) {
             try (Git git = new Git(repository)) {
                 try (RevWalk revWalk = new RevWalk(repository)) {
                     // Definiamo il formato della data
@@ -100,7 +95,7 @@ public class CommitController {
 	
 	public List<String> getClasses(RevCommit commit, String repo) throws IOException, JSONException {
 		List<String> classes = new ArrayList<>();
-		 try (Repository repository = new FileRepository(new File(fILE_PATH + repo + suffix1 + suffix2))) {
+		 try (Repository repository = new FileRepository(new File(getFpath() + repo + suffix1 + suffix2))) {
 			 try (TreeWalk treeWalk = new TreeWalk(repository)) {
 	            treeWalk.addTree(commit.getTree());
 	            treeWalk.setRecursive(true);
@@ -118,7 +113,7 @@ public class CommitController {
 	
 	public List<String> getModifiedClasses(RevCommit commit, String project) throws IOException {
 		List<String> modifiedClasses = new ArrayList<>();	
-		try (Repository repo = new FileRepository(new File(fILE_PATH + project + suffix1 + suffix2))) {
+		try (Repository repo = new FileRepository(new File(getFpath() + project + suffix1 + suffix2))) {
 			try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE); 
 			ObjectReader reader = repo.newObjectReader()) {			
 			CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
