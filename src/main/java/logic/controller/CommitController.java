@@ -32,10 +32,18 @@ public class CommitController {
 	//String fILE_PATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
 	String suffix1 = "\\";
 	String suffix2 = "/.git";
+	String filePath;
+	
+	public CommitController() {
+		this.filePath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+	}
 	
 	public String getFpath() {
-		String fILEPATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
-		return fILEPATH;
+		return filePath;
+	}
+	
+	public void setFpath(String fPath) {
+		this.filePath = fPath;
 	}
 		
 	public List<Commit> getCommitsForRelease(Release release, String repo, String releaseDateSince, int iter) 

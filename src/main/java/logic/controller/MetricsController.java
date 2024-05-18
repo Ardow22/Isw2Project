@@ -31,11 +31,19 @@ public class MetricsController {
     //String fILEPATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
     String sUFFIX1 = "\\";
     String sUFFIX2 = "/.git";
-    
-   public String getFpath() {
-	   String fILEPATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
-	   return fILEPATH;
-   }
+    String filePath;
+	
+	public MetricsController() {
+		this.filePath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+	}
+	
+	public String getFpath() {
+		return filePath;
+	}
+	
+	public void setFpath(String fPath) {
+		this.filePath = fPath;
+	}
 	
 	
 	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo) throws IOException, JSONException, GitAPIException {
