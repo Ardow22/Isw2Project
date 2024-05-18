@@ -33,8 +33,8 @@ public class MetricsController {
     String sUFFIX2 = "/.git";
     String filePath;
 	
-	public MetricsController() {
-		this.filePath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+	public MetricsController(String fPath) {
+		this.filePath = fPath;
 	}
 	
 	public String getFpath() {

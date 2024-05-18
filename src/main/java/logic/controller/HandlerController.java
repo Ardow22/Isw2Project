@@ -27,9 +27,9 @@ public class HandlerController {
 		
 		//RECUPERO LA LISTA DELLE RELEASE
 		ReleaseController rc = new ReleaseController();
-		CommitController cc = new CommitController();
+		CommitController cc = new CommitController("C:\\Users\\HP\\Desktop\\Progetti Apache\\");
 		TicketController tc = new TicketController();
-		MetricsController mc = new MetricsController();
+		MetricsController mc = new MetricsController("C:\\Users\\HP\\Desktop\\Progetti Apache\\");
 		CSVController csv = new CSVController();
 		WekaController wc = new WekaController();
 		List<Release> releaseList = ReleaseController.listRelease(repository.toUpperCase());

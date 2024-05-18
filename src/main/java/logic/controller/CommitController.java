@@ -34,8 +34,8 @@ public class CommitController {
 	String suffix2 = "/.git";
 	String filePath;
 	
-	public CommitController() {
-		this.filePath = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
+	public CommitController(String fPath) {
+		this.filePath = fPath;
 	}
 	
 	public String getFpath() {
