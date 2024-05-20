@@ -22,7 +22,7 @@ public class HandlerController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(HandlerController.class);
 	
-	public void startAnalysis(String repository) throws Exception{
+	public void startAnalysis(String repository) throws JSONException, IOException, RevisionSyntaxException, ParseException, GitAPIException {
 		System.out.println("Analisi del progetto "+ repository);
 		
 		//RECUPERO LA LISTA DELLE RELEASE

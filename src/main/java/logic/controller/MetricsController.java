@@ -58,7 +58,7 @@ public class MetricsController {
 				for (JavaClass jClass: release.getJavaClasses()) {			
 					System.out.println("\n");
 					//1 CALCOLO NUMERO DI AUTORI [Nauth]
-					List<String> totAuth = calculateAuthors(release, jClass);
+					List<String> totAuth = calculateAuthors(jClass);
 					jClass.setAuthors(totAuth);
 					System.out.println("AUTORI: "+jClass.getAuthors());
 
@@ -95,7 +95,7 @@ public class MetricsController {
 					System.out.println("max ChangeSetSize: "+jClass.getMaxChangeSetSize());
 
 					//9 CALCOLO NUMERO DI LOC AGGIUNTE
-					List<Integer> locAddedAndMax = countLocAddedAndMax(jClass, repo, repos, git, walk);
+					List<Integer> locAddedAndMax = countLocAddedAndMax(jClass, repos);
 					jClass.setlOCadded(locAddedAndMax.get(0));
 					System.out.println("ADDED LOC: "+jClass.getlOCadded());
 
@@ -107,7 +107,7 @@ public class MetricsController {
 		}
 	}
 	
-	public List<Integer> countLocAddedAndMax(JavaClass jClass, String repo, Repository repos, Git git, RevWalk walk) throws IOException, GitAPIException {
+	public List<Integer> countLocAddedAndMax(JavaClass jClass, Repository repos) throws IOException {
 		int addedLines = 0;
 		int max = 0;
 		List<Integer> dataLOC = new ArrayList<>();
@@ -124,7 +124,7 @@ public class MetricsController {
 		return dataLOC;
 	}
 		
-	public int countAddedLines(RevCommit commit, String repository, Repository repos, Git git2, RevWalk walk2) throws IOException, GitAPIException {
+	public int countAddedLines(RevCommit commit, Repository repos, Git git2) throws IOException, GitAPIException {
                 // Ottieni l'albero del commit
                 CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
                 ObjectId oldTree = commit.getParents()[0].getTree();
@@ -176,7 +176,7 @@ public class MetricsController {
 	    return count;
 	}
 	
-	public List<String> calculateAuthors(Release r, JavaClass jClass) {
+	public List<String> calculateAuthors(JavaClass jClass) {
 		List<String> totAuthors = new ArrayList<>();
 		for (Commit c: jClass.getClassCommits()) {
 			if (!totAuthors.contains(c.getAuthor()))  {
@@ -187,10 +187,10 @@ public class MetricsController {
 	}
 	
 	public List<Integer> countInClass(JavaClass jClass, Commit lastCommit, String repo, Repository repos) throws IOException, JSONException {
-		 return countAll(jClass, lastCommit.getCommit(), repo, repos);
+		 return countAll(jClass, lastCommit.getCommit(), repos);
 	}
 	
-	public List<Integer> countAll(JavaClass jClass, RevCommit commit, String repo, Repository repos) throws IOException {
+	public List<Integer> countAll(JavaClass jClass, RevCommit commit, Repository repos) throws IOException {
 		List<Integer> totalMetrics = new ArrayList<>();
 		int linesOfCode = 0;
 		int linesOfComment = 0;
