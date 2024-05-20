@@ -12,7 +12,6 @@ import java.util.List;
 import logic.model.bean.ReleaseBean;
 import logic.model.entity.Commit;
 
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.json.JSONException;
 import org.slf4j.Logger;
@@ -22,7 +21,7 @@ public class HandlerController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(HandlerController.class);
 	
-	public void startAnalysis(String repository) throws JSONException, IOException, RevisionSyntaxException, ParseException, GitAPIException {
+	public void startAnalysis(String repository) throws Exception {
 		System.out.println("Analisi del progetto "+ repository);
 		
 		//RECUPERO LA LISTA DELLE RELEASE
@@ -181,8 +180,8 @@ public class HandlerController {
 		System.out.println("Creazione del file csv in corso...");
 		csv.createDataset(myReleaseList, repository, logger);
 		
-		//System.out.println("Analisi di Weka in corso...");
-		//wc.walkForward(myReleaseList, repository, csv, logger);
+		System.out.println("Analisi di Weka in corso...");
+		wc.walkForward(myReleaseList, repository, csv, logger);
 		
 		System.out.println("FINITOOOOO!");
 	}
