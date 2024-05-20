@@ -47,7 +47,7 @@ public class MetricsController {
 		this.filePath = fPath;
 	}
 	
-	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo) throws IOException, JSONException, GitAPIException {
+	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo) throws IOException, JSONException {
 		int nR = 0;
 		int nFix = 0;
 		int changeSetSize = 0;
@@ -64,7 +64,7 @@ public class MetricsController {
 
 					//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
 					//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
-					List<Integer> lines = countInClass(jClass, lastCommit, repo, repos);
+					List<Integer> lines = countInClass(jClass, lastCommit, repos);
 					jClass.setLOC(lines.get(0));
 					jClass.setLinesOfComments(lines.get(1));
 					System.out.println("LOC: "+jClass.getLOC());
@@ -186,7 +186,7 @@ public class MetricsController {
 		return totAuthors;
 	}
 	
-	public List<Integer> countInClass(JavaClass jClass, Commit lastCommit, String repo, Repository repos) throws IOException, JSONException {
+	public List<Integer> countInClass(JavaClass jClass, Commit lastCommit, Repository repos) throws IOException, JSONException {
 		 return countAll(jClass, lastCommit.getCommit(), repos);
 	}
 	
@@ -369,7 +369,7 @@ public class MetricsController {
 				Commit lastCommit = release.getLastCommit();
 				//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
 				//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
-				List<Integer> lines = countInClass(jClass, lastCommit, repo, repos);
+				List<Integer> lines = countInClass(jClass, lastCommit, repos);
 				jClass.setLOC(lines.get(0));
 				jClass.setLinesOfComments(lines.get(1));
 
