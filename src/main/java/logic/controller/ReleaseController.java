@@ -110,12 +110,30 @@ public class ReleaseController {
 			jClass.setNamePath(className);
 			jClass.setRelease(r);
 			jClass.setBuggy(false);
+			jClass.setClassCommits(retrieveCommitsForClass(r, className));
 			classList.add(jClass);
 		}
 		return classList;
-		
 	}
-
+	
+	public List<Commit> retrieveCommitsForClass(Release r, String classN) {
+		List<Commit> listOfCommits = new ArrayList<>();
+		if (!r.getCommits().isEmpty()) {
+			listOfCommits = r.getCommits(); 
+		}
+		else {
+			listOfCommits = r.getFakeCommits();
+		}
+		List<Commit> newList = new ArrayList<>();
+		for (Commit c: listOfCommits) {
+			if (c.getClassesTouched().contains(classN)) {
+				newList.add(c);
+			}
+		}
+		return newList;
+	}
+	
+	
 	public Commit retrieveLastCommit(Release r) {
 		if (!r.getCommits().isEmpty()) {
 			return r.getCommits().get(0);

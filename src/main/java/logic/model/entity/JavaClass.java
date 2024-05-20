@@ -16,6 +16,7 @@ public class JavaClass {
 	private boolean buggy;
 	private int lOCadded;
 	private int maxLocAdded;
+	private List<Commit> classCommits;
 
 	public String getNamePath() {
 		return namePath;
@@ -116,5 +117,13 @@ public class JavaClass {
 
 	public void setMaxLocAdded(int maxLocAdded) {
 		this.maxLocAdded = maxLocAdded;
+	}
+
+	public List<Commit> getClassCommits() {
+		return classCommits;
+	}
+
+	public void setClassCommits(List<Commit> classCommits) {
+		this.classCommits = classCommits;
 	}
 }

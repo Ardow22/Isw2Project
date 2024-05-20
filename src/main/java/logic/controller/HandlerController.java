@@ -181,8 +181,8 @@ public class HandlerController {
 		System.out.println("Creazione del file csv in corso...");
 		csv.createDataset(myReleaseList, repository, logger);
 		
-		System.out.println("Analisi di Weka in corso...");
-		wc.walkForward(myReleaseList, repository, csv, logger);
+		//System.out.println("Analisi di Weka in corso...");
+		//wc.walkForward(myReleaseList, repository, csv, logger);
 		
 		System.out.println("FINITOOOOO!");
 	}
@@ -293,6 +293,7 @@ public class HandlerController {
 	
 	public void calculateMetrics(List<Release> myReleaseList, List<Ticket> myTicketList, String repository, MetricsController mc) throws JSONException, IOException, GitAPIException {
 		for (Release r: myReleaseList) {
+			System.out.println("\n\nRELEASE "+r.getNameRelease());
 			if (!r.getCommits().isEmpty()) {
 				mc.calculateMetrics(r, myTicketList, repository);
 			}

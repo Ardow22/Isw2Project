@@ -15,11 +15,14 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.json.JSONException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.Edit;
+import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 
 import logic.model.entity.JavaClass;
@@ -28,7 +31,6 @@ import logic.model.entity.Release;
 import logic.model.entity.Ticket;
 
 public class MetricsController {
-    //String fILEPATH = "C:\\Users\\HP\\Desktop\\Progetti Apache\\";
     String sUFFIX1 = "\\";
     String sUFFIX2 = "/.git";
     String filePath;
@@ -45,93 +47,99 @@ public class MetricsController {
 		this.filePath = fPath;
 	}
 	
-	
 	public void calculateMetrics(Release release, List<Ticket> myTicketList, String repo) throws IOException, JSONException, GitAPIException {
 		int nR = 0;
 		int nFix = 0;
 		int changeSetSize = 0;
 		int maxChangeSetSize = 0;
 		Commit lastCommit = release.getLastCommit();
-		for (JavaClass jClass: release.getJavaClasses()) {			
-			
-			//1 CALCOLO NUMERO DI AUTORI [Nauth]
-			List<String> totAuth = calculateAuthors(release, jClass);
-			jClass.setAuthors(totAuth);
+		try (Repository repos = new FileRepository(new File(getFpath() + repo + sUFFIX1 + sUFFIX2))) {
+			try (Git git = new Git(repos); RevWalk walk = new RevWalk(repos)) {
+				for (JavaClass jClass: release.getJavaClasses()) {			
+					System.out.println("\n");
+					//1 CALCOLO NUMERO DI AUTORI [Nauth]
+					List<String> totAuth = calculateAuthors(release, jClass);
+					jClass.setAuthors(totAuth);
+					System.out.println("AUTORI: "+jClass.getAuthors());
 
-			//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
-			//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
-			List<Integer> lines = countInClass(jClass, lastCommit, repo);
-			jClass.setLOC(lines.get(0));
-			jClass.setLinesOfComments(lines.get(1));
+					//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
+					//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
+					List<Integer> lines = countInClass(jClass, lastCommit, repo, repos);
+					jClass.setLOC(lines.get(0));
+					jClass.setLinesOfComments(lines.get(1));
+					System.out.println("LOC: "+jClass.getLOC());
+					System.out.println("COMMENTS: "+jClass.getLinesOfComments());
 
-			//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
-			nR = countCommits(release, jClass);
-			jClass.setNumberOfCommits(nR);
+					//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
+					nR = countCommits(jClass);
+					jClass.setNumberOfCommits(nR);
+					System.out.println("NR: "+jClass.getNumberOfCommits());
 
-			//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
-			nFix = countFixCommits(myTicketList, release, jClass);
-			jClass.setNumberOfFixDefects(nFix);
+					//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
+					nFix = countFixCommits(myTicketList, jClass);
+					jClass.setNumberOfFixDefects(nFix);
+					System.out.println("nFIX: "+jClass.getNumberOfFixDefects());
 
-			//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
-			release.setAgeOfRelease(calculateAgeOfRelease(release));
+					//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
+					release.setAgeOfRelease(calculateAgeOfRelease(release));
+					System.out.println("Age: "+release.getAgeOfRelease());
 
-			//7 CALCOLO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE (PRENDI ULTIMO COMMIT) [CHANGE SET SIZE]
-			changeSetSize = countFiles(lastCommit);
-			jClass.setChangeSetSize(changeSetSize);
+					//7 CALCOLO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE (PRENDI ULTIMO COMMIT) [CHANGE SET SIZE]
+					changeSetSize = countFiles(lastCommit);
+					jClass.setChangeSetSize(changeSetSize);
+					System.out.println("ChangeSetSize: "+jClass.getChangeSetSize());
 
-			//8 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
-			maxChangeSetSize = maxCountFiles(jClass, release);
-			jClass.setMaxChangeSetSize(maxChangeSetSize);
-			
-			//9 CALCOLO NUMERO DI LOC AGGIUNTE
-			List<Integer> locAddedAndMax = countLocAddedAndMax(jClass, release, repo);
-			jClass.setlOCadded(locAddedAndMax.get(0));
-			
-			//10 CALCOLO MASSIMO NUMERO DI LOC AGGIUNTE
-			jClass.setMaxLocAdded(locAddedAndMax.get(1));
+					//8 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
+					maxChangeSetSize = maxCountFiles(jClass);
+					jClass.setMaxChangeSetSize(maxChangeSetSize);
+					System.out.println("max ChangeSetSize: "+jClass.getMaxChangeSetSize());
+
+					//9 CALCOLO NUMERO DI LOC AGGIUNTE
+					List<Integer> locAddedAndMax = countLocAddedAndMax(jClass, repo, repos, git, walk);
+					jClass.setlOCadded(locAddedAndMax.get(0));
+					System.out.println("ADDED LOC: "+jClass.getlOCadded());
+
+					//10 CALCOLO MASSIMO NUMERO DI LOC AGGIUNTE
+					jClass.setMaxLocAdded(locAddedAndMax.get(1));
+					System.out.println("MAX ADDED LOC: "+jClass.getMaxLocAdded());
+				}
+			}
 		}
 	}
 	
-	public List<Integer> countLocAddedAndMax(JavaClass jClass, Release r, String repo) throws IOException, GitAPIException {
+	public List<Integer> countLocAddedAndMax(JavaClass jClass, String repo, Repository repos, Git git, RevWalk walk) throws IOException, GitAPIException {
 		int addedLines = 0;
 		int max = 0;
 		List<Integer> dataLOC = new ArrayList<>();
-		for (Commit c: r.getCommits()) {
+		for (Commit c: jClass.getClassCommits()) {
 			int newAddedLines = 0;
-		    for(String jName: c.getClassesTouched()) {
-		    	if (jName.equals(jClass.getNamePath())) {
-		    		newAddedLines = countAddedLines(c.getCommit(), repo);
-		    		addedLines += newAddedLines;
-		    		if (max < newAddedLines) {
-		    			max = newAddedLines;
-		    		}
-		    	}
-		    }
+			newAddedLines = retrieveAddedLines(c.getCommit(), jClass, repos);
+			addedLines += newAddedLines;
+			if (max < newAddedLines) {
+				max = newAddedLines;
+			}
 		}
 		dataLOC.add(addedLines);
 		dataLOC.add(max);
 		return dataLOC;
 	}
-	
-	public int countAddedLines(RevCommit commit, String repository) throws IOException, GitAPIException {
-		try (Repository repo = new FileRepository(new File(getFpath() + repository + sUFFIX1 + sUFFIX2))) {
-            try (Git git = new Git(repo);
-                 RevWalk walk = new RevWalk(repo)) {
+		
+	public int countAddedLines(RevCommit commit, String repository, Repository repos, Git git2, RevWalk walk2) throws IOException, GitAPIException {
                 // Ottieni l'albero del commit
                 CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
                 ObjectId oldTree = commit.getParents()[0].getTree();
-                try (ObjectReader reader = repo.newObjectReader()) {
+                try (ObjectReader reader = repos.newObjectReader()) {
                     oldTreeParser.reset(reader, oldTree);
                 }
                 // Ottieni l'albero del commit corrente
                 CanonicalTreeParser newTreeParser = new CanonicalTreeParser();
                 ObjectId newTree = commit.getTree();
-                try (ObjectReader reader = repo.newObjectReader()) {
+                try (ObjectReader reader = repos.newObjectReader()) {
                     newTreeParser.reset(reader, newTree);
                 }
 
                 // Calcola le differenze tra l'albero vecchio e quello nuovo
-                List<DiffEntry> diffs = git.diff()
+                List<DiffEntry> diffs = git2.diff()
                         .setOldTree(oldTreeParser)
                         .setNewTree(newTreeParser)
                         .call();
@@ -145,7 +153,7 @@ public class MetricsController {
                         // Utilizza il formatter per ottenere le linee aggiunte
                         try (ByteArrayOutputStream out = new ByteArrayOutputStream();
                              DiffFormatter formatter = new DiffFormatter(out)) {
-                            formatter.setRepository(repo);
+                            formatter.setRepository(repos);
                             formatter.format(entry);
                             String diffText = out.toString("UTF-8");
                             // Conta le linee aggiunte contando i caratteri di fine riga
@@ -154,8 +162,8 @@ public class MetricsController {
                     }
                 }
                 return addedLinesCount;
-            }
-        }
+            
+        
 	}
 	
 	private int countNewLines(String diffText) {
@@ -169,55 +177,38 @@ public class MetricsController {
 	}
 	
 	public List<String> calculateAuthors(Release r, JavaClass jClass) {
-		 List<String> totAuthors = new ArrayList<>();
-		 for (Commit c: r.getCommits()) {
-			 List<String> jc = c.getClassesTouched();
-		     for (String jName: jc) {
-		    	 if (jClass.getNamePath().equals(jName) && !totAuthors.contains(c.getAuthor()))  {
-		    		 totAuthors.add(c.getAuthor());
-					 	
-				 }
-			 }
-		 }
-		 return totAuthors;
-	 }
-	
-	public List<Integer> countInClass(JavaClass jClass, Commit lastCommit, String repo) throws IOException, JSONException {
-		 /*int LOC = 0;
-		 int linesOfComments = 0;
-		 int numMethods = 0;
-		 int numAttributes = 0;*/
-		 /*LOC = countLinesOfCode(jClass, lastCommit.getCommit(), repo);
-	     total.add(LOC);
-	     linesOfComments = countLinesOfComments(jClass, lastCommit.getCommit(), repo);
-	     total.add(linesOfComments);
-	     numMethods = countLinesOfMethods(jClass, lastCommit.getCommit(), repo);
-	     total.add(numMethods);
-	     numAttributes = countLinesOfAttributes(jClass, lastCommit.getCommit(), repo);
-	     total.add(numMethods);*/
-		 return countAll(jClass, lastCommit.getCommit(), repo);
+		List<String> totAuthors = new ArrayList<>();
+		for (Commit c: jClass.getClassCommits()) {
+			if (!totAuthors.contains(c.getAuthor()))  {
+				totAuthors.add(c.getAuthor());
+			}
+		}
+		return totAuthors;
 	}
 	
-	public List<Integer> countAll(JavaClass jClass, RevCommit commit, String repo) throws IOException {
+	public List<Integer> countInClass(JavaClass jClass, Commit lastCommit, String repo, Repository repos) throws IOException, JSONException {
+		 return countAll(jClass, lastCommit.getCommit(), repo, repos);
+	}
+	
+	public List<Integer> countAll(JavaClass jClass, RevCommit commit, String repo, Repository repos) throws IOException {
 		List<Integer> totalMetrics = new ArrayList<>();
 		int linesOfCode = 0;
 		int linesOfComment = 0;
-		try (Repository repository = new FileRepository(new File(getFpath() + repo + sUFFIX1 + sUFFIX2))) {
-        	try (TreeWalk treeWalk = new TreeWalk(repository)) {
-        		treeWalk.addTree(commit.getTree());
-                treeWalk.setRecursive(true);
-                while (treeWalk.next()) {
-                	if (treeWalk.getPathString().equals(jClass.getNamePath())) {
-                		String content = new String(repository.open(treeWalk.getObjectId(0)).getBytes());
-                        linesOfCode = countNonEmptyLines(content);
-                        linesOfComment = countComments(content);
-                        totalMetrics.add(linesOfCode);
-                        totalMetrics.add(linesOfComment);
-                        break;
-                    }
-                }
-            }
-        }
+		try (TreeWalk treeWalk = new TreeWalk(repos)) {
+			treeWalk.addTree(commit.getTree());
+			treeWalk.setRecursive(true);
+			while (treeWalk.next()) {
+				if (treeWalk.getPathString().equals(jClass.getNamePath())) {
+					String content = new String(repos.open(treeWalk.getObjectId(0)).getBytes());
+					linesOfCode = countNonEmptyLines(content);
+					linesOfComment = countComments(content);
+					totalMetrics.add(linesOfCode);
+					totalMetrics.add(linesOfComment);
+					break;
+				}
+			}
+		}
+
 		return totalMetrics;
 	}
 			
@@ -283,29 +274,17 @@ public class MetricsController {
 		 return commentLines;		
 	}
 	
-	public int countCommits(Release r, JavaClass jClass) {
-		int count = 0;
-		for (Commit c: r.getCommits()) {
-			for (String jName: c.getClassesTouched()) {
-				if (jName.equals(jClass.getNamePath())) {
-					count++;
-				}
-			}
-		}
-		return count;
+	public int countCommits(JavaClass jClass) {
+		return jClass.getClassCommits().size();
 	}
 	
-	public int countFixCommits(List<Ticket> ticketList, Release r, JavaClass jClass) {
+	public int countFixCommits(List<Ticket> ticketList, JavaClass jClass) {
 		int count = 0;
-		for (Commit c: r.getCommits()) {
+		for (Commit c: jClass.getClassCommits()) {
 			boolean result = false;
 			result = checkCommitTicket(c, ticketList);
 			if (result) {
-				for (String jName: c.getClassesTouched()) {
-					if (jName.equals(jClass.getNamePath())) {
-						count++;
-					}
-				}
+				count++;
 			}
 		}
 		return count;
@@ -331,20 +310,18 @@ public class MetricsController {
 	
 	public int countFiles(Commit lastCommit) {
 		return lastCommit.getClassesTouched().size();
-		//return release.getJavaClasses().size();
 	}
-	 
-	public int maxCountFiles(JavaClass jClass, Release r) {
+	
+	public int maxCountFiles(JavaClass jClass) {
 		int max = 0;
-		for (Commit c: r.getCommits()) {
-			for (String jName: c.getClassesTouched()) {
-				if (jName.equals(jClass.getNamePath()) && c.getClassesTouched().size() > max) {
-					max = c.getClassesTouched().size();
-				}
-			} 
-		 }
-		 return max;
-	 }
+		for (Commit c: jClass.getClassCommits()) {
+			if (c.getClassesTouched().size() > max) {
+				max = c.getClassesTouched().size();
+			}
+		}
+		return max;
+	}
+	
 	 
 	 public List<Commit> selectCommitsWithTicket(List<Commit> listCommit, List<Ticket> myTicketList) {
 		 List<Commit> commits = new ArrayList<>();
@@ -380,40 +357,73 @@ public class MetricsController {
 		}
 		
 	}
-
-
+	
 	public void setMetrics(Release release, String repo) throws JSONException, IOException {
-		for (JavaClass jClass: release.getJavaClasses()) {			
-			//1 CALCOLO NUMERO DI AUTORI [Nauth]
-			List<String> totAuth = new ArrayList<>();
-			jClass.setAuthors(totAuth);
+		try (Repository repos = new FileRepository(new File(getFpath() + repo + sUFFIX1 + sUFFIX2))) {
 
-			Commit lastCommit = release.getLastCommit();
-			//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
-			//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
-			List<Integer> lines = countInClass(jClass, lastCommit, repo);
-			jClass.setLOC(lines.get(0));
-			jClass.setLinesOfComments(lines.get(1));
+			for (JavaClass jClass: release.getJavaClasses()) {			
+				//1 CALCOLO NUMERO DI AUTORI [Nauth]
+				List<String> totAuth = new ArrayList<>();
+				jClass.setAuthors(totAuth);
 
-			//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
-			jClass.setNumberOfCommits(0);
+				Commit lastCommit = release.getLastCommit();
+				//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
+				//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
+				List<Integer> lines = countInClass(jClass, lastCommit, repo, repos);
+				jClass.setLOC(lines.get(0));
+				jClass.setLinesOfComments(lines.get(1));
 
-			//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
-			jClass.setNumberOfFixDefects(0);
+				//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
+				jClass.setNumberOfCommits(0);
 
-			//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
-			release.setAgeOfRelease(calculateAgeOfRelease(release));
+				//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
+				jClass.setNumberOfFixDefects(0);
 
-			//7 CALCOLO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE (PRENDI ULTIMO COMMIT) [CHANGE SET SIZE]
-			jClass.setChangeSetSize(0);
+				//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
+				release.setAgeOfRelease(calculateAgeOfRelease(release));
 
-			//8 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
-			jClass.setMaxChangeSetSize(0);
-			//9 CALCOLO NUMERO DI LOC AGGIUNTE
-			jClass.setlOCadded(0);
-			//10 CALCOLO MASSIMO NUMERO DI LOC AGGIUNTE
-			jClass.setMaxLocAdded(0);
+				//7 CALCOLO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE (PRENDI ULTIMO COMMIT) [CHANGE SET SIZE]
+				jClass.setChangeSetSize(0);
+
+				//8 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
+				jClass.setMaxChangeSetSize(0);
+				//9 CALCOLO NUMERO DI LOC AGGIUNTE
+				jClass.setlOCadded(0);
+				//10 CALCOLO MASSIMO NUMERO DI LOC AGGIUNTE
+				jClass.setMaxLocAdded(0);
+			}
 		}
+	}
+	
+	private int retrieveAddedLines(RevCommit commit, JavaClass jClass, Repository repository) throws IOException {
+		int result = 0;
+		try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
+			RevCommit parentComm = commit.getParent(0);
+			diffFormatter.setRepository(repository);
+			diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+			diffFormatter.setDetectRenames(true);
+
+			List<DiffEntry> diffEntrList = diffFormatter.scan(parentComm.getTree(), commit.getTree());
+			for (DiffEntry diffEntry : diffEntrList) {
+				if (diffEntry.getNewPath().equals(jClass.getNamePath())) {
+					result = retrieveCountLines(diffFormatter, diffEntry);
+				}
+			}
+
+		} catch (ArrayIndexOutOfBoundsException ignored) {
+			// se non trova un parent è ignorato
+		}
+		return result;
+	}
+	
+	
+	private int retrieveCountLines(DiffFormatter diffFormatter, DiffEntry diffEntry) throws IOException {
+		int count = 0;
+		// linee aggiunte
+		for (Edit edit : diffFormatter.toFileHeader(diffEntry).toEditList()) {
+			count += edit.getEndB() - edit.getBeginB();
+		}
+		return count;
 	}
 } 
 
