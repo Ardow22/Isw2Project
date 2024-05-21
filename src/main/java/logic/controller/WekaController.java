@@ -38,6 +38,7 @@ public class WekaController {
 	protected static final List<String> Accuracy = new ArrayList<>(Arrays.asList("Precision", "Recall", "AUC", "Kappa"));
 
 	public void walkForward(List<Release> myReleaseList, String repo, CSVController csv, Logger logger) throws Exception {
+		String csvF = csv.createCsv(repo);
 		for (Release r: myReleaseList) {
 			if (r.getNumberOfRelease() > 0) { //la prima release la consideriamo solo come training
 				
@@ -52,9 +53,8 @@ public class WekaController {
 					System.out.println("NUMERO RELEASE "+re.getNumberOfRelease());
 				}
 				System.out.println("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
-			    
-				List<String> parameters = new ArrayList<>();
-				startWalkForward(trainingSetANDtestingSet, parameters, repo, csv, testingSet.get(0), logger);
+				
+				startWalkForward(trainingSetANDtestingSet, repo, csv, testingSet.get(0), logger, csvF);
 				/*for (String feature: FeatureSelection) {
 			    	for (String sampling: Sampling) {
 			    		for (String costSensitive: CostSensitive) {
@@ -76,17 +76,18 @@ public class WekaController {
 	
 	
 	
-	private void startWalkForward(List<Instances> trainingSetANDtestingSet, List<String> parameters, String repo,
-			CSVController csv, Release testSet, Logger logger) throws Exception {
+	private void startWalkForward(List<Instances> trainingSetANDtestingSet, String repo,
+			CSVController csv, Release testSet, Logger logger, String csvName) throws Exception {
 		for (String feature: FeatureSelection) {
 	    	for (String sampling: Sampling) {
 	    		for (String costSensitive: CostSensitive) {
 	    			for (String classifier: Classifiers) {
+	    				List<String> parameters = new ArrayList<>();
 	    				parameters.add(feature);
 	    				parameters.add(sampling);
 	    				parameters.add(costSensitive);
 	    				parameters.add(classifier);
-	    				execute(trainingSetANDtestingSet, parameters, repo, csv, testSet, logger);
+	    				execute(trainingSetANDtestingSet, parameters, repo, csv, testSet, logger, csvName);
 	    				System.out.println("\n\n");
 	    			}
 	    		}
@@ -97,7 +98,7 @@ public class WekaController {
 
 
 
-	public void execute(List<Instances> trainingAndTesting, List<String> param, String repo, CSVController csv, Release testingRelease, Logger logger) throws Exception {
+	public void execute(List<Instances> trainingAndTesting, List<String> param, String repo, CSVController csv, Release testingRelease, Logger logger, String csvN) throws Exception {
 		String feature = param.get(0); 
 		String sampling = param.get(1);
 		String costSensitive = param.get(2);
@@ -109,7 +110,7 @@ public class WekaController {
 		testingSet.setClassIndex(testingSet.numAttributes() - 1);
 
 		if (feature.equals("No selection")) {
-			//System.out.println("FEATURE NO SELECTION");
+			System.out.println("FEATURE NO SELECTION");
 		}
 		else {
 			// Crea un oggetto CfsSubsetEval (valutatore)
@@ -138,7 +139,7 @@ public class WekaController {
             testingSet = filteredTestingData;
             // Impostazione dell'indice dell'attributo di classe per il set di test
             testingSet.setClassIndex(filteredTestingData.numAttributes() - 1);
-            //System.out.println("BEST FIRST");
+            System.out.println("BEST FIRST");
 			
 		}
 		
@@ -158,7 +159,7 @@ public class WekaController {
         double oversamplingRatio = (double) majoritySize / minoritySize;
 		
 		if (sampling.equals("No sampling")) {
-			//System.out.println("NO SAMPLING");
+			System.out.println("NO SAMPLING");
 		}
 		else if (sampling.equals("Oversampling")) {
             Resample resampleFilter = new Resample();
@@ -175,7 +176,7 @@ public class WekaController {
             oversampledData.addAll(oversampledMinorityInstances);
 
             trainingSet = oversampledData;
-            //System.out.println("OVERSAMPLING");
+            System.out.println("OVERSAMPLING");
 		}
 		else if (sampling.equals("Undersampling")) {
 	        Filter samplingFilter = new SpreadSubsample();
@@ -186,7 +187,7 @@ public class WekaController {
 	        trainingSet = undersampledData;
 	        trainingSet.setClassIndex(trainingSet.numAttributes() - 1);
 	        
-	        //System.out.println("UNDERSAMPLING");
+	        System.out.println("UNDERSAMPLING");
 			
 		}
 		else if (sampling.equals("SMOTE")) {
@@ -202,22 +203,22 @@ public class WekaController {
             smote.setOptions(opts);
 
             trainingSet = Filter.useFilter(trainingSet, smote);
-            //System.out.println("SMOTE");
+            System.out.println("SMOTE");
 		}
 		
 		Classifier actualClassifier = new RandomForest();
 		if (classifier.equals("Random Forest")) {
 			actualClassifier = new RandomForest();
-			//System.out.println("RANDOM FOREST");
+			System.out.println("RANDOM FOREST");
 
 		}
 		else if (classifier.equals("NaiveBayes")) {
 			actualClassifier = new NaiveBayes();
-			//System.out.println("NAIVE BAYES");
+			System.out.println("NAIVE BAYES");
 		}
 		else if (classifier.equals("IBK")) {
 			actualClassifier = new IBk();
-			//System.out.println("IBK");		
+			System.out.println("IBK");		
 		}
 		
 		Evaluation eval = new Evaluation(testingSet);
@@ -228,7 +229,7 @@ public class WekaController {
 			// Valutazione delle prestazioni del modello utilizzando il testing set
 			//eval = new Evaluation(testingSet);
 			eval.evaluateModel(actualClassifier, testingSet);
-			//System.out.println("NO COST SENSITIVE");
+			System.out.println("NO COST SENSITIVE");
 		}
 		
 		else if (costSensitive.equals("Sensitive Threshold")) {
@@ -243,7 +244,7 @@ public class WekaController {
 	        // Valutare le prestazioni del modello utilizzando il testing set
 	        eval = new Evaluation(testingSet, costMatrix);
 	        eval.evaluateModel(c1, testingSet);
-	        //System.out.println("SENSITIVE THRESHOLD");
+	        System.out.println("SENSITIVE THRESHOLD");
 
 
 		}
@@ -261,14 +262,15 @@ public class WekaController {
 	        // Valutare le prestazioni del modello utilizzando il testing set
 	        //eval = new Evaluation(testingSet);
 	        eval.evaluateModel(c1, testingSet);
-	        //System.out.println("SENSITIVE LEARNING");
+	        System.out.println("SENSITIVE LEARNING");
 		}
 		
 		double precision = eval.precision(0);
 		double recall = eval.recall(0);
 		double kappa = eval.kappa();
 		double auc = eval.areaUnderROC(0);
-		csv.writeResults(repo, testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc);
+		
+		csv.writeResults(repo, testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc, csvN);
 	} 
 	
 
