@@ -117,7 +117,7 @@ public class ReleaseController {
 	}
 	
 	public List<Commit> retrieveCommitsForClass(Release r, String classN) {
-		List<Commit> listOfCommits = new ArrayList<>();
+		List<Commit> listOfCommits;
 		if (!r.getCommits().isEmpty()) {
 			listOfCommits = r.getCommits(); 
 		}

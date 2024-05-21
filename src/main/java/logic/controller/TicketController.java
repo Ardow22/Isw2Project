@@ -31,9 +31,9 @@ public class TicketController {
 	public List<Ticket> retrieveTicketsID(String projName, List<Release> releaseList) throws IOException, JSONException {
 		   List<Ticket> ticketList = new ArrayList<>();
 		   String releaseDate = "";
-		   String releaseName = "";
+		   //String releaseName = "";
 		   String fixReleaseDate = "";
-		   String fixName = "";
+		   //String fixName = "";
 		   String creationDate = "";
 		   String resolutionDate = "";
 		   Integer j = 0; 
@@ -61,10 +61,10 @@ public class TicketController {
 	             tk.setResolutionDate(resolutionDate);
 	        	 
 	        	 int len1 = issues.getJSONObject(i%1000).getJSONObject(fIELDS).getJSONArray("versions").length();
-	        	 retrieveAffVersion(len1, fields, releaseDate, releaseName, releaseList, affVersList, tk);
+	        	 retrieveAffVersion(len1, fields, releaseDate, releaseList, affVersList, tk);
 	        	 
 	        	 int len2 = issues.getJSONObject(i%1000).getJSONObject(fIELDS).getJSONArray("fixVersions").length();
-	        	 retrieveFixVersion(len2, fields, fixReleaseDate, fixName, releaseList, tk);
+	        	 retrieveFixVersion(len2, fields, fixReleaseDate, releaseList, tk);
 	        	 ticketList.add(tk);
 	          }  
 	       } while (i < total);
@@ -78,8 +78,7 @@ public class TicketController {
 	         return listTicket;
 	 }
 	
-	private void retrieveFixVersion(int len2, JSONObject fields2, String fixReleaseD, String fixN,
-			List<Release> releaseList, Ticket tk) {
+	private void retrieveFixVersion(int len2, JSONObject fields2, String fixReleaseD, List<Release> releaseList, Ticket tk) {
 		if (len2 > 0) {
 			List<Release> fixV = new ArrayList<>();
 			JSONArray fixVersions = fields2.getJSONArray("fixVersions");
@@ -88,7 +87,7 @@ public class TicketController {
 				if (fixVersion.has(stringReleaseDate)) {
 					fixReleaseD = fixVersion.getString(stringReleaseDate);
 				}
-				fixN = fixVersion.getString("name");
+				String fixN = fixVersion.getString("name");
 				checkForFixV(releaseList, fixVersion, fixN, fixReleaseD, tk, len2, fixV);
 			}
 			if (fixV.size() > 1) {
@@ -138,7 +137,7 @@ public class TicketController {
 		}		
 	}
 
-	private void retrieveAffVersion(int len1, JSONObject fields2, String releaseDt, String releaseNm, List<Release> releaseList, List<Release> affVersList, Ticket tk) {
+	private void retrieveAffVersion(int len1, JSONObject fields2, String releaseDt, List<Release> releaseList, List<Release> affVersList, Ticket tk) {
 		if (len1 > 0) {
 			JSONArray versions = fields2.getJSONArray("versions");
 			for (int x = 0; x < versions.length(); x++) {
@@ -146,7 +145,7 @@ public class TicketController {
 				if (version.has(stringReleaseDate)) {
 					releaseDt = version.getString(stringReleaseDate);
 				}
-				releaseNm = version.getString("name");
+				String releaseNm = version.getString("name");
 				checkForAffVersion(releaseList, version, releaseDt, releaseNm, affVersList);
 			}
 		}

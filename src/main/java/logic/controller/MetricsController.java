@@ -338,7 +338,7 @@ public class MetricsController {
 		for (Ticket t: myTicketList) {
 			for (Commit c: t.getCommitsForTicket()) {
 				for (String jName: c.getClassesTouched()) {
-					checkJavaClass(jName, myReleaseList, c.getRelease(), t.getInjectedVersion());	
+					checkJavaClass(jName, myReleaseList, c.getRelease());	
 				}
 			}
 		}
@@ -346,10 +346,9 @@ public class MetricsController {
 	}
 
 
-	private void checkJavaClass(String jName, List<Release> myReleaseList, Release commitRelease, Release iv) {
+	private void checkJavaClass(String jName, List<Release> myReleaseList, Release commitRelease) {
 		for (Release r: myReleaseList) {
 			for (JavaClass jc: r.getJavaClasses()) {
-				//if (jc.getNamePath().equals(jName) && r.getNumberOfRelease() < commitRelease.getNumberOfRelease() && jc.getRelease().getNumberOfRelease() >= iv.getNumberOfRelease()) {
 				if (jc.getNamePath().equals(jName) && r.getNumberOfRelease() < commitRelease.getNumberOfRelease()) {
 					jc.setBuggy(true);
 				}
