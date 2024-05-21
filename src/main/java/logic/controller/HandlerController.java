@@ -40,19 +40,6 @@ public class HandlerController {
 	    //RECUPERO TUTTI I COMMIT DI OGNI RELEASE
 	    System.out.println("Recupero dei commit relativi ad ogni release in corso...");
 	    retrieveCommitForRelease(repository, releaseList, cc);
-	    /*String lastReleaseDate = null;
-	    int iteration = 0;
-	    ReleaseBean rb = new ReleaseBean();
-	    for (Release r: releaseList) {
-	    	r.setCommits(cc.getCommitsForRelease(r, repository, lastReleaseDate, iteration));
-	    	lastReleaseDate = r.getReleaseDate();
-	    	iteration++;
-	    	if (r.getCommits().isEmpty()) {
-	    		r.setFakeCommits(rb.getCommits());
-	    	}
-	    	rb.setCommits(r.getCommits());
-	    	//IL PRIMO ELEMENTO DELLA LISTA DI COMMIT è IL PIù RECENTE, QUINDI L'ULTIMO
-	    }*/
 	    
 	    //RECUPERO TUTTI I TICKET 
 	    System.out.println("Recupero dei ticket relativi ai bug chiusi del progetto in corso...");
@@ -62,58 +49,27 @@ public class HandlerController {
 		//ASSOCIO I COMMIT AD I RELATIVI TICKET
 		System.out.println("Recupero dei commit associati al ticket specifico in corso...");
 		retrieveCommitForTicket(ticketList, tc, releaseList);
-		/*for (Ticket t: ticketList) {
-			t.setCommitsForTicket(tc.searchCommitsForTicket(t, releaseList));	
-		}*/
 		
 		//ELIMINO TUTTI I TICKET CHE NON HANNO COMMIT ASSOCIATI
 		ArrayList<Ticket> myTktList = new ArrayList<>();
 		removeTicketWithoutCommit(ticketList, myTktList);
-		/*for (Ticket t: ticketList) {
-			if (!t.getCommitsForTicket().isEmpty()) {
-				myTktList.add(t);
-			}
-		}*/
 		
 		System.out.println("Calcolo delle Opening Version e delle Injected Version in corso...");
 		calculateOvIv(myTktList, tc, releaseList);
-	    /*for (Ticket t: myTktList) {
-	    	//IL PRIMO AV DEVE ESSERE PRIMA DI OV, QUINDI IV <= OV
-	    	t.setOpeningVersion(tc.calculateOpeningVersion(t, releaseList));
-	    }*/
 	    
 	    //TOLGO TUTTI I TICKET CON VALORI DI FV E OV NON CONGRUI
 	    ArrayList<Ticket> myTktList2 = new ArrayList<>();
 	    removeFvOvIncorrect(myTktList, myTktList2);
-	    /*for (Ticket t: myTktList) {
-	    	if (t.getFixVersion().getNumberOfRelease() >= t.getOpeningVersion().getNumberOfRelease()) {
-	    		myTktList2.add(t);
-	    	}
-	    }*/
 	    
 	    calculateIv(myTktList2, tc, releaseList, rc);
-	    /*for (Ticket t: myTktList2) {
-	    	t.setInjectedVersion(tc.calculateInjectedVersion(t, releaseList, myTktList2, rc));
-	    }*/
-	   
 	    
 	    //CONSIDERO SOLO I TICKET CHE HANNO IV E OV CONGRUI
 	    List<Ticket> myTktList3 = new ArrayList<>();
 	    removeIvOvIncorrect(myTktList3, myTktList2);
-	    /*for (Ticket t: myTktList2) {
-	    	if (t.getInjectedVersion().getNumberOfRelease() < t.getOpeningVersion().getNumberOfRelease()) {
-	    		myTktList3.add(t);
-	    	} 
-	    }*/
 	    
 	    //TOLGO ANCHE I TICKET CHE HANNO INJECTED VERSION E FIX VERSION UGUALI, PERCHé SIGNIFICA CHE IL BUG NON C'è
 	    List<Ticket> myTicketList = new ArrayList<>();
 	    removeEqualIvFv(myTktList3, myTicketList);
-	    /*for (Ticket t: myTktList3) {
-	    	if (t.getInjectedVersion().getNumberOfRelease() != t.getFixVersion().getNumberOfRelease()) {
-	    		myTicketList.add(t);
-	    	} 
-	    }*/
 	    
 	    //ELENCO DEI TICKET RIMASTI
 	    for (Ticket t: myTicketList) {
@@ -130,52 +86,15 @@ public class HandlerController {
 		
 		System.out.println("Recupero di tutte le classi toccate da ogni commit nelle varie release in corso...");
 		retrieveClassesFromCommit(myReleaseList, cc, repository);
-		/*for (Release r: myReleaseList) {
-			System.out.println("\nRelease: "+r.getNameRelease());
-			if (!r.getCommits().isEmpty()) {
-				for (Commit c: r.getCommits()) {
-					boolean isLast = r.getCommits().get(r.getCommits().size() - 1).equals(c);
-					if (isLast) {
-						c.setClassesTouched(cc.getClasses(c.getCommit(), repository));
-					}
-					else {
-						c.setClassesTouched(cc.getModifiedClasses(c.getCommit(), repository));	
-					}
-			    }	
-			}
-			else {
-				for (Commit c2: r.getFakeCommits()) {
-					c2.setClassesTouched(cc.getModifiedClasses(c2.getCommit(), repository));
-				}	
-			}
-		}*/
 		
 		retrieveClassesForTickets(myTicketList, cc, repository);
-		/*for (Ticket tk: myTicketList) {
-			for (Commit c: tk.getCommitsForTicket()) {
-				c.setClassesTouched(cc.getModifiedClasses(c.getCommit(), repository));
-			}
-		}*/
 		
 		System.out.println("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
 		retrieveClassesForRelease(myReleaseList, rc, cc, repository);
-		/*for (Release r: myReleaseList) {
-			r.setLastCommit(rc.retrieveLastCommit(r));
-			List<String> nameClasses = rc.retrieveClassesForRelease2(r, cc, repository);
-			r.setJavaClasses(rc.createClasses(r, nameClasses));
-		}*/
 		
 		System.out.println("Calcolo buggyness e metriche in corso....");
 		mc.calculateBuggyness(myReleaseList, myTicketList);
-		calculateMetrics(myReleaseList, myTicketList, repository, mc);
-		/*for (Release r: myReleaseList) {
-			if (!r.getCommits().isEmpty()) {
-				mc.calculateMetrics(r, myTicketList, repository);
-			}
-			else {
-				mc.setMetrics(r, repository);
-			}
-		}*/	
+		calculateMetrics(myReleaseList, myTicketList, repository, mc);	
 		
 		System.out.println("Creazione del file csv in corso...");
 		csv.createDataset(myReleaseList, repository, logger);

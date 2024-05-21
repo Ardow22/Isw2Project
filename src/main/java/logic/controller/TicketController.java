@@ -62,75 +62,9 @@ public class TicketController {
 	        	 
 	        	 int len1 = issues.getJSONObject(i%1000).getJSONObject(fIELDS).getJSONArray("versions").length();
 	        	 retrieveAffVersion(len1, fields, releaseDate, releaseName, releaseList, affVersList, tk);
-	        	 /*if (len1 > 0) {
-	        		 JSONArray versions = fields.getJSONArray("versions");
-	        		 for (int x = 0; x < versions.length(); x++) {
-	                     JSONObject version = versions.getJSONObject(x);
-	                     if (version.has(stringReleaseDate)) {
-	                    	 releaseDate = version.getString(stringReleaseDate);
-	                     }
-	                     releaseName = version.getString("name");
-	                     for (Release r: releaseList) {
-	                    	 if (version.has(stringReleaseDate)) {
-	                    		 if (r.getReleaseDate().equals(releaseDate) || r.getNameRelease().equals(releaseName)) {
-	                    			 affVersList.add(r);
-	                             }
-	                    	 }
-	                    	 else {
-	                    		 if (r.getNameRelease().equals(releaseName)) {
-	                    			 affVersList.add(r);
-	                    		 }
-	                    	 }
-	                     }
-	        		 }
-	        	 }
-	        	 tk.setAffversions(affVersList);*/
 	        	 
 	        	 int len2 = issues.getJSONObject(i%1000).getJSONObject(fIELDS).getJSONArray("fixVersions").length();
 	        	 retrieveFixVersion(len2, fields, fixReleaseDate, fixName, releaseList, tk);
-	        	 /*if (len2 > 0) {
-	        		 List<Release> fixV = new ArrayList<>();
-	        		 JSONArray fixVersions = fields.getJSONArray("fixVersions");
-	        		 for (int y = 0; y < fixVersions.length(); y++) {
-	        			 JSONObject fixVersion = fixVersions.getJSONObject(y);
-	        			 if (fixVersion.has(stringReleaseDate)) {
-	        				 fixReleaseDate = fixVersion.getString(stringReleaseDate);
-	        			 }
-	        			 fixName = fixVersion.getString("name");
-	        			 for (Release r: releaseList) {
-	        				 if (fixVersion.has(stringReleaseDate)) {
-	                    		 if (r.getReleaseDate().equals(fixReleaseDate) || r.getNameRelease().equals(fixName)) {
-	                    			 if (len2 == 1) {
-	                    				tk.setFixVersion(r); 
-	                    			 }
-	                    			 else {
-	                    				fixV.add(r);
-	                    			 }
-	                             }
-	                    	 }
-	                    	 else {
-	                    		 if (r.getNameRelease().equals(fixName)) {
-	                    			 if (len2 == 1) {
-	                    				 tk.setFixVersion(r); 
-		                    		 }
-		                    		 else {
-		                    			 fixV.add(r);
-		                    		 }
-	                    		 }
-	                    	 } 
-	        			 }
-	        		 }
-	        		 if (fixV.size() > 1) {
-	        			 Release maxFv = new Release();
-		        		 maxFv.setNumberOfRelease(-1);
-		        		 for (Release fv: fixV) {
-		        			 if (fv.getNumberOfRelease() > maxFv.getNumberOfRelease()) {
-		        				 maxFv = fv;
-		        			 }
-		        		 }
-		        		 tk.setFixVersion(maxFv);
-	        		 }
-	        	 }*/
 	        	 ticketList.add(tk);
 	          }  
 	       } while (i < total);
@@ -156,28 +90,6 @@ public class TicketController {
 				}
 				fixN = fixVersion.getString("name");
 				checkForFixV(releaseList, fixVersion, fixN, fixReleaseD, tk, len2, fixV);
-				/*for (Release r: releaseList) {
-					if (fixVersion.has(stringReleaseDate)) {
-						if (r.getReleaseDate().equals(fixReleaseDate) || r.getNameRelease().equals(fixName)) {
-							if (len2 == 1) {
-								tk.setFixVersion(r); 
-							}
-							else {
-								fixV.add(r);
-							}
-						}
-					}
-					else {
-						if (r.getNameRelease().equals(fixName)) {
-							if (len2 == 1) {
-								tk.setFixVersion(r); 
-							}
-							else {
-								fixV.add(r);
-							}
-						}
-					} 
-				}*/
 			}
 			if (fixV.size() > 1) {
 				Release maxFv = new Release();
@@ -197,25 +109,9 @@ public class TicketController {
 		for (Release r: releaseList) {
 			if (fixVersion.has(stringReleaseDate)) {
 				check2FixV(r, fixReleaseDa, fixNa, len2, tk, fixV);
-				/*if (r.getReleaseDate().equals(fixReleaseDa) || r.getNameRelease().equals(fixNa)) {
-					if (len2 == 1) {
-						tk.setFixVersion(r); 
-					}
-					else {
-						fixV.add(r);
-					}
-				}*/
 			}
 			else {
 				check3FixV(r, fixNa, tk, fixV, len2);
-				/*if (r.getNameRelease().equals(fixNa)) {
-					if (len2 == 1) {
-						tk.setFixVersion(r); 
-					}
-					else {
-						fixV.add(r);
-					}
-				}*/
 			} 
 		}	
 	}
@@ -252,18 +148,6 @@ public class TicketController {
 				}
 				releaseNm = version.getString("name");
 				checkForAffVersion(releaseList, version, releaseDt, releaseNm, affVersList);
-				/*for (Release r: releaseList) {
-					if (version.has(stringReleaseDate)) {
-						if (r.getReleaseDate().equals(releaseDate) || r.getNameRelease().equals(releaseName)) {
-							affVersList.add(r);
-						}
-					}
-					else {
-						if (r.getNameRelease().equals(releaseName)) {
-							affVersList.add(r);
-						}
-					}
-				}*/
 			}
 		}
    	  tk.setAffversions(affVersList);
@@ -322,8 +206,7 @@ public class TicketController {
 	
 	public Release calculateInjectedVersion(Ticket ticket, List<Release> releaseList, List<Ticket> ticketList, ReleaseController rc) throws JSONException, IOException, ParseException {
   	  if (!ticket.getAffversions().isEmpty()) {
-  		  //ticket.getAffversions().sort(Comparator.comparing(release -> release.getNumberOfRelease()));
-  		  return ticket.getAffversions().get(0);//nel caso aggiungere codice per verificare quale versione venga prima   
+  		  return ticket.getAffversions().get(0);   
   	  }
   	  else if (ticket.getFixVersion().getNumberOfRelease() == 0) {
   		  return ticket.getFixVersion();
@@ -422,55 +305,25 @@ public class TicketController {
     		Collections.reverse(ticketsList);
     		
     		coldStarCalculateOpeningVersion(ticketsList, releasesList);
-    		/*for (Ticket t: ticketsList) {
-    	    	t.setOpeningVersion(calculateOpeningVersion(t, releasesList));
-    	    }*/
     		
     		//TOLGO TUTTI I TICKET CON VALORI DI FV E OV NON CONGRUI
     		List<Ticket> myTktsList2 = new ArrayList<>();
     		coldStartRemoveFvOvIncorrect(ticketsList, myTktsList2);
-    	    /*for (Ticket t: ticketsList) {
-    	    	if (t.getFixVersion().getNumberOfRelease() >= t.getOpeningVersion().getNumberOfRelease()) {
-    	    		myTktsList2.add(t);
-    	    	}
-    	    }*/
     	    
     	    //I TICKET SENZA AFFECTED VERSION NON CI INTERESSANO
     	    List<Ticket> myTktsList3 = new ArrayList<>();
     	    coldStartRemoveTktWithoutAffVersion(myTktsList2, myTktsList3);
-    	    /*for (Ticket t: myTktsList2) {
-    	    	if (!t.getAffversions().isEmpty()) {
-    	    		myTktsList3.add(t);
-    	    	}
-    	    }
-    	    
-    	    for (Ticket t: myTktsList3) {
-    	    	t.setInjectedVersion(coldStartInjectedVersion(t));
-    	    }*/
     	    
     	    //CONSIDERO SOLO I TICKET CHE HANNO IV E OV CONGRUI
     	    List<Ticket> myTktsList4 = new ArrayList<>();
     	    coldStartIvOvCorrect(myTktsList4, myTktsList3);
-    	    /*for (Ticket t: myTktsList3) {
-    	    	if (t.getInjectedVersion().getNumberOfRelease() < t.getOpeningVersion().getNumberOfRelease()) {
-    	    		myTktsList4.add(t);
-    	    	} 
-    	    }*/
     	    
     	    //TOLGO ANCHE I TICKET CHE HANNO INJECTED VERSION E FIX VERSION UGUALI, PERCHé SIGNIFICA CHE IL BUG NON C'è
     	    List<Ticket> myTktsList5 = new ArrayList<>();
     	    coldStartRemoveEqualIvFv(myTktsList5, myTktsList4);
-    	    /*for (Ticket t: myTktsList4) {
-    	    	if (t.getInjectedVersion().getNumberOfRelease() != t.getFixVersion().getNumberOfRelease()) {
-    	    		myTktsList5.add(t);
-    	    	} 
-    	    }*/
     	    
     	    //AGGIUNGO I TICKET RIMASTI AI TICKET FINALI
     	    coldStartAddAllTickets(myTktsList5, allTickets);
-    	    /*for (Ticket t: myTktsList5) {
-    	    	allTickets.add(t);
-    	    } */
     	}
     	
     	//PRENDO SOLO I TICKET FINO ALLA DATA CHE MI INTERESSA
@@ -538,21 +391,6 @@ public class TicketController {
 	public Release coldStartInjectedVersion(Ticket ticket) {//DA CONTROLLARE, A ME SERVONO SOLO I TICKET CHE GIà HANNO LE AFFECTED VERSION
     	if (!ticket.getAffversions().isEmpty()) {
     		final SimpleDateFormat sdf = new SimpleDateFormat(fORMAT);
-            /*Comparator<Release> comparator = new Comparator<Release>() {
-                @Override
-                public int compare(Release release1, Release release2) {
-                    try {
-                        // Converti le date in oggetti Date
-                        Date date1 = sdf.parse(release1.getReleaseDate());
-                        Date date2 = sdf.parse(release2.getReleaseDate());
-                        // Confronta le date
-                        return date2.compareTo(date1);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                        return 0;
-                    }
-                }
-            };*/
     		Comparator<Release> comparator = (release1, release2) -> {
     		    try {
     		        // Converti le date in oggetti Date
