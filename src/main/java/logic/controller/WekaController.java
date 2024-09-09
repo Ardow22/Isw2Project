@@ -89,10 +89,10 @@ public class WekaController {
 				parameters.add(param);
 			}
 		}
-		execute(trainingSetANDtestingSet, parameters, repo, csv, testSet, logger, csvName);
+		execute(trainingSetANDtestingSet, parameters, csv, testSet, logger, csvName);
 	}
 	
-	public void execute(List<Instances> trainingAndTesting, List<String> param, String repo, CSVController csv, Release testingRelease, Logger logger, String csvN) throws Exception {
+	public void execute(List<Instances> trainingAndTesting, List<String> param, CSVController csv, Release testingRelease, Logger logger, String csvN) throws Exception {
 		String feature = param.get(0); 
 		String sampling = param.get(1);
 		String costSensitive = param.get(2);
