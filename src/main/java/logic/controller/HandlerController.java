@@ -32,9 +32,7 @@ public class HandlerController {
 		CSVController csv = new CSVController();
 		WekaController wc = new WekaController();
 		List<Release> releaseList = ReleaseController.listRelease(repository.toUpperCase());
-	    rc.setNumberReleases(releaseList);
-	    for (int i = 0; i < releaseList.size(); i++)
-			 System.out.println("RELEASE NUMBER: "+ releaseList.get(i).getNumberOfRelease() +" = "+"RELEASE NAME: "+releaseList.get(i).getNameRelease() + " RELEASE DATE: "+releaseList.get(i).getReleaseDate()+ " RELEASE ID: "+releaseList.get(i).getIdRelease()); 	 	
+	    rc.setNumberReleases(releaseList);	 	
 	  
 	   
 	    //RECUPERO TUTTI I COMMIT DI OGNI RELEASE
