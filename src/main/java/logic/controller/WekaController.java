@@ -270,7 +270,7 @@ public class WekaController {
 		double kappa = eval.kappa();
 		double auc = eval.areaUnderROC(0);
 		
-		csv.writeResults(repo, testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc, csvN);
+		csv.writeResults(testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc, csvN);
 	} 
 	
 
