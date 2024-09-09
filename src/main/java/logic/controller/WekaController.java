@@ -31,9 +31,13 @@ import weka.core.Instance;
 
 public class WekaController {
 	
-	protected static final List<String> FeatureSelection = new ArrayList<>(Arrays.asList("No selection", "Backward Search", "Forward Search", "Bidirectional"));
+	/*protected static final List<String> FeatureSelection = new ArrayList<>(Arrays.asList("No selection", "Backward Search", "Forward Search", "Bidirectional"));
 	protected static final List<String> Sampling = new ArrayList<>(Arrays.asList("No sampling", "Oversampling", "Undersampling", "SMOTE"));
-	protected static final List<String> CostSensitive = new ArrayList<>(Arrays.asList("No cost sensitive", "Sensitive Threshold", "Sensitive Learning"));
+	protected static final List<String> CostSensitive = new ArrayList<>(Arrays.asList("No cost sensitive", "Sensitive Threshold", "Sensitive Learning"));*/
+	protected static final List<String> Configuration_first = new ArrayList<>(Arrays.asList("No selection", "No sampling", "No cost sensitive"));
+	protected static final List<String> Configuration_second = new ArrayList<>(Arrays.asList("Forward Search", "No sampling", "No cost sensitive"));
+	protected static final List<String> Configuration_third = new ArrayList<>(Arrays.asList("Forward Search", "SMOTE", "No cost sensitive"));
+	protected static final List<String> Configuration_fourth = new ArrayList<>(Arrays.asList("Forward Search", "No sampling", "Sensitive Threshold"));
 	protected static final List<String> Classifiers = new ArrayList<>(Arrays.asList("Random Forest", "NaiveBayes", "IBK"));
 	protected static final List<String> Accuracy = new ArrayList<>(Arrays.asList("Precision", "Recall", "AUC", "Kappa"));
 
@@ -53,30 +57,203 @@ public class WekaController {
 					System.out.println("NUMERO RELEASE "+re.getNumberOfRelease());
 				}
 				System.out.println("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
-				
-				startWalkForward(trainingSetANDtestingSet, repo, csv, testingSet.get(0), logger, csvF);
-				/*for (String feature: FeatureSelection) {
-			    	for (String sampling: Sampling) {
-			    		for (String costSensitive: CostSensitive) {
-			    			for (String classifier: Classifiers) {
-			    				parameters.add(feature);
-			    				parameters.add(sampling);
-			    				parameters.add(costSensitive);
-			    				parameters.add(classifier);
-			    				execute(trainingSetANDtestingSet, parameters, repo, csv, testingSet.get(0), logger);
-			    				System.out.println("\n\n");
-			    			}
-			    		}
-			    	}
-			    }*/
+				int configuration = 1;
+				for (configuration = 1; configuration < 5; configuration++) {
+					startWalkForward(trainingSetANDtestingSet, repo, csv, testingSet.get(0), logger, csvF, configuration);
+				}
 				System.out.println("\n\n");
 			}
 		}
 	}
 	
-	
-	
 	private void startWalkForward(List<Instances> trainingSetANDtestingSet, String repo,
+			CSVController csv, Release testSet, Logger logger, String csvName, int conf) throws Exception {
+		List<String> parameters = new ArrayList<>();
+		if (conf == 1) {
+			for (String param: Configuration_first) {
+				parameters.add(param);
+			}
+		}
+		else if (conf == 2) {
+			for (String param: Configuration_second) {
+				parameters.add(param);
+			}
+		}
+		else if (conf == 3) {
+			for (String param: Configuration_third) {
+				parameters.add(param);
+			}
+		}
+		else {
+			for (String param: Configuration_fourth) {
+				parameters.add(param);
+			}
+		}
+		execute(trainingSetANDtestingSet, parameters, repo, csv, testSet, logger, csvName);
+	}
+	
+	public void execute(List<Instances> trainingAndTesting, List<String> param, String repo, CSVController csv, Release testingRelease, Logger logger, String csvN) throws Exception {
+		String feature = param.get(0); 
+		String sampling = param.get(1);
+		String costSensitive = param.get(2);
+		//String classifier = param.get(3);
+		System.out.println("EXECUTE CON TESTING: "+testingRelease.getNumberOfRelease());
+		Instances trainingSet = trainingAndTesting.get(0);
+		trainingSet.setClassIndex(trainingSet.numAttributes() - 1);
+		Instances testingSet = trainingAndTesting.get(1);
+		testingSet.setClassIndex(testingSet.numAttributes() - 1);
+
+		if (feature.equals("No selection")) {
+			System.out.println("FEATURE NO SELECTION");
+		}
+		else {
+			// Crea un oggetto CfsSubsetEval (valutatore)
+			AttributeSelection attsel = new AttributeSelection();
+            CfsSubsetEval eval = new CfsSubsetEval();
+            BestFirst search = new BestFirst();
+
+            String[] evalOptions = {"-P", "1", "-E", "1"};
+            eval.setOptions(evalOptions);
+
+            String[] searchOptions = {"-D", "1", "-N", "5"};
+            search.setOptions(searchOptions);
+
+            attsel.setEvaluator(eval);
+            attsel.setSearch(search);
+            attsel.setInputFormat(trainingSet);
+
+
+            // Applica il filtro al dataset
+            Instances filteredData = Filter.useFilter(trainingSet, attsel);
+            trainingSet = filteredData;
+            trainingSet.setClassIndex(trainingSet.numAttributes() - 1);
+
+            // Applicazione del filtro al set di test
+            Instances filteredTestingData = Filter.useFilter(testingSet, attsel);
+            testingSet = filteredTestingData;
+            // Impostazione dell'indice dell'attributo di classe per il set di test
+            testingSet.setClassIndex(filteredTestingData.numAttributes() - 1);
+            System.out.println("BEST FIRST");
+			
+		}
+		
+		Instances minorityClassInstances = new Instances(trainingSet, 0);
+        Instances majorityClassInstances = new Instances(trainingSet, 0);
+        for (Instance instance : trainingSet) {
+            if (instance.stringValue(trainingSet.numAttributes()-1).equals("yes")) {
+                minorityClassInstances.add(instance);
+            } else {
+                majorityClassInstances.add(instance);
+            }
+        }
+
+        // Calculate the oversampling ratio
+        int minoritySize = minorityClassInstances.size();
+        int majoritySize = majorityClassInstances.size();
+        double oversamplingRatio = (double) majoritySize / minoritySize;
+		
+		if (sampling.equals("No sampling")) {
+			System.out.println("NO SAMPLING");
+		}
+		else if (sampling.equals("Oversampling")) {
+            Resample resampleFilter = new Resample();
+            resampleFilter.setSampleSizePercent(oversamplingRatio*100);
+            resampleFilter.setBiasToUniformClass(1.0);
+
+            // Oversample the minority class
+            resampleFilter.setInputFormat(minorityClassInstances);
+            Instances oversampledMinorityInstances = Filter.useFilter(minorityClassInstances, resampleFilter);
+
+            //Combina la minoranza delle istanze (maggiorata) con la maggioranza delle istanze
+            Instances oversampledData = new Instances(trainingSet, 0);
+            oversampledData.addAll(majorityClassInstances);
+            oversampledData.addAll(oversampledMinorityInstances);
+
+            trainingSet = oversampledData;
+            System.out.println("OVERSAMPLING");
+		}
+		else if (sampling.equals("Undersampling")) {
+	        Filter samplingFilter = new SpreadSubsample();
+	        String[] options = new String[]{"-M", "1.0"};
+	        samplingFilter.setOptions(options);
+	        samplingFilter.setInputFormat(trainingSet);
+	        Instances undersampledData = Filter.useFilter(trainingSet, samplingFilter);
+	        trainingSet = undersampledData;
+	        trainingSet.setClassIndex(trainingSet.numAttributes() - 1);
+	        
+	        System.out.println("UNDERSAMPLING");
+			
+		}
+		else if (sampling.equals("SMOTE")) {
+			SMOTE smote = new SMOTE();
+            smote.setInputFormat(trainingSet);
+
+            //creazione di gruppi della stessa dimensione
+            String percentageToCreate = "0";
+            if(minoritySize !=0)
+                percentageToCreate= String.valueOf((majoritySize-minoritySize)/(double)minoritySize*100.0);
+
+            String[] opts = new String[]{ "-P", percentageToCreate};
+            smote.setOptions(opts);
+
+            trainingSet = Filter.useFilter(trainingSet, smote);
+            System.out.println("SMOTE");
+		}
+		
+		Classifier actualClassifier = new RandomForest();
+		for (String classifier: Classifiers) {
+			if (classifier.equals("Random Forest")) {
+				actualClassifier = new RandomForest();
+				System.out.println("RANDOM FOREST");
+			}
+			else if (classifier.equals("NaiveBayes")) {
+				actualClassifier = new NaiveBayes();
+				System.out.println("NAIVE BAYES");
+			}
+			else if (classifier.equals("IBK")) {
+				actualClassifier = new IBk();
+				System.out.println("IBK");		
+			}
+
+
+			Evaluation eval = new Evaluation(testingSet);
+
+			if (costSensitive.equals("No cost sensitive")) {			
+				// Addestrare il modello utilizzando il training set
+				actualClassifier.buildClassifier(trainingSet);
+				// Valutazione delle prestazioni del modello utilizzando il testing set
+				//eval = new Evaluation(testingSet);
+				eval.evaluateModel(actualClassifier, testingSet);
+				System.out.println("NO COST SENSITIVE");
+			}
+
+			else if (costSensitive.equals("Sensitive Threshold")) {
+				// Creare la matrice dei costi
+				CostMatrix costMatrix = createCostMatrix(1.0, 1.0);	
+				// Creare un CostSensitiveClassifier con Sensitive Threshold
+				CostSensitiveClassifier c1 = new CostSensitiveClassifier();
+				c1.setClassifier(actualClassifier); // Impostare il classificatore base
+				c1.setCostMatrix(costMatrix); // Impostare la matrice dei costi
+				// Addestrare il modello utilizzando il training set
+				c1.buildClassifier(trainingSet);
+				// Valutare le prestazioni del modello utilizzando il testing set
+				eval = new Evaluation(testingSet, costMatrix);
+				eval.evaluateModel(c1, testingSet);
+				System.out.println("SENSITIVE THRESHOLD");
+			}
+
+			//actualClassifier.distributionForInstance(testingSet);
+			double precision = eval.precision(0);
+			double recall = eval.recall(0);
+			double kappa = eval.kappa();
+			double auc = eval.areaUnderROC(0);
+
+			//csv.writeResults(repo, testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc, csvN);
+			csv.writeResults(testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc, csvN);
+		}
+	}
+
+	/*private void startWalkForward(List<Instances> trainingSetANDtestingSet, String repo,
 			CSVController csv, Release testSet, Logger logger, String csvName) throws Exception {
 		for (String feature: FeatureSelection) {
 	    	for (String sampling: Sampling) {
@@ -265,13 +442,14 @@ public class WekaController {
 	        System.out.println("SENSITIVE LEARNING");
 		}
 		
+		//actualClassifier.distributionForInstance(testingSet);
 		double precision = eval.precision(0);
 		double recall = eval.recall(0);
 		double kappa = eval.kappa();
 		double auc = eval.areaUnderROC(0);
 		
-		csv.writeResults(testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc, csvN);
-	} 
+		csv.writeResults(repo, testingRelease.getNumberOfRelease(), classifier, precision, recall, kappa, auc, csvN);
+	} */
 	
 
 	private List<Instances> retrieveDataSet(List<String> arffFiles) throws IOException {
