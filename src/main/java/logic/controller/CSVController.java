@@ -79,7 +79,7 @@ public class CSVController {
 		try (FileWriter fileWriter = new FileWriter(outname)) {
 
 			//Name of CSV for output
-			fileWriter.append("Dataset, #TestingRelease, Classifier, Precision, Recall, AUC, Kappa");
+			fileWriter.append("#TestingRelease, Classifier, Precision, Recall, AUC, Kappa");
 			fileWriter.append("\n");
 		} catch (IOException e) {
 			System.out.println(alert1);
@@ -110,12 +110,12 @@ public class CSVController {
 		}
 	}*/
 	
-	public void writeResults(String repo, int nRelease, String classifier, double precision, double recall, double kappa, double auc, String name) {
+	public void writeResults(int nRelease, String classifier, double precision, double recall, double kappa, double auc, String name) {
 
 		try (FileWriter fileWriter = new FileWriter(name, true)) {
 		    // Scrive i dati
 		    //fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f \n", repo, nRelease, classifier, precision, recall, kappa, auc));
-		    fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f%n", repo, nRelease, classifier, precision, recall, kappa, auc));
+		    fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f%n", nRelease, classifier, precision, recall, kappa, auc));
 		} catch (IOException e) {
 		    System.out.println(alert1);
 		    e.printStackTrace();
