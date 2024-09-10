@@ -60,48 +60,38 @@ public class MetricsController {
 					//1 CALCOLO NUMERO DI AUTORI [Nauth]
 					List<String> totAuth = calculateAuthors(jClass);
 					jClass.setAuthors(totAuth);
-					System.out.println("AUTORI: "+jClass.getAuthors());
 
 					//2 CALCOLO LOC DELL'ULTIMO COMMIT DELLA RELEASE [SIZE(LOC)]
 					//3 CALCOLO LINEE DI COMMENTI DELL'ULTIMO COMMIT
 					List<Integer> lines = countInClass(jClass, lastCommit, repos);
 					jClass.setLOC(lines.get(0));
 					jClass.setLinesOfComments(lines.get(1));
-					System.out.println("LOC: "+jClass.getLOC());
-					System.out.println("COMMENTS: "+jClass.getLinesOfComments());
 
 					//4 CALCOLO NUMERO DI COMMIT CONTENENTE LA CLASSE [NR]
 					nR = countCommits(jClass);
 					jClass.setNumberOfCommits(nR);
-					System.out.println("NR: "+jClass.getNumberOfCommits());
 
 					//5 CALCOLO NUMERO DI COMMIT FIXANTI IN CUI COMPARE LA CLASSE [Nfix]
 					nFix = countFixCommits(myTicketList, jClass);
 					jClass.setNumberOfFixDefects(nFix);
-					System.out.println("nFIX: "+jClass.getNumberOfFixDefects());
 
 					//6 CALCOLO ETà DELLA RELEASE [AGE OF RELEASE]
 					release.setAgeOfRelease(calculateAgeOfRelease(release));
-					System.out.println("Age: "+release.getAgeOfRelease());
 
 					//7 CALCOLO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE (PRENDI ULTIMO COMMIT) [CHANGE SET SIZE]
 					changeSetSize = countFiles(lastCommit);
 					jClass.setChangeSetSize(changeSetSize);
-					System.out.println("ChangeSetSize: "+jClass.getChangeSetSize());
 
 					//8 CALCOLO MASSIMO NUMERO DI FILE COMMITTED INSIEME ALLA CLASSE [MAX CHANGE SET]
 					maxChangeSetSize = maxCountFiles(jClass);
 					jClass.setMaxChangeSetSize(maxChangeSetSize);
-					System.out.println("max ChangeSetSize: "+jClass.getMaxChangeSetSize());
 
 					//9 CALCOLO NUMERO DI LOC AGGIUNTE
 					List<Integer> locAddedAndMax = countLocAddedAndMax(jClass, repos);
 					jClass.setlOCadded(locAddedAndMax.get(0));
-					System.out.println("ADDED LOC: "+jClass.getlOCadded());
 
 					//10 CALCOLO MASSIMO NUMERO DI LOC AGGIUNTE
 					jClass.setMaxLocAdded(locAddedAndMax.get(1));
-					System.out.println("MAX ADDED LOC: "+jClass.getMaxLocAdded());
 				}
 			}
 		}

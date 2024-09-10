@@ -41,11 +41,6 @@ public class WekaController {
 			    List<String> arffFiles = createFileArff(trainingSet, testingSet, csv, logger);
 				List<Instances> trainingSetANDtestingSet = retrieveDataSet(arffFiles);
 				
-				logger.info("TRAINING SET: ");
-				for (Release re: trainingSet) {
-					System.out.println("NUMERO RELEASE "+re.getNumberOfRelease());
-				}
-				logger.info("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
 				startWalkForward(trainingSetANDtestingSet, repo, csv, testingSet.get(0), logger, csvF, csvAcume);
 			}
 		}

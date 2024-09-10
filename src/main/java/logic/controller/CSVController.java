@@ -15,10 +15,12 @@ public class CSVController {
 	
 	String alert1 = "Error in csv writer";
 	String alert2 = "Error while flushing/closing fileWriter !!!";
+	String openjpa = "openjpa";
+	String bookkeeper = "bookkeeper";
 	
 	public String createDataset(List<Release> releaseList, String projName, Logger logger) {
 		 String outname = "";
-		 if (projName.equals("bookkeeper") || projName.equals("openjpa")) {
+		 if (projName.equals(bookkeeper) || projName.equals(openjpa)) {
 	            outname = projName + "Buggy.csv";
 	     }
 		    try (FileWriter fileWriter = new FileWriter(outname)) {
@@ -76,7 +78,7 @@ public class CSVController {
 	}
 	
 	public String createCsv(String repo) {
-		String outname = repo.equals("bookkeeper") || repo.equals("openjpa") ? repo + "MachineLearning.csv" : "";
+		String outname = repo.equals(bookkeeper) || repo.equals(openjpa) ? repo + "MachineLearning.csv" : "";
 		try (FileWriter fileWriter = new FileWriter(outname)) {
 
 			//Name of CSV for output
@@ -89,7 +91,7 @@ public class CSVController {
 	}
 	
 	public String createAcumeCsv(String repo) {
-		String outname = repo.equals("bookkeeper") || repo.equals("openjpa") ? repo + "Acume.csv" : "";
+		String outname = repo.equals(bookkeeper) || repo.equals(openjpa) ? repo + "Acume.csv" : "";
 		try (FileWriter fileWriter = new FileWriter(outname)) {
 
 			//Name of CSV for output
@@ -107,9 +109,6 @@ public class CSVController {
         	act = "Yes";
         }
 		try (FileWriter fileWriter = new FileWriter(name, true)) {
-		    // Scrive i dati
-		    //fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f \n", repo, nRelease, classifier, precision, recall, kappa, auc));
-		    //fileWriter.append(String.format("%d,%s,%.6f,%.6f,%.6f,%.6f%n", nRelease, classifier, precision, recall, kappa, auc));
 			String formatted = String.format(Locale.US, "%d,%.6f,%.6f,%s%n", id, size, prediction, act);
 			fileWriter.append(formatted);
 		} catch (IOException e) {

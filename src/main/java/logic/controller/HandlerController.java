@@ -22,7 +22,7 @@ public class HandlerController {
 	private static final Logger logger = LoggerFactory.getLogger(HandlerController.class);
 	
 	public void startAnalysis(String repository) throws Exception {
-		System.out.println("Analisi del progetto "+ repository);
+		logger.info("Analisi del progetto "+ repository);
 		
 		//RECUPERO LA LISTA DELLE RELEASE
 		ReleaseController rc = new ReleaseController();
@@ -70,14 +70,6 @@ public class HandlerController {
 	    List<Ticket> myTicketList = new ArrayList<>();
 	    removeEqualIvFv(myTktList3, myTicketList);
 	    
-	    //ELENCO DEI TICKET RIMASTI
-	    for (Ticket t: myTicketList) {
-	    	System.out.println("Ticket: "+t.getKey());
-	    	System.out.println("IV: "+t.getInjectedVersion().getNumberOfRelease());
-	    	System.out.println("OV: "+t.getOpeningVersion().getNumberOfRelease());
-	    	System.out.println("FV: "+t.getFixVersion().getNumberOfRelease());
-	    	System.out.println("\n"); 	
-	    }
 	    
 	    //CONSIDERO SOLO LA PRIMA METà DELLE RELEASE
 	    int halfSize = releaseList.size() / 2;

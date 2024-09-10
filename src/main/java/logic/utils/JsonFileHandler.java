@@ -29,8 +29,7 @@ public class JsonFileHandler {
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)); 
 			String jsonText = readAll(rd); 
 			return new JSONObject(jsonText); 
-		} catch (Exception e) { 
-			System.out.println("Errore nella lettura del file json da url"); 
+		} catch (Exception e) {  
 			e.printStackTrace(); 
 	        return null; 
 	    }
@@ -62,8 +61,7 @@ public class JsonFileHandler {
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)); 
 			String jsonText = readAll(rd); 
 			return new JSONArray(jsonText); 
-		} catch (Exception e) { 
-			System.out.println("Errore nella lettura del file json da url: "+e.getMessage()); 
+		} catch (Exception e) {  
 			e.printStackTrace(); 
 	        return null; 
 	    }
