@@ -162,7 +162,6 @@ public class HandlerController {
 	
 	public void retrieveClassesFromCommit(List<Release> myReleaseList, CommitController cc, String repository) throws JSONException, IOException {
 		for (Release r: myReleaseList) {
-			System.out.println("\nRelease: "+r.getNameRelease());
 			if (!r.getCommits().isEmpty()) {
 				for (Commit c: r.getCommits()) {
 					boolean isLast = r.getCommits().get(r.getCommits().size() - 1).equals(c);
@@ -200,7 +199,6 @@ public class HandlerController {
 	
 	public void calculateMetrics(List<Release> myReleaseList, List<Ticket> myTicketList, String repository, MetricsController mc) throws JSONException, IOException {
 		for (Release r: myReleaseList) {
-			System.out.println("\n\nRELEASE "+r.getNameRelease());
 			if (!r.getCommits().isEmpty()) {
 				mc.calculateMetrics(r, myTicketList, repository);
 			}
