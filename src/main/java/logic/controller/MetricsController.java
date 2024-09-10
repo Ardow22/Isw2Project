@@ -56,7 +56,7 @@ public class MetricsController {
 		try (Repository repos = new FileRepository(new File(getFpath() + repo + sUFFIX1 + sUFFIX2))) {
 			try (Git git = new Git(repos); RevWalk walk = new RevWalk(repos)) {
 				for (JavaClass jClass: release.getJavaClasses()) {			
-					System.out.println("\n");
+					
 					//1 CALCOLO NUMERO DI AUTORI [Nauth]
 					List<String> totAuth = calculateAuthors(jClass);
 					jClass.setAuthors(totAuth);
