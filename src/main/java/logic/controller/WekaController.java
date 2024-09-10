@@ -3,12 +3,12 @@ package logic.controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
 
 import logic.model.entity.Release;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ArffSaver;
@@ -24,26 +24,14 @@ import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.lazy.IBk;
 import weka.classifiers.meta.CostSensitiveClassifier;
 import weka.classifiers.meta.FilteredClassifier;
-import weka.filters.supervised.instance.Resample;
-import weka.filters.supervised.instance.SMOTE;
 import weka.filters.supervised.instance.SpreadSubsample;
 import weka.filters.Filter;
-import weka.core.Instance;
 
 public class WekaController {
-	
-	/*protected static final List<String> FeatureSelection = new ArrayList<>(Arrays.asList("No selection", "Backward Search", "Forward Search", "Bidirectional"));
-	protected static final List<String> Sampling = new ArrayList<>(Arrays.asList("No sampling", "Oversampling", "Undersampling", "SMOTE"));
-	protected static final List<String> CostSensitive = new ArrayList<>(Arrays.asList("No cost sensitive", "Sensitive Threshold", "Sensitive Learning"));*/
-	protected static final List<String> Configuration_first = new ArrayList<>(Arrays.asList("No selection", "No sampling", "No cost sensitive"));
-	protected static final List<String> Configuration_second = new ArrayList<>(Arrays.asList("Forward Search", "No sampling", "No cost sensitive"));
-	protected static final List<String> Configuration_third = new ArrayList<>(Arrays.asList("Forward Search", "OverSampling", "No cost sensitive"));
-	protected static final List<String> Configuration_fourth = new ArrayList<>(Arrays.asList("Forward Search", "No sampling", "Sensitive Threshold"));
-	protected static final List<String> Classifiers = new ArrayList<>(Arrays.asList("Random Forest", "NaiveBayes", "IBK"));
-	protected static final List<String> Accuracy = new ArrayList<>(Arrays.asList("Precision", "Recall", "AUC", "Kappa"));
 
 	public void walkForward(List<Release> myReleaseList, String repo, CSVController csv, Logger logger) throws Exception {
 		String csvF = csv.createCsv(repo);
+		String csvAcume = csv.createAcumeCsv(repo);
 		for (Release r: myReleaseList) {
 			if (r.getNumberOfRelease() > 0) { //la prima release la consideriamo solo come training
 				
@@ -53,25 +41,18 @@ public class WekaController {
 			    List<String> arffFiles = createFileArff(trainingSet, testingSet, csv, logger);
 				List<Instances> trainingSetANDtestingSet = retrieveDataSet(arffFiles);
 				
-				System.out.println("TRAINING SET: ");
+				logger.info("TRAINING SET: ");
 				for (Release re: trainingSet) {
 					System.out.println("NUMERO RELEASE "+re.getNumberOfRelease());
 				}
-				System.out.println("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
-				int configuration = 1;
-				startWalkForward(trainingSetANDtestingSet, repo, csv, testingSet.get(0), logger, csvF, configuration);
-				/*int configuration = 1;
-				for (configuration = 1; configuration < 5; configuration++) {
-					startWalkForward(trainingSetANDtestingSet, repo, csv, testingSet.get(0), logger, csvF, configuration);
-				}*/
-				System.out.println("\n\n");
+				logger.info("TESTING SET: "+testingSet.get(0).getNumberOfRelease());
+				startWalkForward(trainingSetANDtestingSet, repo, csv, testingSet.get(0), logger, csvF, csvAcume);
 			}
 		}
 	}
 	
 	private void startWalkForward(List<Instances> trainingAndTesting, String repo,
-			CSVController csv, Release testingRelease, Logger logger, String csvName, int conf) throws Exception {
-		System.out.println("EXECUTE CON TESTING: "+testingRelease.getNumberOfRelease());
+			CSVController csv, Release testingRelease, Logger logger, String csvName, String csvAcume) throws Exception {
 		double precision = 0.0;
 		double recall = 0.0;
 		double kappa = 0.0;
@@ -92,6 +73,7 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(trainingSet, testingSet, rf, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "Random Forest", precision, recall, kappa, auc, csvName);
 		
 		NaiveBayes nb = new NaiveBayes();
@@ -101,6 +83,7 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(trainingSet, testingSet, nb, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "Naive Bayes", precision, recall, kappa, auc, csvName);
 		
 		IBk iBk = new IBk();
@@ -110,6 +93,7 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(trainingSet, testingSet, iBk, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "IBK", precision, recall, kappa, auc, csvName);
 		
 		/*CONFIGURAZIONE 2 */
@@ -131,7 +115,6 @@ public class WekaController {
         Instances filteredTestingData = Filter.useFilter(testingSet, attsel);
         // Impostazione dell'indice dell'attributo di classe per il set di test
         filteredTestingData.setClassIndex(filteredTestingData.numAttributes() - 1);
-        System.out.println("BEST FIRST BIDIRECTIONAL");
         
         eval = new Evaluation(filteredTrainingData);
         
@@ -142,6 +125,7 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(filteredTrainingData, filteredTestingData, rf, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "Random Forest", precision, recall, kappa, auc, csvName);
 		
 		nb = new NaiveBayes();
@@ -151,6 +135,7 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(filteredTrainingData, filteredTestingData, nb, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "Naive Bayes", precision, recall, kappa, auc, csvName);
 		
 		iBk = new IBk();
@@ -160,11 +145,14 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(filteredTrainingData, filteredTestingData, iBk, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "IBK", precision, recall, kappa, auc, csvName);
 		
 		/*Configurazione 3*/
 		Filter samplingFilter = new SpreadSubsample();
         String[] options = new String[]{"-M", "1.0"};
+        samplingFilter.setOptions(options);
+        samplingFilter.setInputFormat(trainingSet);
         FilteredClassifier filteredClassifier = new FilteredClassifier();
         filteredClassifier.setFilter(samplingFilter);
         
@@ -178,6 +166,7 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(filteredTrainingData, filteredTestingData, rf, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "Random Forest", precision, recall, kappa, auc, csvName);
 		
 		nb = new NaiveBayes();
@@ -188,6 +177,7 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(filteredTrainingData, filteredTestingData, nb, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "Naive Bayes", precision, recall, kappa, auc, csvName);
 		
 		iBk = new IBk();
@@ -198,6 +188,7 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(filteredTrainingData, filteredTestingData, iBk, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "IBK", precision, recall, kappa, auc, csvName);
 		
 		/*Configurazione 4*/
@@ -213,6 +204,7 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(filteredTrainingData, filteredTestingData, rf, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "Random Forest", precision, recall, kappa, auc, csvName);
 		
 		nb = new NaiveBayes();
@@ -224,6 +216,7 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(filteredTrainingData, filteredTestingData, nb, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "Naive Bayes", precision, recall, kappa, auc, csvName);
 		
 		iBk = new IBk();
@@ -235,9 +228,37 @@ public class WekaController {
 		recall = eval.recall(0);
 		kappa = eval.kappa();
 		auc = eval.areaUnderROC(0);
+		calculateNpofB(filteredTrainingData, filteredTestingData, iBk, csv, csvAcume);
 		csv.writeResults(testingRelease.getNumberOfRelease(), "IBK", precision, recall, kappa, auc, csvName);
 		
 		
+	}
+	
+	private static double getPrediction(Instance instance, Classifier classifier) throws Exception {
+		double[] predDist = classifier.distributionForInstance(instance);
+		for(int i=0;i<predDist.length;i++){
+            if (instance.classAttribute().value(i).equals("Yes")){
+                return predDist[i];
+            }
+        }
+		return 0.0;
+	}
+	
+	private void calculateNpofB(Instances training, Instances testing, Classifier actualClassifier, CSVController csv, String acumeFile) throws Exception {
+		int numtesting = testing.numInstances();
+		
+		int lastAttrIndex = testing.numAttributes()-1;
+	    
+	    actualClassifier.buildClassifier(training);
+	    
+	    // Loop over each test instance.
+	    for (int i = 0; i < numtesting; i++) {
+	    	int id = i;
+	    	double size = testing.get(i).value(0);
+	    	double prediction = getPrediction(testing.get(i), actualClassifier);
+	    	boolean actual = testing.get(i).toString(lastAttrIndex).equals("Yes");
+	    	csv.writeAcumeFile(id, size, prediction, actual, acumeFile);
+	    	}
 	}
 	
 	private List<Instances> retrieveDataSet(List<String> arffFiles) throws IOException {
@@ -313,4 +334,5 @@ public class WekaController {
  }
 
 
+	
 	

@@ -32,27 +32,28 @@ public class HandlerController {
 		CSVController csv = new CSVController();
 		WekaController wc = new WekaController();
 		List<Release> releaseList = ReleaseController.listRelease(repository.toUpperCase());
-	    rc.setNumberReleases(releaseList);	 	
+	    rc.setNumberReleases(releaseList);
+	    
 	  
 	   
 	    //RECUPERO TUTTI I COMMIT DI OGNI RELEASE
-	    System.out.println("Recupero dei commit relativi ad ogni release in corso...");
+	    logger.info("Recupero dei commit relativi ad ogni release in corso...");
 	    retrieveCommitForRelease(repository, releaseList, cc);
 	    
 	    //RECUPERO TUTTI I TICKET 
-	    System.out.println("Recupero dei ticket relativi ai bug chiusi del progetto in corso...");
+	    logger.info("Recupero dei ticket relativi ai bug chiusi del progetto in corso...");
 	    List<Ticket> ticketList = tc.retrieveTicketsID(repository.toUpperCase(), releaseList);
 		Collections.reverse(ticketList);
 		
 		//ASSOCIO I COMMIT AD I RELATIVI TICKET
-		System.out.println("Recupero dei commit associati al ticket specifico in corso...");
+		logger.info("Recupero dei commit associati al ticket specifico in corso...");
 		retrieveCommitForTicket(ticketList, tc, releaseList);
 		
 		//ELIMINO TUTTI I TICKET CHE NON HANNO COMMIT ASSOCIATI
 		ArrayList<Ticket> myTktList = new ArrayList<>();
 		removeTicketWithoutCommit(ticketList, myTktList);
 		
-		System.out.println("Calcolo delle Opening Version e delle Injected Version in corso...");
+		logger.info("Calcolo delle Opening Version e delle Injected Version in corso...");
 		calculateOvIv(myTktList, tc, releaseList);
 	    
 	    //TOLGO TUTTI I TICKET CON VALORI DI FV E OV NON CONGRUI
@@ -82,25 +83,24 @@ public class HandlerController {
 	    int halfSize = releaseList.size() / 2;
 		ArrayList<Release> myReleaseList = new ArrayList<>(releaseList.subList(0, halfSize));
 		
-		System.out.println("Recupero di tutte le classi toccate da ogni commit nelle varie release in corso...");
+		logger.info("Recupero di tutte le classi toccate da ogni commit nelle varie release in corso...");
 		retrieveClassesFromCommit(myReleaseList, cc, repository);
 		
 		retrieveClassesForTickets(myTicketList, cc, repository);
 		
-		System.out.println("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
+		logger.info("Recupero di tutte le classi di ogni release dall'ultimo commit in corso...");
 		retrieveClassesForRelease(myReleaseList, rc, cc, repository);
 		
-		System.out.println("Calcolo buggyness e metriche in corso....");
+		logger.info("Calcolo buggyness e metriche in corso....");
 		mc.calculateBuggyness(myReleaseList, myTicketList);
 		calculateMetrics(myReleaseList, myTicketList, repository, mc);	
 		
-		System.out.println("Creazione del file csv in corso...");
+		logger.info("Creazione del file csv in corso...");
 		csv.createDataset(myReleaseList, repository, logger);
 		
-		System.out.println("Analisi di Weka in corso...");
+		logger.info("Analisi di Weka in corso...");
 		wc.walkForward(myReleaseList, repository, csv, logger);
 		
-		System.out.println("FINITOOOOO!");
 	}
 
 	public void retrieveCommitForRelease(String repository, List<Release> releaseList, CommitController cc) throws RevisionSyntaxException, JSONException, IOException, ParseException {

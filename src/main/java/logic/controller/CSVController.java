@@ -1,9 +1,10 @@
 package logic.controller;
 
-//import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+
+import java.util.Locale;
 
 import org.slf4j.Logger;
 
@@ -82,42 +83,51 @@ public class CSVController {
 			fileWriter.append("#TestingRelease, Classifier, Precision, Recall, AUC, Kappa");
 			fileWriter.append("\n");
 		} catch (IOException e) {
-			System.out.println(alert1);
 			e.printStackTrace();
 		}
 		return outname;
 	}
+	
+	public String createAcumeCsv(String repo) {
+		String outname = repo.equals("bookkeeper") || repo.equals("openjpa") ? repo + "Acume.csv" : "";
+		try (FileWriter fileWriter = new FileWriter(outname)) {
 
-	/*public void writeResults(String repo, int nRelease, String classifier, double precision, double recall, double kappa, double auc) {
-		String outname = repo.equals("bookkeeper") || repo.equals("openjpa") ? repo + "MachineLearning.csv" : "";
-
-		try (FileWriter fileWriter = new FileWriter(outname, true)) {
-		    // Verifica se il file esiste già
-		    boolean fileExists = new File(outname).exists();
-
-		    // Scrive l'intestazione solo se il file è appena stato creato
-		    if (!fileExists) {
-		        fileWriter.append("Dataset, #TestingRelease, Classifier, Precision, Recall, AUC, Kappa");
-		        fileWriter.append("\n");
-		    }
-
+			//Name of CSV for output
+			fileWriter.append("ID, Size, Prediction, Actual");
+			fileWriter.append("\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return outname;
+	}
+	
+	public void writeAcumeFile(int id, double size, double prediction, boolean actual, String name) {
+        String act = "No";
+		if (actual) {
+        	act = "Yes";
+        }
+		try (FileWriter fileWriter = new FileWriter(name, true)) {
 		    // Scrive i dati
 		    //fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f \n", repo, nRelease, classifier, precision, recall, kappa, auc));
-		    fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f%n", repo, nRelease, classifier, precision, recall, kappa, auc));
+		    //fileWriter.append(String.format("%d,%s,%.6f,%.6f,%.6f,%.6f%n", nRelease, classifier, precision, recall, kappa, auc));
+			String formatted = String.format(Locale.US, "%d,%.6f,%.6f,%s%n", id, size, prediction, act);
+			fileWriter.append(formatted);
 		} catch (IOException e) {
-		    System.out.println(alert1);
 		    e.printStackTrace();
 		}
-	}*/
-	
+	}
+
+
+		
 	public void writeResults(int nRelease, String classifier, double precision, double recall, double kappa, double auc, String name) {
 
 		try (FileWriter fileWriter = new FileWriter(name, true)) {
 		    // Scrive i dati
 		    //fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f \n", repo, nRelease, classifier, precision, recall, kappa, auc));
-		    fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f%n", nRelease, classifier, precision, recall, kappa, auc));
+		    //fileWriter.append(String.format("%d,%s,%.6f,%.6f,%.6f,%.6f%n", nRelease, classifier, precision, recall, kappa, auc));
+			String formatted = String.format(Locale.US, "%d,%s,%.6f,%.6f,%.6f,%.6f%n", nRelease, classifier, precision, recall, kappa, auc);
+			fileWriter.append(formatted);
 		} catch (IOException e) {
-		    System.out.println(alert1);
 		    e.printStackTrace();
 		}
 	}

@@ -31,9 +31,7 @@ public class TicketController {
 	public List<Ticket> retrieveTicketsID(String projName, List<Release> releaseList) throws IOException, JSONException {
 		   List<Ticket> ticketList = new ArrayList<>();
 		   String releaseDate = "";
-		   //String releaseName = "";
 		   String fixReleaseDate = "";
-		   //String fixName = "";
 		   String creationDate = "";
 		   String resolutionDate = "";
 		   Integer j = 0; 
