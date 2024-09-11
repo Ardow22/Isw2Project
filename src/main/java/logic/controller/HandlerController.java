@@ -36,7 +36,6 @@ public class HandlerController {
 	  
 	   
 	    //RECUPERO TUTTI I COMMIT DI OGNI RELEASE
-	    logger.info("Recupero dei commit relativi ad ogni release in corso...");
 	    retrieveCommitForRelease(repository, releaseList, cc);
 	    
 	    //RECUPERO TUTTI I TICKET 
