@@ -45,7 +45,6 @@ public class CSVController {
 		        }
 		    } catch (IOException e) {
 		        logger.info(alert1);
-		        e.printStackTrace();
 		    }
 
 		    return outname;
