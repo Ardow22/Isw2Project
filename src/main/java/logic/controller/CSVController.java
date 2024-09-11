@@ -39,7 +39,6 @@ public class CSVController {
 		                } else {
 		                    buggyness = "No";
 		                }
-		                //fileWriter.append(String.format("%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s \n", projName, jvc.getNamePath(), releaseNumber, jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), jvc.getLinesOfComments(), jvc.getLOC(), jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), jvc.getNumberOfFixDefects(), r.getAgeOfRelease(), jvc.getlOCadded(), jvc.getMaxLocAdded(), buggyness));
 		                fileWriter.append(String.format("%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s%n", projName, jvc.getNamePath(), releaseNumber, jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), jvc.getLinesOfComments(), jvc.getLOC(), jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), jvc.getNumberOfFixDefects(), r.getAgeOfRelease(), jvc.getlOCadded(), jvc.getMaxLocAdded(), buggyness));
 		            }
 		        }
@@ -65,8 +64,6 @@ public class CSVController {
 						buggyness = "Yes";
 					} else {
 						buggyness = "No";
-					}
-					//fileWriter.append(String.format("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s \n", jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), jvc.getLinesOfComments(), jvc.getLOC(), jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), jvc.getNumberOfFixDefects(), jvc.getlOCadded(), jvc.getMaxLocAdded(), r.getAgeOfRelease(), buggyness));
 					fileWriter.append(String.format("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s%n", jvc.getNumberOfAuthors(), jvc.getChangeSetSize(), jvc.getLinesOfComments(), jvc.getLOC(), jvc.getMaxChangeSetSize(), jvc.getNumberOfCommits(), jvc.getNumberOfFixDefects(), jvc.getlOCadded(), jvc.getMaxLocAdded(), r.getAgeOfRelease(), buggyness));
 				}
 			}
@@ -122,8 +119,6 @@ public class CSVController {
 
 		try (FileWriter fileWriter = new FileWriter(name, true)) {
 		    // Scrive i dati
-		    //fileWriter.append(String.format("%s,%d,%s,%.6f,%.6f,%.6f,%.6f \n", repo, nRelease, classifier, precision, recall, kappa, auc));
-		    //fileWriter.append(String.format("%d,%s,%.6f,%.6f,%.6f,%.6f%n", nRelease, classifier, precision, recall, kappa, auc));
 			String formatted = String.format(Locale.US, "%d,%s,%.6f,%.6f,%.6f,%.6f%n", nRelease, classifier, precision, recall, kappa, auc);
 			fileWriter.append(formatted);
 		} catch (IOException e) {
