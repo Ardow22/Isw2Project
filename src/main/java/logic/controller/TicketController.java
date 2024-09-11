@@ -396,7 +396,6 @@ public class TicketController {
     		        // Confronta le date
     		        return date2.compareTo(date1);
     		    } catch (ParseException e) {
-    		        e.printStackTrace();
     		        return 0;
     		    }
     		};
