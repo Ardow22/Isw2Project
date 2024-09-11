@@ -7,7 +7,9 @@ public class App {
 	
     public static void main( String[] args ) throws Exception {
     	HandlerController hc = new HandlerController();
-    	String repository = "bookkeeper";
-        hc.startAnalysis(repository);
+    	String repository1 = "bookkeeper";
+	String repository2 = "openjpa";
+        hc.startAnalysis(repository1);
+	hc.startAnalysis(repository2);
     }
 }
