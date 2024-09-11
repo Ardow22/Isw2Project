@@ -22,7 +22,6 @@ public class HandlerController {
 	private static final Logger logger = LoggerFactory.getLogger(HandlerController.class);
 	
 	public void startAnalysis(String repository) throws Exception {
-		System.out.println("Analisi in corso..");
 		
 		//RECUPERO LA LISTA DELLE RELEASE
 		ReleaseController rc = new ReleaseController();
