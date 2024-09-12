@@ -139,7 +139,8 @@ public class CommitController {
 				}
 			}
 		    } catch(ArrayIndexOutOfBoundsException e) {
-                        return null;
+                        List<String> emptyList = new ArrayList<>();
+			return emptyList;
 		     }
 		return modifiedClasses;
 	    }
