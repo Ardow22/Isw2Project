@@ -83,7 +83,7 @@ public class CSVController {
 			fileWriter.append("#TestingRelease, Classifier, Precision, Recall, AUC, Kappa");
 			fileWriter.append("\n");
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger2.info(alert2);
 		}
 		return outname;
 	}
@@ -96,7 +96,7 @@ public class CSVController {
 			fileWriter.append("ID, Size, Prediction, Actual");
 			fileWriter.append("\n");
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger2.info(alert2);
 		}
 		return outname;
 	}
@@ -110,7 +110,7 @@ public class CSVController {
 			String formatted = String.format(Locale.US, "%d,%.6f,%.6f,%s%n", id, size, prediction, act);
 			fileWriter.append(formatted);
 		} catch (IOException e) {
-		    e.printStackTrace();
+		    logger2.info(alert1);
 		}
 	}
 
