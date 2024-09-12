@@ -29,8 +29,7 @@ public class JsonFileHandler {
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)); 
 			String jsonText = readAll(rd); 
 			return new JSONObject(jsonText); 
-		} catch (Exception e) {  
-			e.printStackTrace(); 
+		} catch (Exception e) {   
 	        return null; 
 	    }
 	}
@@ -62,7 +61,6 @@ public class JsonFileHandler {
 			String jsonText = readAll(rd); 
 			return new JSONArray(jsonText); 
 		} catch (Exception e) {  
-			e.printStackTrace(); 
 	        return null; 
 	    }
 	}
