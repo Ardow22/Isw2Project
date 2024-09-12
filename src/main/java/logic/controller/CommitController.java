@@ -139,7 +139,7 @@ public class CommitController {
 				}
 			}
 		    } catch(ArrayIndexOutOfBoundsException e) {
-                e.printStackTrace();
+                        return null;
 		     }
 		return modifiedClasses;
 	    }
