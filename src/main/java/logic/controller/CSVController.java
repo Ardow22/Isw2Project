@@ -122,7 +122,6 @@ public class CSVController {
 			String formatted = String.format(Locale.US, "%d,%s,%.6f,%.6f,%.6f,%.6f%n", nRelease, classifier, precision, recall, kappa, auc);
 			fileWriter.append(formatted);
 		} catch (IOException e) {
-		    return null;
 		}
 	}
 	
