@@ -12,7 +12,7 @@ import logic.model.entity.JavaClass;
 import logic.model.entity.Release;
 
 public class CSVController {
-	
+	private static final Logger logger2 = LoggerFactory.getLogger(CSVController.class);
 	String alert1 = "Error in csv writer";
 	String alert2 = "Error while flushing/closing fileWriter !!!";
 	String openjpa = "openjpa";
@@ -122,6 +122,7 @@ public class CSVController {
 			String formatted = String.format(Locale.US, "%d,%s,%.6f,%.6f,%.6f,%.6f%n", nRelease, classifier, precision, recall, kappa, auc);
 			fileWriter.append(formatted);
 		} catch (IOException e) {
+			logger2.info(alert1);
 		}
 	}
 	
