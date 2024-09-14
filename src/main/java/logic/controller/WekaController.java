@@ -191,7 +191,7 @@ public class WekaController {
 		
 		/*Configurazione 4*/
 		CostSensitiveClassifier c = new CostSensitiveClassifier();
-		CostMatrix newCostMatrix = createCostMatrix(1.0, 1.0);
+		CostMatrix newCostMatrix = createCostMatrix(1.0, 10.0);
 		
 		rf = new RandomForest();
         c.setCostMatrix(newCostMatrix);
